@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Flywheels and Public AI - 16&nbsp; Appendix 1: LLM Data Schemas</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./appendix2_prefsig.html" rel="next">
+<link href="./references.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix1_llm_data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix1_llm_data.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Appendix 1: LLM Data Schemas</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Flywheels and Public AI</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Concepts &amp; Rationale</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01a_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b_why.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Why collect data?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c_pipeworks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">A Democratic Data Pipeworks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01d_leverage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Flywheels and Bargaining Power</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01e_options_for_flywheel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Flywheel design space</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01f_ethics_compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ethics and Compliance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01g_upstream.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Upstream data and data contribution</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Case Study: Low friction peer production</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2a_mvp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">The OpenWebUI Action MVP</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2b_life_of_a_chat.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Life of a Chat</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2c_terms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Terms and Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2d_faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Public AI Data Flywheel — User FAQ</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2e_code.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Code</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Updating this book</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3a_contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Contributing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3b_ai_guidelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Guidelines for Using AI</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3c_future_directions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Future Directions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix1_llm_data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Appendix 1: LLM Data Schemas</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix2_prefsig.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2 — Preference Signals for AI Data Use (CC signals + IETF AI Preferences)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix3_example_legalterms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 3: LLM Policy Docs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix4_diffable_terms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Diffable Terms</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#open-web-crawls" id="toc-open-web-crawls" class="nav-link active" data-scroll-target="#open-web-crawls"><span class="header-section-number">16.1</span> Open Web / Crawls</a></li>
+  <li><a href="#encyclopedic-books" id="toc-encyclopedic-books" class="nav-link" data-scroll-target="#encyclopedic-books"><span class="header-section-number">16.2</span> Encyclopedic / Books</a></li>
+  <li><a href="#scientific-legal" id="toc-scientific-legal" class="nav-link" data-scroll-target="#scientific-legal"><span class="header-section-number">16.3</span> Scientific / Legal</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">16.4</span> Code</a></li>
+  <li><a href="#forums-qa-social" id="toc-forums-qa-social" class="nav-link" data-scroll-target="#forums-qa-social"><span class="header-section-number">16.5</span> Forums / Q&amp;A / Social</a></li>
+  <li><a href="#instruction-conversations-post-training-sft" id="toc-instruction-conversations-post-training-sft" class="nav-link" data-scroll-target="#instruction-conversations-post-training-sft"><span class="header-section-number">16.6</span> Instruction / Conversations (Post-training SFT)</a></li>
+  <li><a href="#preference-feedback-rlhf-dpo" id="toc-preference-feedback-rlhf-dpo" class="nav-link" data-scroll-target="#preference-feedback-rlhf-dpo"><span class="header-section-number">16.7</span> Preference / Feedback (RLHF &amp; DPO)</a></li>
+  <li><a href="#multimodal-for-vlmsasr" id="toc-multimodal-for-vlmsasr" class="nav-link" data-scroll-target="#multimodal-for-vlmsasr"><span class="header-section-number">16.8</span> Multimodal (for VLMs/ASR)</a></li>
+  <li><a href="#math-reasoning-often-for-post-trainingeval" id="toc-math-reasoning-often-for-post-trainingeval" class="nav-link" data-scroll-target="#math-reasoning-often-for-post-trainingeval"><span class="header-section-number">16.9</span> Math Reasoning (often for post-training/eval)</a></li>
+  <li><a href="#common-storage-containers" id="toc-common-storage-containers" class="nav-link" data-scroll-target="#common-storage-containers"><span class="header-section-number">16.10</span> Common Storage Containers</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix1_llm_data.html">Appendices</a></li><li class="breadcrumb-item"><a href="./appendix1_llm_data.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Appendix 1: LLM Data Schemas</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Appendix 1: LLM Data Schemas</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Here, we describe many variants of LLM data. This will be relevant for when we extend the flywheel to include more types of data, and especially shift towards promoting the sharing (via opt-in flywheels, but also via new market mechanisms) of richer “content data”.</p>
+<hr>
+<section id="open-web-crawls" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="open-web-crawls"><span class="header-section-number">16.1</span> Open Web / Crawls</h2>
+<ul>
+<li><p><strong>WARC/WAT/WET</strong></p>
+<ul>
+<li><em>WARC</em> (container for HTTP request/response records) — spec &amp; overview: <span class="citation" data-cites="iipc_warc loc_warc">(<a href="references.html#ref-iipc_warc" role="doc-biblioref">International Internet Preservation Consortium 2017</a>; <a href="references.html#ref-loc_warc" role="doc-biblioref">Library of Congress, n.d.</a>)</span></li>
+<li><em>WAT</em> (JSON metadata extracted from WARC) and <em>WET</em> (plain text extracted from HTML) — Common Crawl guides <span class="citation" data-cites="cc_getstarted cc_formats">(<a href="references.html#ref-cc_getstarted" role="doc-biblioref">Common Crawl, n.d.a</a>, <a href="references.html#ref-cc_formats" role="doc-biblioref">n.d.b</a>)</span></li>
+</ul></li>
+<li><p><strong>C4 (Colossal Clean Crawled Corpus)</strong> — TFDS catalog &amp; generator code <span class="citation" data-cites="tfds_c4 c4_github">(<a href="references.html#ref-tfds_c4" role="doc-biblioref">TensorFlow Datasets, n.d.a</a>, <a href="references.html#ref-c4_github" role="doc-biblioref">n.d.b</a>)</span></p></li>
+<li><p><strong>The Pile</strong> (22-source, mixed corpus) — paper <span class="citation" data-cites="pile_paper">(<a href="references.html#ref-pile_paper" role="doc-biblioref">Gao et al. 2021</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="encyclopedic-books" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="encyclopedic-books"><span class="header-section-number">16.2</span> Encyclopedic / Books</h2>
+<ul>
+<li><p><strong>Wikipedia XML dumps</strong> (page/revision XML; SQL tables for links) — <span class="citation" data-cites="meta_dumps wiki_db">(<a href="references.html#ref-meta_dumps" role="doc-biblioref">Wikimedia Meta-Wiki, n.d.</a>; <a href="references.html#ref-wiki_db" role="doc-biblioref">Wikipedia, n.d.</a>)</span></p></li>
+<li><p><strong>Project Gutenberg</strong></p>
+<ul>
+<li><em>Books</em>: plain text/HTML master formats; ePub/MOBI derived <span class="citation" data-cites="pg_formats">(<a href="references.html#ref-pg_formats" role="doc-biblioref">Project Gutenberg, n.d.a</a>)</span></li>
+<li><em>Catalog schema</em>: daily RDF/XML (also CSV) for metadata; offline catalogs <span class="citation" data-cites="pg_catalogs">(<a href="references.html#ref-pg_catalogs" role="doc-biblioref">Project Gutenberg, n.d.b</a>)</span></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="scientific-legal" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="scientific-legal"><span class="header-section-number">16.3</span> Scientific / Legal</h2>
+<ul>
+<li><p><strong>arXiv</strong> (Atom/OAI-PMH metadata; bulk &amp; API) — <span class="citation" data-cites="arxiv_oai arxiv_api arxiv_bulk">(<a href="references.html#ref-arxiv_oai" role="doc-biblioref">arXiv.org, n.d.c</a>, <a href="references.html#ref-arxiv_api" role="doc-biblioref">n.d.a</a>, <a href="references.html#ref-arxiv_bulk" role="doc-biblioref">n.d.b</a>)</span></p></li>
+<li><p><strong>JATS XML</strong> (journal article tag suite) — <span class="citation" data-cites="jats_niso jats_nlm">(<a href="references.html#ref-jats_niso" role="doc-biblioref">NISO 2024</a>; <a href="references.html#ref-jats_nlm" role="doc-biblioref">NLM, n.d.</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="code" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="code"><span class="header-section-number">16.4</span> Code</h2>
+<ul>
+<li><strong>BigCode — The Stack / The Stack v2</strong> (source files + license/provenance metadata; dedup variants) — <span class="citation" data-cites="stack_hf stack_v2_hf stack_docs stack_paper">(<a href="references.html#ref-stack_hf" role="doc-biblioref">BigCode Project, n.d.b</a>, <a href="references.html#ref-stack_v2_hf" role="doc-biblioref">n.d.c</a>, <a href="references.html#ref-stack_docs" role="doc-biblioref">n.d.a</a>; <a href="references.html#ref-stack_paper" role="doc-biblioref"><strong>stack_paper?</strong></a>)</span></li>
+</ul>
+<hr>
+</section>
+<section id="forums-qa-social" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="forums-qa-social"><span class="header-section-number">16.5</span> Forums / Q&amp;A / Social</h2>
+<ul>
+<li><p><strong>Stack Exchange dumps</strong> (XML: Posts, Users, Comments, Votes, etc.) — <span class="citation" data-cites="se_meta se_dataexplorer">(<a href="references.html#ref-se_meta" role="doc-biblioref">Meta Stack Exchange, n.d.</a>; <a href="references.html#ref-se_dataexplorer" role="doc-biblioref">Stack Exchange, n.d.</a>)</span></p></li>
+<li><p><strong>Reddit</strong></p>
+<ul>
+<li><em>API JSON</em> schema — official docs <span class="citation" data-cites="reddit_api reddit_help">(<a href="references.html#ref-reddit_api" role="doc-biblioref">Reddit, n.d.</a>; <a href="references.html#ref-reddit_help" role="doc-biblioref">Reddit Help, n.d.</a>)</span></li>
+<li><em>Pushshift</em> (historical dumps; research dataset) — <span class="citation" data-cites="pushshift_site pushshift_paper">(<a href="references.html#ref-pushshift_site" role="doc-biblioref">Pushshift, n.d.</a>; <a href="references.html#ref-pushshift_paper" role="doc-biblioref">Baumgartner et al. 2020</a>)</span></li>
+</ul></li>
+</ul>
+<hr>
+</section>
+<section id="instruction-conversations-post-training-sft" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="instruction-conversations-post-training-sft"><span class="header-section-number">16.6</span> Instruction / Conversations (Post-training SFT)</h2>
+<ul>
+<li><p><strong>OpenAI-style chat schema</strong> (role-tagged: <code>system|user|assistant</code>, plus tool calls) — <span class="citation" data-cites="openai_chatapi">(<a href="references.html#ref-openai_chatapi" role="doc-biblioref">OpenAI, n.d.c</a>)</span></p></li>
+<li><p><strong>Alpaca</strong> (JSON prompts/instructions/outputs) — <span class="citation" data-cites="alpaca_post alpaca_repo alpaca_clean">(<a href="references.html#ref-alpaca_post" role="doc-biblioref">Stanford CRFM 2023</a>; <a href="references.html#ref-alpaca_repo" role="doc-biblioref">Tatsu Lab, n.d.</a>; <a href="references.html#ref-alpaca_clean" role="doc-biblioref">gururise, n.d.</a>)</span></p></li>
+<li><p><strong>Databricks Dolly-15k</strong> (human-written instruction/response pairs) — <span class="citation" data-cites="dolly_repo">(<a href="references.html#ref-dolly_repo" role="doc-biblioref">Databricks, n.d.</a>)</span></p></li>
+<li><p><strong>OpenAssistant OASST1</strong> (message-tree conversations with roles) — <span class="citation" data-cites="oasst1_hf">(<a href="references.html#ref-oasst1_hf" role="doc-biblioref">OpenAssistant, n.d.</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="preference-feedback-rlhf-dpo" class="level2" data-number="16.7">
+<h2 data-number="16.7" class="anchored" data-anchor-id="preference-feedback-rlhf-dpo"><span class="header-section-number">16.7</span> Preference / Feedback (RLHF &amp; DPO)</h2>
+<ul>
+<li><p><strong>HH-RLHF</strong> (Anthropic helpful/harmless, JSONL pairs: <code>chosen</code> vs <code>rejected</code>) — <span class="citation" data-cites="hh_rlhf">(<a href="references.html#ref-hh_rlhf" role="doc-biblioref">Anthropic, n.d.</a>)</span></p></li>
+<li><p><strong>DPO format</strong> (prompt + preferred vs dispreferred response) — <span class="citation" data-cites="dpo_paper">(<a href="references.html#ref-dpo_paper" role="doc-biblioref">Rafailov et al. 2024</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="multimodal-for-vlmsasr" class="level2" data-number="16.8">
+<h2 data-number="16.8" class="anchored" data-anchor-id="multimodal-for-vlmsasr"><span class="header-section-number">16.8</span> Multimodal (for VLMs/ASR)</h2>
+<ul>
+<li><p><strong>LAION-5B / Re-LAION-5B</strong> (image–text pairs with CLIP scores; links) — <span class="citation" data-cites="laion_5b relaion_5b">(<a href="references.html#ref-laion_5b" role="doc-biblioref">LAION 2022a</a>, <a href="references.html#ref-relaion_5b" role="doc-biblioref">2022b</a>)</span></p></li>
+<li><p><strong>Whisper</strong> (weakly-supervised ASR; audio → text pairs) — <span class="citation" data-cites="whisper_paper whisper_blog">(<a href="references.html#ref-whisper_paper" role="doc-biblioref">Radford et al. 2022</a>; <a href="references.html#ref-whisper_blog" role="doc-biblioref">OpenAI 2022</a>)</span></p></li>
+<li><p><strong>HowTo100M</strong> (YouTube instructional video clips + narrations) — <span class="citation" data-cites="howto100m_site howto100m_paper">(<a href="references.html#ref-howto100m_site" role="doc-biblioref">École Normale Supérieure, n.d.</a>; <a href="references.html#ref-howto100m_paper" role="doc-biblioref">Miech et al. 2019</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="math-reasoning-often-for-post-trainingeval" class="level2" data-number="16.9">
+<h2 data-number="16.9" class="anchored" data-anchor-id="math-reasoning-often-for-post-trainingeval"><span class="header-section-number">16.9</span> Math Reasoning (often for post-training/eval)</h2>
+<ul>
+<li><p><strong>GSM8K</strong> (grade-school word problems; JSON) — <span class="citation" data-cites="gsm8k_repo gsm8k_hf">(<a href="references.html#ref-gsm8k_repo" role="doc-biblioref">OpenAI, n.d.a</a>, <a href="references.html#ref-gsm8k_hf" role="doc-biblioref">n.d.b</a>)</span></p></li>
+<li><p><strong>MATH</strong> (competition problems with step-by-step solutions) — <span class="citation" data-cites="math_paper math_hf">(<a href="references.html#ref-math_paper" role="doc-biblioref">Hendrycks et al. 2021</a>; <a href="references.html#ref-math_hf" role="doc-biblioref">Hendrycks, n.d.</a>)</span></p></li>
+</ul>
+<hr>
+</section>
+<section id="common-storage-containers" class="level2" data-number="16.10">
+<h2 data-number="16.10" class="anchored" data-anchor-id="common-storage-containers"><span class="header-section-number">16.10</span> Common Storage Containers</h2>
+<ul>
+<li><p><strong>JSON Lines / NDJSON</strong> — <span class="citation" data-cites="jsonlines ndjson_spec">(<a href="references.html#ref-jsonlines" role="doc-biblioref">jsonlines.org, n.d.</a>; <a href="references.html#ref-ndjson_spec" role="doc-biblioref">ndjson, n.d.</a>)</span></p></li>
+<li><p><strong>TFRecord</strong> — <span class="citation" data-cites="tfrecord_tf">(<a href="references.html#ref-tfrecord_tf" role="doc-biblioref">TensorFlow, n.d.</a>)</span></p></li>
+<li><p><strong>Apache Parquet</strong> — <span class="citation" data-cites="parquet">(<a href="references.html#ref-parquet" role="doc-biblioref">Apache Software Foundation, n.d.</a>)</span></p></li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-hh_rlhf" class="csl-entry" role="listitem">
+Anthropic. n.d. <span>“HH-RLHF Dataset.”</span> <a href="https://github.com/anthropics/hh-rlhf">https://github.com/anthropics/hh-rlhf</a>.
+</div>
+<div id="ref-parquet" class="csl-entry" role="listitem">
+Apache Software Foundation. n.d. <span>“Apache Parquet Project.”</span> <a href="https://parquet.apache.org/">https://parquet.apache.org/</a>.
+</div>
+<div id="ref-arxiv_api" class="csl-entry" role="listitem">
+arXiv.org. n.d.a. <span>“arXiv API User’s Manual.”</span> <a href="https://info.arxiv.org/help/api/user-manual.html">https://info.arxiv.org/help/api/user-manual.html</a>.
+</div>
+<div id="ref-arxiv_bulk" class="csl-entry" role="listitem">
+———. n.d.b. <span>“arXiv Bulk Data Access.”</span> <a href="https://info.arxiv.org/help/bulk_data.html">https://info.arxiv.org/help/bulk_data.html</a>.
+</div>
+<div id="ref-arxiv_oai" class="csl-entry" role="listitem">
+———. n.d.c. <span>“arXiv OAI-PMH Interface.”</span> <a href="https://info.arxiv.org/help/oa/index.html">https://info.arxiv.org/help/oa/index.html</a>.
+</div>
+<div id="ref-pushshift_paper" class="csl-entry" role="listitem">
+Baumgartner, Jason, Savvas Zannettou, Brian Keegan, Megan Squire, and Jeremy Blackburn. 2020. <span>“The Pushshift Reddit Dataset”</span> 14: 830–39.
+</div>
+<div id="ref-stack_docs" class="csl-entry" role="listitem">
+BigCode Project. n.d.a. <span>“BigCode Project Documentation.”</span> <a href="https://www.bigcode-project.org/docs/about/the-stack/">https://www.bigcode-project.org/docs/about/the-stack/</a>.
+</div>
+<div id="ref-stack_hf" class="csl-entry" role="listitem">
+———. n.d.b. <span>“The Stack Dataset on Hugging Face.”</span> <a href="https://huggingface.co/datasets/bigcode/the-stack/tree/main">https://huggingface.co/datasets/bigcode/the-stack/tree/main</a>.
+</div>
+<div id="ref-stack_v2_hf" class="csl-entry" role="listitem">
+———. n.d.c. <span>“The Stack V2 Dataset on Hugging Face.”</span> <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">https://huggingface.co/datasets/bigcode/the-stack-v2</a>.
+</div>
+<div id="ref-cc_getstarted" class="csl-entry" role="listitem">
+Common Crawl. n.d.a. <span>“Common Crawl – Get Started.”</span> <a href="https://commoncrawl.org/get-started">https://commoncrawl.org/get-started</a>.
+</div>
+<div id="ref-cc_formats" class="csl-entry" role="listitem">
+———. n.d.b. <span>“Web Archiving File Formats Explained.”</span> <a href="https://commoncrawl.org/blog/web-archiving-file-formats-explained">https://commoncrawl.org/blog/web-archiving-file-formats-explained</a>.
+</div>
+<div id="ref-dolly_repo" class="csl-entry" role="listitem">
+Databricks. n.d. <span>“Databricks Dolly Repository.”</span> <a href="https://github.com/databrickslabs/dolly">https://github.com/databrickslabs/dolly</a>.
+</div>
+<div id="ref-howto100m_site" class="csl-entry" role="listitem">
+École Normale Supérieure. n.d. <span>“HowTo100M Project.”</span> <a href="https://www.di.ens.fr/willow/research/howto100m/">https://www.di.ens.fr/willow/research/howto100m/</a>.
+</div>
+<div id="ref-pile_paper" class="csl-entry" role="listitem">
+Gao, Leo, Stella Biderman, Sid Black, Laurence Golding, Travis Hoppe, Charles Foster, Jason Phang, et al. 2021. <span>“The Pile: An 800GB Dataset of Diverse Text for Language Modeling.”</span> <em>CoRR</em> abs/2101.00027. <a href="https://arxiv.org/abs/2101.00027">https://arxiv.org/abs/2101.00027</a>.
+</div>
+<div id="ref-alpaca_clean" class="csl-entry" role="listitem">
+gururise. n.d. <span>“Alpaca Data Cleaned Repository.”</span> <a href="https://github.com/gururise/AlpacaDataCleaned">https://github.com/gururise/AlpacaDataCleaned</a>.
+</div>
+<div id="ref-math_hf" class="csl-entry" role="listitem">
+Hendrycks, Dan. n.d. <span>“Competition Math Dataset on Hugging Face.”</span> <a href="https://huggingface.co/datasets/hendrycks/competition_math">https://huggingface.co/datasets/hendrycks/competition_math</a>.
+</div>
+<div id="ref-math_paper" class="csl-entry" role="listitem">
+Hendrycks, Dan, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric Tang, Dawn Song, and Jacob Steinhardt. 2021. <span>“Measuring Mathematical Problem Solving with the MATH Dataset.”</span> <a href="https://arxiv.org/abs/2103.03874">https://arxiv.org/abs/2103.03874</a>.
+</div>
+<div id="ref-iipc_warc" class="csl-entry" role="listitem">
+International Internet Preservation Consortium. 2017. <span>“The WARC Format 1.1.”</span> <a href="https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.1/">https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.1/</a>.
+</div>
+<div id="ref-jsonlines" class="csl-entry" role="listitem">
+jsonlines.org. n.d. <span>“JSON Lines Specification.”</span> <a href="https://jsonlines.org/">https://jsonlines.org/</a>.
+</div>
+<div id="ref-laion_5b" class="csl-entry" role="listitem">
+LAION. 2022a. <span>“LAION-5B: A New Era of Open Large-Scale Multi-Modal Datasets.”</span> <a href="https://laion.ai/laion-5b-a-new-era-of-open-large-scale-multi-modal-datasets/">https://laion.ai/laion-5b-a-new-era-of-open-large-scale-multi-modal-datasets/</a>.
+</div>
+<div id="ref-relaion_5b" class="csl-entry" role="listitem">
+———. 2022b. <span>“Releasing Re-LAION-5B.”</span> <a href="https://laion.ai/blog/relaion-5b/">https://laion.ai/blog/relaion-5b/</a>.
+</div>
+<div id="ref-loc_warc" class="csl-entry" role="listitem">
+Library of Congress. n.d. <span>“WARC, Web ARChive File Format.”</span> <a href="https://www.loc.gov/preservation/digital/formats/fdd/fdd000236.shtml">https://www.loc.gov/preservation/digital/formats/fdd/fdd000236.shtml</a>.
+</div>
+<div id="ref-se_meta" class="csl-entry" role="listitem">
+Meta Stack Exchange. n.d. <span>“Why Is the Stack Exchange Data Dump Only Available in XML?”</span> <a href="https://meta.stackexchange.com/questions/267329/why-is-the-stack-exchange-data-dump-only-available-in-xml-file-format">https://meta.stackexchange.com/questions/267329/why-is-the-stack-exchange-data-dump-only-available-in-xml-file-format</a>.
+</div>
+<div id="ref-howto100m_paper" class="csl-entry" role="listitem">
+Miech, Antoine, Dimitri Zhukov, Jean-Baptiste Alayrac, Makarand Tapaswi, Ivan Laptev, and Josef Sivic. 2019. <span>“HowTo100M: Learning a Text-Video Embedding by Watching Hundred Million Narrated Video Clips.”</span> <em>CoRR</em> abs/1906.03327. <a href="http://arxiv.org/abs/1906.03327">http://arxiv.org/abs/1906.03327</a>.
+</div>
+<div id="ref-ndjson_spec" class="csl-entry" role="listitem">
+ndjson. n.d. <span>“NDJSON Specification.”</span> <a href="https://github.com/ndjson/ndjson-spec">https://github.com/ndjson/ndjson-spec</a>.
+</div>
+<div id="ref-jats_niso" class="csl-entry" role="listitem">
+NISO. 2024. <span>“ANSI/NISO Z39.96-2024, JATS: Journal Article Tag Suite.”</span> <a href="https://www.niso.org/publications/z3996-2024-jats">https://www.niso.org/publications/z3996-2024-jats</a>.
+</div>
+<div id="ref-jats_nlm" class="csl-entry" role="listitem">
+NLM. n.d. <span>“Journal Article Tag Suite.”</span> <a href="https://jats.nlm.nih.gov/">https://jats.nlm.nih.gov/</a>.
+</div>
+<div id="ref-whisper_blog" class="csl-entry" role="listitem">
+OpenAI. 2022. <span>“Introducing Whisper.”</span> <a href="https://openai.com/index/whisper/">https://openai.com/index/whisper/</a>.
+</div>
+<div id="ref-gsm8k_repo" class="csl-entry" role="listitem">
+———. n.d.a. <span>“Grade-School Math (GSM8K) Repository.”</span> <a href="https://github.com/openai/grade-school-math">https://github.com/openai/grade-school-math</a>.
+</div>
+<div id="ref-gsm8k_hf" class="csl-entry" role="listitem">
+———. n.d.b. <span>“GSM8K Hugging Face Dataset Card.”</span> <a href="https://huggingface.co/datasets/openai/gsm8k">https://huggingface.co/datasets/openai/gsm8k</a>.
+</div>
+<div id="ref-openai_chatapi" class="csl-entry" role="listitem">
+———. n.d.c. <span>“OpenAI API Reference – Chat.”</span> <a href="https://platform.openai.com/docs/api-reference/chat">https://platform.openai.com/docs/api-reference/chat</a>.
+</div>
+<div id="ref-oasst1_hf" class="csl-entry" role="listitem">
+OpenAssistant. n.d. <span>“OpenAssistant OASST1 Dataset Card.”</span> <a href="https://huggingface.co/datasets/OpenAssistant/oasst1">https://huggingface.co/datasets/OpenAssistant/oasst1</a>.
+</div>
+<div id="ref-pg_formats" class="csl-entry" role="listitem">
+Project Gutenberg. n.d.a. <span>“Project Gutenberg File Formats.”</span> <a href="https://www.gutenberg.org/help/file_formats.html">https://www.gutenberg.org/help/file_formats.html</a>.
+</div>
+<div id="ref-pg_catalogs" class="csl-entry" role="listitem">
+———. n.d.b. <span>“Project Gutenberg Offline Catalogs and Feeds.”</span> <a href="https://www.gutenberg.org/ebooks/offline_catalogs.html">https://www.gutenberg.org/ebooks/offline_catalogs.html</a>.
+</div>
+<div id="ref-pushshift_site" class="csl-entry" role="listitem">
+Pushshift. n.d. <span>“Pushshift.io.”</span> <a href="https://pushshift.io/">https://pushshift.io/</a>.
+</div>
+<div id="ref-whisper_paper" class="csl-entry" role="listitem">
+Radford, Alec, Jong Wook Kim, Tao Xu, Greg Brockman, Christine McLeavey, and Ilya Sutskever. 2022. <span>“Robust Speech Recognition via Large-Scale Weak Supervision.”</span> <a href="https://arxiv.org/abs/2212.04356">https://arxiv.org/abs/2212.04356</a>.
+</div>
+<div id="ref-dpo_paper" class="csl-entry" role="listitem">
+Rafailov, Rafael, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. 2024. <span>“Direct Preference Optimization: Your Language Model Is Secretly a Reward Model.”</span> <a href="https://arxiv.org/abs/2305.18290">https://arxiv.org/abs/2305.18290</a>.
+</div>
+<div id="ref-reddit_api" class="csl-entry" role="listitem">
+Reddit. n.d. <span>“Reddit API Documentation.”</span> <a href="https://www.reddit.com/dev/api/">https://www.reddit.com/dev/api/</a>.
+</div>
+<div id="ref-reddit_help" class="csl-entry" role="listitem">
+Reddit Help. n.d. <span>“Reddit Data API Wiki.”</span> <a href="https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki">https://support.reddithelp.com/hc/en-us/articles/16160319875092-Reddit-Data-API-Wiki</a>.
+</div>
+<div id="ref-se_dataexplorer" class="csl-entry" role="listitem">
+Stack Exchange. n.d. <span>“Stack Exchange Data Explorer Help.”</span> <a href="https://data.stackexchange.com/help">https://data.stackexchange.com/help</a>.
+</div>
+<div id="ref-alpaca_post" class="csl-entry" role="listitem">
+Stanford CRFM. 2023. <span>“Alpaca: A Strong, Replicable Instruction-Following Model.”</span> <a href="https://crfm.stanford.edu/2023/03/13/alpaca.html">https://crfm.stanford.edu/2023/03/13/alpaca.html</a>.
+</div>
+<div id="ref-alpaca_repo" class="csl-entry" role="listitem">
+Tatsu Lab. n.d. <span>“Stanford Alpaca GitHub Repository.”</span> <a href="https://github.com/tatsu-lab/stanford_alpaca">https://github.com/tatsu-lab/stanford_alpaca</a>.
+</div>
+<div id="ref-tfrecord_tf" class="csl-entry" role="listitem">
+TensorFlow. n.d. <span>“TFRecord and Tf.train.example Tutorial.”</span> <a href="https://www.tensorflow.org/tutorials/load_data/tfrecord">https://www.tensorflow.org/tutorials/load_data/tfrecord</a>.
+</div>
+<div id="ref-tfds_c4" class="csl-entry" role="listitem">
+TensorFlow Datasets. n.d.a. <span>“C4 Dataset in TensorFlow Datasets.”</span> <a href="https://www.tensorflow.org/datasets/catalog/c4">https://www.tensorflow.org/datasets/catalog/c4</a>.
+</div>
+<div id="ref-c4_github" class="csl-entry" role="listitem">
+———. n.d.b. <span>“C4 Generator Code.”</span> <a href="https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/text/c4.py">https://github.com/tensorflow/datasets/blob/master/tensorflow_datasets/text/c4.py</a>.
+</div>
+<div id="ref-meta_dumps" class="csl-entry" role="listitem">
+Wikimedia Meta-Wiki. n.d. <span>“Wikipedia Data Dumps – Dump Format.”</span> <a href="https://meta.wikimedia.org/wiki/Data_dumps/Dump_format">https://meta.wikimedia.org/wiki/Data_dumps/Dump_format</a>.
+</div>
+<div id="ref-wiki_db" class="csl-entry" role="listitem">
+Wikipedia. n.d. <span>“Wikipedia Database Download.”</span> <a href="https://en.wikipedia.org/wiki/Wikipedia:Database_download">https://en.wikipedia.org/wiki/Wikipedia:Database_download</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./references.html" class="pagination-link  aria-label=" references"="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">References</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./appendix2_prefsig.html" class="pagination-link" aria-label="<span class='chapter-number'>17</span>&nbsp; <span class='chapter-title'>Appendix 2 — Preference Signals for AI Data Use (CC signals + IETF AI Preferences)</span>">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2 — Preference Signals for AI Data Use (CC signals + IETF AI Preferences)</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

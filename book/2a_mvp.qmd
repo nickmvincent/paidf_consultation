@@ -1,0 +1,61 @@
+# The OpenWebUI Action MVP
+
+## Overview
+
+Our first working flywheel is deliberately simple: an OpenWebUI Action lets people opt in to share selected chats directly from the interface, and those contributions become pull requests to a HuggingFace dataset. By building on OpenWebUI’s accounts and controls, we avoid asking contributors to learn a new product or workflow, while still anchoring the data pipeline in a transparent source-control backend.
+
+The design goal is to keep friction low without abandoning provenance. Git-backed contributions provide an auditable history, clear authorship models, and a natural venue for discussion and review. At the same time, the action abstracts the mechanics of branching and committing so the contribution experience feels like a normal chat, not a dev tool.
+
+We experimented with two architectures on the way to this MVP. The earlier attempt staged submissions in a private "waiting room" repository and processed them asynchronously. It offered control but made it hard for contributors to see their impact. The current approach, which raises a pull request per contribution, lets contributors and reviewers observe exactly what was added and why, and it makes the curation process legible to the public.
+
+## Components
+
+Three pieces make the flywheel work in practice. The chat frontend at https://chat.publicai.co/ provides the familiar place where conversations happen. An OpenWebUI action, implemented in Python, packages a contribution when a user chooses to share, pulling in the conversation, the user’s persistent preferences, and some basic metadata. Finally, the action talks to a HuggingFace dataset repository with a write token and opens a pull request that can be triaged manually or by scripts. In effect, the web app functions as a thin wrapper over "make a pull request with a typed JSON payload," but that thin wrapper is precisely the difference between a usable experience and a developer-only workflow. Power users who prefer to operate in the open can always submit direct pull requests from their own HuggingFace accounts; the action does not preclude that path.
+
+## Contribution Flow
+
+First-time setup is intentionally lightweight. A user signs in to OpenWebUI, opens the Controls (Valves, Functions), and enables sharing. In the same place, they select a default license (for example CC0-1.0, CC-BY-4.0, or CC-BY-SA-4.0), choose an AI preference signal such as `train-genai=n;exceptions=cc-cr`, and decide how they want to be named in public artifacts: their username, a custom pseudonym, or a generic “anonymous.” Users who prefer to skip extra prompts can also opt into automatic feedback collection.
+
+With preferences set, contributing looks like any other chat until the moment of consent. After finishing a conversation with any model, the user clicks the Public AI Data Flywheel action. The action shows a concise confirmation screen that restates the current settings, previews the exact content to be shared, and explains what will happen next. The user can edit optional feedback or add context, then confirm. The action assembles a single, well-typed JSON record: the messages, a summary of the model and usage metadata, the selected license and preference signal, the chosen attribution, and a random contribution id. That record becomes the body of a pull request to the dataset repository.
+
+The pull request is the central coordination object. Reviewers can comment, merge, or request changes; automated checks can validate format and run policy scanners; and anyone can see the history that led to the decision. If the contribution is accepted, the data lands in the public dataset with the same license and preference signals the user selected. The PR thread itself preserves the reasoning and any follow-up, which becomes part of the public provenance trail.
+
+## Privacy, Attribution, and Preference Signals
+
+We want people to get credit when they want it, and privacy when they do not. Each contribution carries an attribution string drawn from the user’s chosen setting. Public releases display this attribution string but not the underlying OpenWebUI account id. Today, if you select “pseudonym,” that pseudonym is a deterministic function of your OpenWebUI account id (unsalted), which means contributions under a pseudonym can be linked to each other over time. We chose determinism to make it easy to accrue credit, support light‑weight moderation, and keep analytics simple without exposing account identifiers. If you want the least linkability, choose “anonymous.”
+
+Legal terms and downstream use are encoded explicitly. The action stores the contributor’s default license and the AI‑use preference signals they select. Preference signals, such as `train-genai=n`, are not a silver bullet, but they provide a machine‑readable expression of intent that downstream consumers can honor in tooling and policy. This makes it straightforward to build filters, gates, and dashboards that keep training‑only or evaluation‑only subsets separate, and it answers a recurring question about public datasets: what prevents private labs from silently absorbing everything? Preference signals and licensing do not prevent misuse on their own, but they make honoring the public’s choices the easiest path for responsible actors—and they create structure for accountability conversations when that trust is broken.
+
+Preset options (Content-Usage expressions using CC signals as exceptions):
+- Training family:
+  - `train-genai=n` (deny training)
+  - `train-genai=n;exceptions=cc-cr` (deny training unless Credit)
+  - `train-genai=n;exceptions=cc-cr-dc` (deny training unless Credit + Direct Contribution)
+  - `train-genai=n;exceptions=cc-cr-ec` (deny training unless Credit + Ecosystem Contribution)
+  - `train-genai=n;exceptions=cc-cr-op` (deny training unless Credit + Open)
+- General AI use family:
+  - `ai-use=n` (deny AI use)
+  - `ai-use=n;exceptions=cc-cr` (deny AI use unless Credit)
+  - `ai-use=n;exceptions=cc-cr-dc` (… unless Credit + Direct Contribution)
+  - `ai-use=n;exceptions=cc-cr-ec` (… unless Credit + Ecosystem Contribution)
+  - `ai-use=n;exceptions=cc-cr-op` (… unless Credit + Open)
+
+Default preset: `train-genai=n;exceptions=cc-cr` (deny training unless Credit).
+
+## What We Tried First (and Why We Changed It)
+
+The earliest prototype wrote contributions to a private area named `_waiting_room/` and processed them in batches. A periodic job validated files, ran PII scanning, moved clean items forward, and quarantined anything suspect to a private area. The model mirrored a traditional ingestion pipeline and felt safe and controlled, but it carried an important cost: contributors could not immediately see that they had made a contribution, nor could they link to it, discuss it, or watch it progress. In a public AI context, those shortcomings matter. Visibility is not just a nice-to-have; it is how people learn what the system values and how it behaves.
+
+The pull-request-based MVP retains the benefits that mattered—validation and quarantine are still possible as part of PR checks—while restoring legibility. In practice, the contribution becomes a public artifact immediately, but one that can be refined before it becomes part of the canonical dataset. This change turned out to be the simplest way to align usability with accountability.
+
+## Safety and Review
+
+Contributions pass through a few layers of basic safeguards. The action can run in a mock mode for testing without sending anything upstream. Automated checks scan for common types of sensitive information—emails, phone numbers, government identifiers, payment instruments—and flag or block contributions that appear risky. When there is doubt, reviewers can ask for edits in the PR or move the contribution to quarantine for a closer look. OpenWebUI’s existing rate limiting helps keep abuse manageable without inventing a new throttle.
+
+The goal is not to promise perfect redaction, but to reduce the chance that obviously sensitive material lands in the public dataset. The confirmation screen and the surrounding documentation set expectations clearly: do not share private or confidential content, and prefer synthetic or anonymized examples when in doubt. This guidance, coupled with visible review in PRs, encourages a culture of care without putting the entire burden on automation.
+
+## Why This MVP Matters
+
+Flywheels live or die by their first loop. An MVP that lets people see and understand their impact builds early momentum and attracts contributors who care about quality. Pull requests give us a natural unit of credit, discussion, and iteration; they also create space for lightweight governance. Over time, we can add small, high-leverage improvements—rubrics for labeling, better previews, richer preference signals—without changing the mental model. People chat, opt in, and their contribution shows up where the public can review it.
+
+This approach also sets up the rest of the pipeline. Because every artifact is a typed JSON with explicit license and use preferences, it is straightforward to derive evaluation sets, training splits, or dashboards that track coverage. And because the data moves through PRs, the same infrastructure can support community-led benchmarks, model audits, and discussions about edge cases. The infrastructure is simple on purpose, but it is pointed at the right problems: provenance, participation, and practical control over data use.

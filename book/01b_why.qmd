@@ -1,0 +1,50 @@
+# Why collect data? {#sec-why}
+
+> Key insights: in general, we want more records that contain high-quality signals and/or observations about the world to be available to public AI organizations for training and evaluation.
+
+If we want to build a data flywheel, it is probably useful to first specify why we want more data! This in turn can help us identify what types of data we want.
+
+At its core, "data" is useful for AI (and for other things!) because it provides information about the world.
+
+In general, it is intuitive that having more information will (generally) lead to better decision-making. [^3]. Although there are some scenarios we might come across (or invent) where acquiring information is not helpful -- because we might not have "room" in our memory for more data, or some records might not help us at a certain task, or data causes our model to get worse in some sense (some examples of nuance in academic work: [@shen2024data], [@sorscher2022beyond]) -- in general, most people benefit from having more records of high-quality observations and signals [@hestness_deep_2017]. [^4]
+
+[^3]: A bayesian might say: data is *evidence* that updates a prior into a posterior via Bayes’ rule; the "goodness" of a dataset is how much information (likelihood ratio / bits of surprise) it carries about the hypotheses we actually care about. A frequentist might say: data are *samples* from some process; more (and more representative) samples tighten confidence intervals and reduce estimator variance (roughly with $1/\sqrt{n}$), so sampling design and coverage matter as much as sheer volume.
+
+[^4]: Classical work provides an information-focused perspective on when/why more data is good: [@wolpert2002no], [@Belkin_2019]
+
+So let's put these more complicated cases aside for now, and make the assumption: in expectation, acquiring more high-quality data (that is "accurate", or reflects "insight") is useful. Oftentimes assessing data's quality, or its truthiness, or its insightfulness, is not at all easy! With this assumption in mind (and hearty caution about the thorniness of truth and insight), we can speak generally about the types of data we might acquire through a flywheel and that data will be useful.
+
+## An overly detailed accounting of all the ways we might generate LLM pre-training data
+
+Speaking at a very low level, LLM pre-training data can come from any sensor or form that creates digital records that contain sequences of tokens. However, we generally don't want any old tokens -- we want tokens that contain signals about the world and about people, and that have been organized (typically by people) in a way that captures the underlying structures of our world (or the structures that we people have imposed). In pre-training, it seems we can get away with mixing together many different types of structure. For post-training, we may want specific structure (e.g. data produced by people following specific instructions).
+
+We might further try to describe human-generated data in a very general fashion by saying: data is created when a person does something that leaves a digital trace: typing, speaking into a microphone, using other kinds of digital inputs like buttons, controllers, etc. They might also operate a camera or other sensing instrument that captures signals from the world. We also sometimes may want to use truly "sensor-only data" (e.g., seismic readings), though those sensors are built, placed, funded, and so on by humans.
+
+After typing, a person might use a terminal or GUI to send their inputs into some data structure -- by committing code, editing a wiki, responding on a forum, and so on. Often, the person creating a record has a goal and/or a task they want to complete. This might be: ask a question, teach or correct something, build software, file a bug, summarize a meeting, translate a passage, or simply react to some information object (like/flag/skip). Critically, in practice, many high value sources of data also have some upstream social structure and corresponding incentives -- institutions, communities, etc. that create meaningful incentives for people to produce records that are accurate, insightful, and so on [@deckelmann_wikipedias_2023], [@johnson2024wikimedia], [@aryabumi2024code].
+
+In other words, institutions and communities create incentives so that as people type (or otherwise digitize information), they don't just produce random sequences or the same common sequences repeatedly (or we might have an Internet of web pages that all say "I like good food"; don't we all...)
+
+Moving to a more high-level overview, we might begin to categorize LLM training data:
+
+* Human-authored natural language: blogs, books, encyclopedias, news, forums, Q&A, transcripts (talks, meetings, podcasts), documentation, and manuals.
+  * And now, some non-human-authored natural language (synthetic versions of any of the above).
+* Code: source files, perhaps with licenses and provenance, issue threads, commit messages.
+* Semi-structured text: tables, markup, configs (HTML/Markdown/LaTeX/YAML/JSON) that carry schema and relationships.
+* Multimodal pairs (for VLM/ASR pretraining): image+text, audio+text, video+text, and associated captions/alignment.
+  * Here, the pairing is a critical characteristic that makes this data unique. This implies somebody has looked at the each item in the pair and confirmed a connection (though paired data can be produced in an automated fashion).
+* Metadata about data: records that describe characteristics of other records. language, domain/topic tags, timestamps, links, authorship/attribution, license, AI preference signals.
+  * Quality signals: dedup scores, perplexity filters, toxicity/PII flags, heuristic or model-based ratings—used to weight or exclude.
+
+Some specific tasks that might create especially useful data include:
+
+* Asking a model a question and marking the response "good" or "fail", optionally with a short note about *why*.
+* Corrections/edits: rewriting a wrong answer; adding a missing citation; supplying a step-by-step solution.
+* Pairwise preferences: "A is better than B because ..." (useful for preference learning/DPO).
+* Star ratings / rubrics: numeric or categorical grades on axes like factuality, helpfulness, tone, safety.
+* Tagging according to some taxonomy: topic ("tax law"), language ("id-ID"), difficulty ("HS"), license (CC-BY-SA), and AI preference signals.
+* Synthetic tasks: user-written prompts + *ideal* references (gold answers, test cases, counterexamples).
+* Multimodal: an image with a caption; an audio clip with a transcript; a diagram with labeled parts.
+* Programmatic contributions: code snippets with docstrings/tests; minimal reproductions of a bug.
+* "Negative" structure: anti-patterns, jailbreak attempts, hallucination catalogs.
+
+Of course, a key data for many AI systems is "implicit feedback": clicks, dwell time, scroll/hover, skips/abandonment. This data is typically collected via a "sensor" (logging software), not something users actively contribute through a form.

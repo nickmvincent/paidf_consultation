@@ -1,0 +1,13 @@
+# Preface {.unnumbered}
+
+This is a "mini-book" that discusses "public AI flywheels": software meant to enable people to opt-in to contribute data towards "public AI" causes. The goal of this book is to support efforts to build a transparent, people-centric data collection ecosystem that supports the evaluation and training of public-benefit AI models. If successful, public AI flywheels can create valuable data that materially improves public AI evaluation, research and development. If very successful, these flywheels might also play a role in solving thorny problems around the economics of information in a post-AI age.
+
+This is also a way to organize -- and socialize! -- some design notes, practical documentation that's out of scope for a single example project's repo, and longer abstract writing on the topic.
+
+This document is organized as such:
+
+- In "Part 1: Concepts", we explore definitions, motivations, and the design space of public AI data flywheels.
+- In "Part 2: A Case Study", we discuss one particular implementation of a Minimum Viable Product (MVP) opt-in flywheel meant to accompany a "public AI interface" (hosted interface software that hits various endpoints for "public AI models") that uses a "friendly wrapper around a Git backend" approach
+  - This MVP focuses on collecting "notable chats" (good, bad, or interesting). This data provides immediate value for model evaluation and, at scale, can be used for fine-tuning. Importantly, collecting a list of good and bad chats is also immediately fun, so contributors can get some value before we reach a threshold of data volume needed to construct a full benchmark or dataset. We expect key ideas discussed in this doc, and concretized in this project, to generalize to other data types.
+  - We also provide details on how a data retention policy for a concrete Public AI Data Flywheel might work, and more generally discuss the role of the data strategy for a "full stack" public AI application: from model endpoints to OpenWebUI interface to flywheel platform.
+- The book includes some Appendices with additional information.

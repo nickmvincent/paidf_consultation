@@ -1,0 +1,52 @@
+project:
+  type: book
+  output-dir: ../docs
+
+book:
+  title: "Data Flywheels and Public AI"
+  author: "Nicholas Vincent"
+  date: "9/2/2025"
+  chapters:
+    - index.qmd
+    - part: "Concepts & Rationale"
+      chapters:
+      - 01a_intro.qmd
+      - 01b_why.qmd
+      - 01c_pipeworks.qmd
+      - 01d_leverage.qmd
+      - 01e_options_for_flywheel.qmd
+      - 01f_ethics_compliance.qmd
+      - 01g_upstream.qmd
+    - part: "Case Study: Low friction peer production"
+      chapters:
+      - 2a_mvp.qmd
+      - 2b_life_of_a_chat.qmd
+      - 2c_terms.qmd
+      - 2d_faq.qmd
+      - 2e_code.qmd
+    - part: "Updating this book"
+      chapters:
+      - 3a_contributing.qmd
+      - 3b_ai_guidelines.qmd
+      - 3c_future_directions.qmd
+    - references.qmd
+    - part: "Appendices"
+      chapters:
+      - appendix1_llm_data.qmd
+      - appendix2_prefsig.qmd
+      - appendix3_example_legalterms.qmd
+      - appendix4_diffable_terms.qmd
+    
+
+bibliography: 
+  - references.bib
+  - references_blogs.bib
+  - references_llm_data.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+

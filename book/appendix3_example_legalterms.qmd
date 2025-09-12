@@ -1,0 +1,10 @@
+# Appendix 3: LLM Policy Docs
+
+This Appendix contains a list of links to various live Terms of Service, Privacy Policy, and related docs for major LLM providers, including both private players like frontier labs and public AI-adjacent actors like AI2, Mozilla.
+
+
+- AI2: [ToS](https://allenai.org/terms/2024-09-25) | [Privacy](https://allenai.org/privacy-policy/2025-02-19)
+- Mozilla Common Voice: [ToS](https://commonvoice.mozilla.org/en/terms) | [Privacy](https://commonvoice.mozilla.org/en/privacy)
+- OpenAI: [Terms of Use](https://openai.com/policies/row-terms-of-use/)
+- Anthropic
+- QwenChat

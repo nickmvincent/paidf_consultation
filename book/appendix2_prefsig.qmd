@@ -1,0 +1,62 @@
+## Appendix 2 — Preference Signals for AI Data Use (CC signals + IETF AI Preferences)
+
+This appendix provides a brief description of, a links to, information on emerging "AI Preference Signaling" from Creative Commons and the IETF (other initatives and orgs may be added as well).
+
+Key links:
+
+- ["CC Signals: A New Social Contract for the Age of AI"](https://creativecommons.org/ai-and-the-commons/cc-signals/)
+- ["CC Signals Implementation"](https://creativecommons.org/ai-and-the-commons/cc-signals/implementation/)
+- ["creativecommons/cc-signals"](https://github.com/creativecommons/cc-signals)
+- https://www.ietf.org/archive/id/draft-ietf-aipref-vocab-02.html
+
+
+**What CC signals are**:  A Creative Commons framework for *reciprocal* AI reuse: content stewards can allow specific machine uses if certain conditions are met (e.g., credit, contributions, openness). Overview & implementation notes. 
+
+* **Four proposed CC signals (v0.1)**
+
+  * **Credit (cc-cr)** — cite the dataset/collection; RAG-style outputs should link back when feasible.
+  * **Credit + Direct Contribution (cc-cr-dc)** — proportional financial/in-kind support.
+  * **Credit + Ecosystem Contribution (cc-cr-ec)** — contribute to broader commons.
+  * **Credit + Open (cc-cr-op)** — release model/code/data to keep the chain open.
+    Source (draft repo & posts).
+
+* **IETF AI Preferences (aipref) — the transport & vocabulary**
+
+  * **Vocabulary**: a machine-readable set of *categories* (e.g., `ai-use`, `train-genai`) and *preferences* (`y` = grant, `n` = deny) with **exceptions**. Drafts.
+  * **Attachment**: how to convey these preferences via **HTTP `Content-Usage` header** and **robots.txt** extensions. Drafts.
+  * **Structured Fields**: uses RFC-standardized HTTP structured field values. 
+  * **Robots Exclusion Protocol** baseline.
+
+* **Putting them together (content-usage expression)**
+
+  * Shape:
+
+    ```
+    <category>=<y|n>;exceptions=<cc-signal>
+    ```
+
+    Example in **robots.txt** (allow everything, but *AI use denied unless Credit*):
+
+    ```
+    User-Agent: *
+    Content-Usage: ai-use=n;exceptions=cc-cr
+    Allow: /
+    ```
+
+    Example **HTTP header** (deny *gen-AI training* unless *Credit + Ecosystem*):
+
+    ```
+    Content-Usage: train-genai=n;exceptions=cc-cr-ec
+    ```
+
+    (Syntax and examples from CC & IETF drafts.)
+
+* **Operational notes (for this repo’s flywheel)**
+
+  * **Per-record fields** to store: `license` (CC0/CC-BY/CC-BY-SA) and `ai_pref` (IETF aipref value + optional CC signal), plus optional `attribution` handle. (Aligns with CC write-ups & IETF drafts.)
+  * **Placement**:
+
+    * *Location-based* signals via **robots.txt** for site/paths.
+    * *Unit-based* signals via **HTTP `Content-Usage`** on dataset files and API responses.
+  * **Interoperability expectations**: signals are normative *preferences*; adherence relies on ecosystem norms (similar to robots.txt & CC license culture).
+

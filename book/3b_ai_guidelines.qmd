@@ -1,0 +1,28 @@
+# Guidelines for Using AI
+
+This project is about AI, so using AI tools is welcome throughout the workflow. However, humans are ultimately accountable for what ships. Use AI to accelerate, but keep humans responsible for correctness, coherence, and integrity.
+
+## Writing with AI
+- Human sign-off: read every line before it becomes part of the book. Treat AI output as a draft (sometimes, a VERY EARLY draft) expect to edit and fact-check.
+- Iteration over one-shots: current models rarely produce publication-ready text in one pass, so plan to iterate and refine.
+- Maintain voice: ensure tone, terminology, and structure match the book’s style and audience.
+  - Note that the "voice" here is still up for debate :)
+- Track changes (recommended): summarize AI-assisted edits in PR descriptions; include key prompts when they inform substantive choices.
+
+## Citations with AI
+- Verify metadata: for each citation suggested or formatted by AI, confirm author(s), title, venue, year, DOI/URL, and key fields in `references.bib` or `references_blogs.bib`.
+- Check links: ensure all links resolve and are appropriate for the cited claim; add `urldate` for web sources.
+- Prefer stable identifiers: use DOIs and permalinks when available; avoid ephemeral URLs.
+- Be wary of hallucinated citations: do not add references unless you can independently verify they exist and match the claim.
+
+## Code with AI
+- Write tests: include unit tests or executable examples that validate behavior for any non-trivial code contributed to this repo.
+- Run when possible: execute tests locally when feasible; include brief notes or logs of results in the PR description.
+- Keep records: note model name/version, prompts, and any constraints if they materially affect the code outcome.
+- Security and privacy: do not paste secrets or sensitive data into AI tools; scrub logs and examples of credentials.
+
+## General Practices
+- Attribution: when AI assistance is significant, disclose it briefly (e.g., “sections drafted with AI, edited by <name>”).
+- Accessibility: ensure AI-generated figures, tables, and examples include alt text and are accessible.
+- Consistency: align terminology and formatting with existing chapters; prefer incremental, focused edits.
+

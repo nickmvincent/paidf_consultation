@@ -1,0 +1,102 @@
+# Contributing
+
+Thanks for your interest in improving this book and its supporting materials. This chapter explains how to propose changes, what to edit, and how to preview your work locally.
+
+## How You Can Help
+- Fix typos, grammar, and clarity in chapters.
+- Suggest new sections, examples, figures, or diagrams.
+- Improve citations and references.
+- Review structure, flow, and consistency across chapters.
+
+## Project Structure
+- `book/`: Quarto book source (`.qmd`), bibliography files, and build outputs.
+  - `_quarto.yml`: Book configuration (title, chapters, output).
+  - `*.qmd`: Chapter files.
+  - `references.bib`, `references_blogs.bib`: Citation databases.
+  - `docs/` and `_book/`: Built outputs (HTML site, PDFs). You do not need to update these for small edits.
+- `readme.md`: Project overview.
+
+## Getting Set Up (Optional but Recommended)
+
+You can submit small edits directly via the GitHub web UI.
+
+At this stage, contributors are not required to build the book for each contribution (PR). If activity scales up, this may change.
+
+For local previews:
+- Install Quarto CLI: https://quarto.org
+- For PDF builds: install a LaTeX distribution (e.g., TinyTeX) if you plan to render PDFs.
+
+## Editing Content
+- Work in `book/` for the main text.
+- Use `.qmd` (Quarto Markdown). Keep front matter minimal unless needed.
+- Follow existing naming patterns for files (e.g., `01a_intro.qmd`, `2a_mvp.qmd`).
+- If you add a new chapter, also add it to `book/_quarto.yml` under the appropriate `part` and `chapters` list.
+
+### Style Guidelines (First Draft)
+- Audience: practitioners, policymakers, interested public, and academics; aim for clear, direct language.
+- Voice: concise, neutral, plain language; prefer active voice.
+- Consistency: American English; sentence case for headings unless a proper noun.
+- Structure: short paragraphs, descriptive headings, and lists when helpful.
+- Figures: place images in `book/` (you may create `book/images/`) and reference with relative paths. Provide alt text.
+- Tables/Callouts (sparingly): use standard Markdown tables and Quarto callouts when helpful.
+- Acronyms: spell out on first use; keep consistent across chapters.
+
+### Citations & References
+- Use Quarto/Pandoc citation syntax in text, e.g., `[@smith2020]` or `[@smith2020, p. 10]`.
+- Add scholarly works to `book/references.bib` and blog/web articles to `book/references_blogs.bib`.
+  - (We may break these up a bit more as references accumulate as well!)
+- Prefer stable identifiers (DOIs, permalinks). Include `url` and `urldate` for web sources when possible.
+- Keep references tidy: one entry per work; avoid duplicates.
+
+### Cross-References
+- Use Quarto cross-refs for figures, tables, and sections when needed, e.g., `(@fig:example)`.
+- Keep labels descriptive and unique within the book.
+
+## Previewing Changes Locally
+From the repository root:
+
+1) Preview while you edit (auto-reloads):
+```
+cd book
+quarto preview
+```
+
+2) Render the full book:
+```
+cd book
+quarto render
+```
+Outputs go to `book/docs/` (HTML site) and may include a PDF if configured.
+
+Notes on build outputs:
+- You do not need to commit `book/docs/` or `book/_book/` for small text changes. Maintainers will rebuild as needed.
+- If you do render locally, avoid large diffs to generated files in your PR unless explicitly requested.
+
+## Making a Pull Request
+- Create a feature branch from `main`. Suggested naming: `topic/short-summary` (e.g., `typo/fix-intro-typos`).
+- Keep PRs small and focused; open an issue first for large structural changes.
+- Include a brief summary of what changed and why.
+- If adding a new chapter/section, mention where you placed it and why.
+- If you touched citations, mention any new entries added to the `.bib` files.
+
+PR checklist (recommended):
+- Content: clear, consistent, and scoped to one concern.
+- If possible, try to Build: book renders locally (optional for small fixes).
+- Links: relative links resolve; images render; alt text provided.
+- References: citations compile; bib entries added/updated as needed.
+
+## Reviews & Merging
+- Maintainers aim to review within 1–2 weeks.
+- We may suggest edits for tone, structure, or scope.
+- For substantial changes, we may ask you to split PRs or iterate.
+
+## Code of Conduct
+Please be respectful and constructive. Disagreement is fine; personal attacks are not. Maintainers may moderate discussions and contributions to keep the project welcoming and productive.
+
+## License & Attribution
+- Unless otherwise noted, contributions will be incorporated under the repository’s license (if updated/added). If you require a different licensing arrangement, open an issue before submitting a PR.
+- If you adapt text from openly licensed sources, include proper attribution in comments or commit messages and ensure license compatibility.
+
+## Questions
+Open an issue with your question or proposal. If you’re unsure where to start, consider opening a small PR with suggested changes.
+

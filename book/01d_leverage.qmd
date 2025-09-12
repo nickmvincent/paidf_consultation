@@ -1,0 +1,54 @@
+# Flywheels and Bargaining Power {sec-bargain}
+
+> Key insight: Beyond improving public AI systems, getting public AI data flywheels right can make it easier for people to use data flow as a source of (collective) bargaining power to (1) participate in markets and (2) participate in governance and alignment. 
+
+## How can a public flywheel give people real power over AI systems?
+
+Based on @sec-why, we can arrive at a very obvious argument for a data flywheel: the flywheel will produce data, and that data will make AI better! 
+
+But this isn't the only benefit of building flywheels in a "public AI" manner. Doing so can also enhance the amount of agency that people have over data flow, and make "voting with data" possible such that the public has more power to govern and align AI systems.
+
+In short, AI is somewhat unique relative to other technologies, because of its data dependence. Data comes from people. The fact that this powerful technology has a dependency on people from around the world means that AI has a natural "governance lever".
+
+Setting up a public AI data flywheel is thus important not only to improve AI capabilities; success of public AI data flywheels can collectively help to solve some (but not all!) of the thorny governance and alignment challenges that AI poses by fundamentally changing the data pipeworks of AI.
+
+You can read about data leverage via this [newsletter](https://dataleverage.substack.com/) or even via this [dissertation](https://arch.library.northwestern.edu/concern/generic_works/jq085k38d?locale=en). For a short summary, of "voting with data to improve alignment", check out this post: [Plural AI Data Alignment](https://dataleverage.substack.com/p/measuring-relative-ai-alignment-in-terms-of-data-pipelines). 
+
+It’s worth pulling out two distinct ways that a flywheel can interact with AI and governance:
+
+* A flywheel with no attempt to capture contributor intent or provide data rights may still serve to increase available data, either in fully public repos or in databases accessible by public AI labs. This outcome could still make public models a bit better and help to keep public labs competitive at the margins, but it would not change the bargaining relationship between contributors and model builders.
+
+* A well-governed flywheel that effectively manages the tension between opt-in and friction/ease-of-use can seriously reshape the broader data pipeworks/ecosystem/economy. Ideally this flywheel would also capture provenance, per-item licensing, and per-item AI-use preference (or even enforceable contracts -- "you must pay some organization to use this data", or "you must follow this policy around openness, safety, alignment, etc"). Such flywheels would turn contributions into units that can be assembled, priced, withheld, or targeted, opening the door to markets and, if necessary, strikes.
+
+## How an opt-in flywheel enables markets
+
+An opt-in flywheel can create the prerequisites for functioning data markets without turning the project into "just a marketplace."
+
+Critically, on day one of the data flywheel, each contribution is a unit with provenance, license, usage preferences, and minimal schema. There is also the immediate possibility to associate contributions with reputations of contributors or collectives. This is close to something that is legible enough to transact on. While the initial goal would be to promote conscious data contribution towards public AI causes, it is possible that some data contributors could also use the legibility and the organizing effects of the flywheel to also sell some data to private actors. Indeed, a model already exists that enable people to make public contributions that benefit public interest actors while still allowing large private organizations to pay for data contractually: Wikimedia Enterprise. Wikimedia data is open to all, but Wikimedia is able to monetize "enterprise-level access". [^5]
+
+[^5]: That said, there is no doubt that for certain types of data, some people will need prevent their data from ending up in any public repositories in order to monetize effectively. The public AI data flywheel is only suitable for certain categories of data (in short: content that could be at home in a peer produced knowledge commons). Other types of data may be managed by complementary markets and sharing approaches.
+
+As the data flywheel "spins up", a community could form around the open data to build leaderboards, scarcity tags (rare language/domain), and quality scores. This would effectively begin to generate price signals. A bounty board ("need 5k labeled failures in X") would serve to convert demand into targeted supply. An exemplar here would be bounty boards for open source software. While the outputs of such bounty boards are code contributions that become OSS (and thus non-excludable), it's still possible to have market dynamics emerge.
+
+Co-ops/unions/intermediaries can represent contributors, negotiate bundle terms, run audits, and set default preferences. The flywheel provides a starting shared ledger and release cadence that markets need. (Again in some cases, the intermediary may need to "move off" the flywheel and transact directly in a market).
+
+The key idea here is that it's possible to enable market activity under two distinct sets of conditions: one in which data is kept open-but-gated-and-restricted ("markets" for bespoke Wikimedia Enterprise style packages) or by using the flywheel as a stepping stone towards a more "property-like" market (people organize using the flywheel community or use preference signals as exemplars, then form a data intermediary to collectively bargain directly with data users).
+
+## How an opt-in flywheel enables strikes (or credible refusals)
+
+A data strike here means a coordinated, temporary withdrawal or constraint on high-signal contributions or releases, or retroactive deletion of data (which in some cases, with legal support, could trigger legally enforced retraining https://cyberscoop.com/ftc-algorithm-disgorgement-ai-regulation/ -- though TBA on how this will play out in 2025 onwards).
+
+In data flywheel where contribution is opt-in, non-participation is the default. This makes strikes easy. If the processing cadence is public, strikers might even use the release pipeline provides a natural "valve" for cadence changes or strikes. Additionally, Everyone sees dependence on fresh contributions (e.g., evaluation drift), and this visibility creates leverage.
+
+There are many variants of data strikes in a flywheel ecosystem:
+
+* Quality freeze. Contributors keep using systems but withhold labeled "good/fail" chats or corrections for a period.
+* Selective embargo. A community with scarce data (language/domain) pauses releases or flips new records to "evaluation-only."
+* Preference shift. New contributions change AI-use preferences to deny training unless a stated condition is met (funding, governance, attribution).
+* Rate limit. Collectives cap monthly volume to force negotiations on price or terms.
+
+What a strike cannot do (and shouldn’t promise):
+
+* Undo past licenses. Items released under irrevocable terms (e.g., CC0, CC-BY) remain available.
+* Prevent copying entirely. Public releases can be mirrored; anti-scraping reduces risk but does not eliminate it.
+* Guarantee compliance outside the ecosystem. Preference signals work when counterparties agree to honor them or when law/policy backs them.

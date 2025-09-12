@@ -1,0 +1,97 @@
+# Appendix 1: LLM Data Schemas
+
+Here, we describe many variants of LLM data. This will be relevant for when we extend the flywheel to include more types of data, and especially shift towards promoting the sharing (via opt-in flywheels, but also via new market mechanisms) of richer "content data".
+
+---
+
+## Open Web / Crawls
+
+- **WARC/WAT/WET**
+  - *WARC* (container for HTTP request/response records) — spec & overview: [@iipc_warc; @loc_warc]
+  - *WAT* (JSON metadata extracted from WARC) and *WET* (plain text extracted from HTML) — Common Crawl guides [@cc_getstarted; @cc_formats]
+
+- **C4 (Colossal Clean Crawled Corpus)** — TFDS catalog & generator code [@tfds_c4; @c4_github]
+
+- **The Pile** (22-source, mixed corpus) — paper [@pile_paper]
+
+---
+
+## Encyclopedic / Books
+
+- **Wikipedia XML dumps** (page/revision XML; SQL tables for links) — [@meta_dumps; @wiki_db]
+
+- **Project Gutenberg**
+  - *Books*: plain text/HTML master formats; ePub/MOBI derived [@pg_formats]
+  - *Catalog schema*: daily RDF/XML (also CSV) for metadata; offline catalogs [@pg_catalogs]
+
+---
+
+## Scientific / Legal
+
+- **arXiv** (Atom/OAI-PMH metadata; bulk & API) — [@arxiv_oai; @arxiv_api; @arxiv_bulk]
+
+- **JATS XML** (journal article tag suite) — [@jats_niso; @jats_nlm]
+
+---
+
+## Code
+
+- **BigCode — The Stack / The Stack v2** (source files + license/provenance metadata; dedup variants) — [@stack_hf; @stack_v2_hf; @stack_docs; @stack_paper]
+
+---
+
+## Forums / Q&A / Social
+
+- **Stack Exchange dumps** (XML: Posts, Users, Comments, Votes, etc.) — [@se_meta; @se_dataexplorer]
+
+- **Reddit**
+  - *API JSON* schema — official docs [@reddit_api; @reddit_help]
+  - *Pushshift* (historical dumps; research dataset) — [@pushshift_site; @pushshift_paper]
+
+---
+
+## Instruction / Conversations (Post-training SFT)
+
+- **OpenAI-style chat schema** (role-tagged: `system|user|assistant`, plus tool calls) — [@openai_chatapi]
+
+- **Alpaca** (JSON prompts/instructions/outputs) — [@alpaca_post; @alpaca_repo; @alpaca_clean]
+
+- **Databricks Dolly-15k** (human-written instruction/response pairs) — [@dolly_repo]
+
+- **OpenAssistant OASST1** (message-tree conversations with roles) — [@oasst1_hf]
+
+---
+
+## Preference / Feedback (RLHF & DPO)
+
+- **HH-RLHF** (Anthropic helpful/harmless, JSONL pairs: `chosen` vs `rejected`) — [@hh_rlhf]
+
+- **DPO format** (prompt + preferred vs dispreferred response) — [@dpo_paper]
+
+---
+
+## Multimodal (for VLMs/ASR)
+
+- **LAION-5B / Re-LAION-5B** (image–text pairs with CLIP scores; links) — [@laion_5b; @relaion_5b]
+
+- **Whisper** (weakly-supervised ASR; audio → text pairs) — [@whisper_paper; @whisper_blog]
+
+- **HowTo100M** (YouTube instructional video clips + narrations) — [@howto100m_site; @howto100m_paper]
+
+---
+
+## Math Reasoning (often for post-training/eval)
+
+- **GSM8K** (grade-school word problems; JSON) — [@gsm8k_repo; @gsm8k_hf]
+
+- **MATH** (competition problems with step-by-step solutions) — [@math_paper; @math_hf]
+
+---
+
+## Common Storage Containers
+
+- **JSON Lines / NDJSON** — [@jsonlines; @ndjson_spec]
+
+- **TFRecord** — [@tfrecord_tf]
+
+- **Apache Parquet** — [@parquet]

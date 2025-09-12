@@ -1,0 +1,20 @@
+# Upstream data and data contribution
+
+Data flywheels / contribution pathways are one part of the broader "data strategy" for an AI product or organization. Another key factor is making the full public AI pipeline is transparent is telling users about upstream data. Typically, the terms of service for an application or flywheel try to tell users where the data will go; but it can also be useful to tell users about where the data/AI come from.
+
+### AI builder attribution
+
+At a high-level: in each interaction between users and a public AI system, we want to attribute the organization who did the hard work of prepping a model. Ideally, we also want to attribute the original data creators, though in some cases practical constraints make this hard.
+
+- The custom text, branding, etc. within an AI interface can provide organization- specific, with the goal of making sure all model builders are happy. Can even highlight other interfaces/endpoints, something private AI systems are less likely to do.
+- Important to get this right so that model developers don’t “back out” of the inference MVP and just switch to their own sovereign interfaces
+
+### Data attribution
+
+Another way that public AI platforms can differentiate themselves from private AI is by heavily emphasizing data attribution. This might involve showing users data cards, incorporating features like OlmoTrace [@liu2025olmotrace], etc.
+
+## Why does upstream matter?
+
+Telling users about upstream data is a key part of system-wide transparency. Transparency on both fronts (model builders, data) has the potential to provide further incentive to users to provide data in the first place (because, e.g., they specifically want to support one of the organizations providing models or data).
+
+There are a number of other exciting conncetions between data valuation/attribution, collective action in data (algorithmic collective action, data leverage), and flywheels.

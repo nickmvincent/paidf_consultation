@@ -1,0 +1,99 @@
+# Ethics and Compliance {#sec-ec}
+
+Public AI data flywheels face numerous ethics and compliance challenges.
+
+This mini-book does NOT provide specific legal advice. We do discuss and link to terms of service used by various platforms.
+
+In Part 2, we provide some examples of platform specific data policy terms.
+
+## Ethics
+
+### Flywheel-particular challenges
+
+There is a large literature on harms from AI and sociotechnical systems more generally. We provide a longer set of references at the end of this section.
+
+The top ethics priority for a Public AI Data Flywheel (PAIDF) is figuring out informed consent, and balancing consent and friction. One worst case scenario for a public AI organization is that the flywheel is set up in a way that erodes user trust and ultimately hinders the broader public AI mission.
+
+While designing ethical systems normally involves some degree of multiplicity (there is rarely a single "most ethical solution" for a given group of people), our overall stance is that informed consent can be achieved by maximizing user information about data use and taking a fundamentally opt-in approach.
+
+Beyond consent, a number of other interesting ethics challenges arise. We describe them first, and then discuss the intersection between building an ethical flywheel and a compliant flywheel. 
+
+In particular, there are three flywheel specific concerns, that primarily stem from the very general nature of modern AI data. 
+
+First, it is possible that data that is contributed via the flywheel could create serious security concerns (contributing a chat that includes an injection attack). Second, data that is contributed could create privacy concerns (PII and sensitive strings, from email, names to API keys). And third, data that is contributed may be seen as expressively harmful or leading to representational harms. That is, some users might produce data that is very offensive to other users. This is likely inevitable in a large enough system, and so public AI flywheel designers must plan with values conflict in mind.
+
+In short, when we open up a form to the world, people may enter things (even in good faith) that creates security risks, violates privacy, or violates social norms.
+
+There are also a set of ethical risks that arise from downstream AI systems that we build/improve with flywheel data. While these are not the focus of this mini-book, it is critical to keep them in mind. A non-exhaustive list includes:
+
+
+* allocative harms: outputs affect access to opportunities or resources (moderation, ranking, credit scores)
+* privacy harms at the model layer (distinct from data layer): re-identification, doxxing, accidental leakage of personal or sensitive data
+* security harms (distinct from data layer): prompt injection and data exfiltration via model behavior; poisoning of training or eval sets
+* IP and contract harms: misuse of copyrighted or licensed content; violations of platform terms
+* AI-driven expressive harms: a system produces content that demeans, stereotypes, or legitimizes abuse against some group
+* AI-driven representational harms: skewed data makes groups invisible or mischaracterized (e.g., images that underrepresent darker skin tones; code comments that assume a single gender)
+
+### Flywheel-specific high-level goals
+
+To balance these ethical challenges, we might organize our design around high-level goals that often appear in AI regulation and ethical discussions. These might include "purpose limitation" [@eu_gdpr_2016] (our flywheel should try to collect only data that is necessary for the stated task -- evaluating and improving AI systems) and "proportionality" (we should weigh utility of data collection against the likelihood and severity of harm; to some extent, because the flywheel leans opt-in, some decision-making is delegated to contributors). Considering the more general set of AI harms above, we may also want to specifically acquire or filter data in a way that helps achieve fairness goals. 
+
+Typically, you will see works attempt to classify high-risk data which should be treated differently. Examples include:
+
+* faces, voices, gait, or other biometrics
+* images of minors or contexts involving schools and hospitals [@coppa_ftc_2013; @ferpa_ed_1974; @hipaa_privacy_rule_2000].
+* intimate or medical contexts, support forums, addiction and mental health groups
+* government IDs, financial records, geolocation trails, and precise timestamps
+* credential artifacts: API keys, cookies, session tokens, SSH keys, access logs
+* content from communities with clear norms against scraping or model training
+
+A flywheel designer likely wants to avoid collecting this kind of data, but getting 100\% precision will be nearly impossible, because some of the most interesting AI outputs (especially failure cases) may involve high-stakes scenarios. A flywheel that completely bans contributions related to cybersecurity or human health risks collecting "excessively bland" data.
+
+### Levers for solving these ethics challenges
+
+The flywheel designer can use several avenues for attempting to pre-empt some of the above challenges. In terms of informed consent, this comes down to the implementation of a usable, informative module for consent and the exact UX for opting in and out. In terms of security and privacy, this mainly comes down to implementing filtering/curation at various stages. In terms of values conflict, the designer may employ filtering, but also take a normative or sociotechnical approach (leaning on peer production-style talk pages, moderation, community-generated rules, etc.). 
+
+The designer has the least leverage to directly control downstream model harms, but can have some influence via further training data filtering, helping to document data produced by the flywheel, etc.
+
+## Compliance
+
+In general, data protection regimes impose responsibilities on anyone operating a platform.
+
+Most likely, any public AI data flywheel will also be connected to some frontend (e.g., hosted OpenWebUI instance) and some backend (model provider). These distinct systems are likely to have their own data-related responsibilities, depending on exactly how they hold or process data.
+
+### Risks
+
+In terms of compliance risks, some issues may emerge because of contributor mistakes: users may post personal data that evades whatever filtering/curation the designer has implemented. In some way, PII, secrets, or identifiers may make it into the flywheel's data repo. Further, even when users make contributions via pseudonym, unique phrasing, contextual clues, etc. can deanonymize. If we use salted contributor hashes, these are still stable identifiers across contributions which creates some small risk as well.
+
+In general, a major risk with an approach that creates publicly accessible data is the potential for permanence via forks and mirrors. Removed data can persist in external forks, local clones, or third-party mirrors outside this project’s control. Further, while repo history can be rewritten and monthly files reissued, but downstream models may already have trained; unlearning is best-effort and not guaranteed.
+
+Risks may also stem from the use of various vendors. Hosting providers (e.g. Vercel and similar services, any caching databases uses, any APIs used) may retain request logs; this could be outside the flywheel designer's control.
+
+In some cases, contributions that create "security-related ethical risks" (e.g. a chat in which an LLM provides instruction for conducting some kind of attack) could also create compliance risks. This creates some continuous burden on maintainers. The same is true of offensive content or privacy violations. Even with consent and public repos, some jurisdictions treat certain content types as sensitive or restricted.
+
+## Further reading:
+
+First: works that taxonomize harms [@shelby; @weidinger_risks_2021; @blodgett_language_2020]
+
+Allocative harms: outputs affect access to opportunities or resources (moderation, ranking, credit-like inferences) [@barocas_selbst_big_data_2016; @obermeyer_bias_health_2019].
+
+Works that discuss expressive harms and representative harms [@shelby; @weidinger_risks_2021; @buolamwini_gender_shades_2018; @grother_frvt_demographics_2019; @crawford_paglen_excavating_ai_2019; @blodgett_language_2020].
+
+On data that has actual security concerns (contributing a chat that includes an injection attack) [@owasp_llm_top10_2023; @hubinger2024sleeperagentstrainingdeceptive; @carlini2024poisoningwebscaletrainingdatasets].
+
+On PII and sensitive strings (from email, names to API keys) [@carlini_secret_sharer_2019; @carlini_extracting_training_data_2021].
+
+Reg and legal examples: [@nist_sp800_122_2010; @eu_gdpr_2016; @illinois_bipa_2008; @rosenbach_v_six_flags_2019].
+
+* privacy harms: re-identification, doxxing, accidental leakage of personal or sensitive data [@sweeney_reidentification_2000; @narayanan_shmatikov_2008]
+
+Further reading on:
+
+* proportionality: weigh utility against the likelihood and severity of harm [@iso_23894_2023; @nist_ai_rmf_2023].
+* respect for context: treat data according to the social norms of its origin community [@nissenbaum_contextual_integrity_2004; @jo_gebru_archives_2020].
+* transparency: explain collection, uses, and the limits of control in clear language [@mitchell_model_cards_2019; @gebru_datasheets_2018; @holland2018datasetnutritionlabelframework].
+* accountability: assign owners, metrics, and escalation paths [@nist_ai_rmf_2023; @eu_ai_act_2024].
+* fairness and non-discrimination: measure and mitigate disparate impacts [@barocas_selbst_big_data_2016; @selbst_fairness_abstraction_2019; @obermeyer_bias_health_2019; @bender_stochastic_parrots_2021].
+
+* security harms: prompt injection and data exfiltration via model behavior; poisoning of training or eval sets [@owasp_llm_top10_2023; @carlini2024poisoningwebscaletrainingdatasets].
+* IP and contract harms: misuse of copyrighted or licensed content; violations of platform terms [@us_copyright_office_ai_2024; @cc_ai_and_cc_2023].

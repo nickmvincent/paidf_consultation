@@ -1,0 +1,82 @@
+# A Democratic Data Pipeworks {#sec-pipeworks}
+
+## How does data move from people to AI models — and where can we insert governance levers?
+
+*This is a summary of a longer Data Leverage [post](https://dataleverage.substack.com/p/building-a-data-pipeworks-for-democratic)*.
+
+To further motivate the idea of data contribution with public AI principles, it's worth a brief discussion of what the overall "data pipeworks" of the AI industry looks like from a zoomed out view.
+
+Key takeaways
+
+* Modern AI can be understood as a five-stage pipeworks: (1) Knowledge & Values -> (2) Records -> (3) Datasets -> (4) Models -> (5) Deployed Systems.
+* Treating AI as a cybernetic system puts feedback and control at the center. Contributors can steer outcomes by shaping data flow (more on the next chapter).
+* Human factors dominate AI capabilities because they shape what gets recorded upstream. Interfaces, sensors, and incentives are therefore core AI R&D.
+  * some trends may shift this -- RL in real life, #todo cite experiental learning
+* Properties of data create collective action problems (social dilemmas) that require markets, coalitions, and policy to fix.
+* For public AI flywheels, thinking in terms of data pipeworks reveals "insertion points" to add transparency, consent, rights, and preference signals so democratic inputs actually move the system.
+
+## Why a “pipeworks” view?
+
+Most technical AI work zooms in on a clean optimization problem. But questions about who benefits, who participates, and how AI affects society live upstream and downstream of that problem. A "Data Pipeworks" view describes the end-to-end flow by which human activity becomes records, then datasets, then models embedded in systems that act on the world, and thereby change the future data we can collect.
+
+This view pairs naturally with cybernetics/control: identify system state, actuators, sensors, and feedback loops; then decide which loops to strengthen or dampen.
+
+## Five stages of data
+
+1. Knowledge & Values (Reality Signal): Humans (and the physical world) generate the latent "signal" AI tries to model (facts, preferences, norms). We don’t presume computability; we note its existence to emphasize sampling implications.
+
+2. Records (Sampling Step): Interfaces and sensors transform activity into structured records (forms, clicks, edits, uploads, buttons, cameras, microphones). Design choices here shape what becomes legible to AI. Key idea: generally, any particular sampling instance either leans more towards "sensor" or "form".
+
+3. Datasets (Filtering & Aggregation): Organizations filter, label, merge, and license records under social, economic, and legal constraints. This determines coverage, bias, and what’s even available to learn from.
+
+4. Models (Compression): Learning compresses datasets into input–output mappings. Modeling choices are path-dependent on Stages 1–3; data defines the feasible hypothesis space.
+
+5. Deployed Systems (Actuation): Models are embedded in products, workflows, or infrastructure, producing value and externalities. Deployment feeds back by first, and foremost, **changing the actual world**. Deployment also alters incentives therefore affects future record creation.
+
+Design note: small, well-placed interventions upstream can dominate large downstream tweaks.
+
+## Why this matters for governance and alignment
+
+* Human factors are primary. The distributions the AI field is optimizing over are created, not discovered. Interfaces, defaults, prompts, consent flows, and incentives shape the topology of AI work.
+* Social dilemmas are inevitable. Contributing high-quality records to a shared system is a collective action problem (free-riding, failure to reach critical mass). Today’s "dictator solution" (opaque scraping) collapses when people gain data agency.
+* Data leverage (next chapter) is the steering wheel. Individuals and groups can alter records, licenses, and access. This allows people to steer model behavior by modulating data flow rather than model internals.
+* Pluralism becomes measurable. Tracing contributions lets us quantify relative weight of individuals and communities, enabling pluralistic governance and new not
+
+## Where to place the levers (for public AI flywheels)
+
+* Stage 1 to 2 (Knowledge to Records): invest in interfaces and sensors with informed consent; design contribution prompts and micro-tasks; support pseudonymity and reputation choices. Aim to raise signal quality and widen participation. Note that there will be an omnipresent tension between informed consent and "frictionless" contribution. Can be resolved to some degree by building trust between public and public AI operators.
+
+* Stage 2 to 3 (Records to Datasets): attach licenses and AI preference signals per record; validate, de-duplicate, and redact PII; publish partitioned releases. Make rights legible and keep high-trust, high-reuse bundles. Leaderboards, grants, bounties, governance hooks (votes, preferences) to sustain contributions and invite further steering.
+
+* Stage 3 to 4 (Datasets to Models): enable data markets and coalitions, attribution, and sampling weights; build evaluation sets tied to provenance. Align training with community intent and enable bargaining. (more in this in the next section as well).
+
+* Stage 4 to 5 (Models to Systems): publish transparent deployment notes, opt-outs, and model cards tied to data buckets. Surface externalities and set expectations for use.
+
+* Stage 5 to 1 (Feedback loop): try to ensure that AI actually has positive benefits on the world. Improve standards of living, increase health, free-time, well-being etc. so people can become empowered active participants in whatever stage of the pipeline they please.
+
+
+## Implications for research and practice
+
+Building flywheels is part of a broader agenda to enable a data pipeworks. More in the next chapter on how data contribution through flywheels (including licensed or user-restricted contribution) interplays with data protection, data strikes, markets, etc.
+
+## A compact mental model
+
+* Sensors and interfaces decide what counts.
+* Filters and markets decide what persists.
+* Compression decides what generalizes.
+* Deployment decides what changes next.
+* Governance decides who gets to steer.
+
+Public AI flywheels turn that loop into a participatory control system: contributors see consequences, express preferences, and are (hopefully) rewarded for adding high-signal records.
+
+---
+
+Some useful additional reading that supports these ideas:
+
+- On social dilemmas [@kollock_social_1998] and collective action theory [@marwell_critical_1993]
+- On cybernetics [@noauthor_cybernetics_2025]
+- on power and progress [@Acemoglu2025PowerAP]
+- Technical reference on probabilistic machine learning: [@pml1Book]
+- On influence functions for modern AI systems: https://www.anthropic.com/news/influence-functions
+- Reasons to be critical and skeptical: Modeling Complexity [@Batty2001ModelingC], Fallacy of AI functionality [@Raji2022TheFO], issues with social simulations [@Arnold2014WhatsWW]
+- Viability of technical infrastructures for good data flow: [@CastroFernandez2023DataSharingMM]

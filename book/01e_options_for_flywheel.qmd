@@ -1,0 +1,227 @@
+# Flywheel design space {sec-design}
+
+> Key insight: There is a broad spectrum of technical implementation of the flywheel, ranging from traditional database-on-a-company-server to low-friction-peer-production (our preferred MVP) to radical approaches (e.g. truly federated data access).
+
+## Purpose of this section
+
+This section gives more context about the many ways we might build flywheels, and lays out alternative governance paths and a future work (in particular, a focus on futures that involve healthy data markets, data intermediaries, federated learning, etc.)
+
+We also discuss why we think an approach that includes a minimal retention frontend + opt-in flywheel platform can serve as a pragmatic bridge to more advanced approaches.  For instance, we can use the patterns and concepts discussed here to move towards independently governed data co-ops, eventual federated learning, etc.
+
+## General overview of approaches to flywheels
+
+First, let's lay out a toy model of data "creation" and "flow" (this will come up again Part 2, when we walk through the flow for a real flywheel app).
+
+In @sec-why we talked about the numerous combinations of sensors, forms, task settings, social structure from institutions, communities, etc. that might exist, and in the Appendix we discuss a number of formats and types of data for LLMs in particular.
+
+To summarize, an AI developers might collect or use some of the following kinds of data:
+
+* Simple Signal: Binary feedback (`👍`/`👎`), star ratings, or flags
+* Annotated Conversation: Full chat with user corrections, ratings, or notes
+* Preference Pair: A/B comparisons between responses
+* Examples: User-created prompts and ideal responses
+* Structured Feedback: Form-based input (error type, severity, correction)
+* Multimodal Bundle: Text + images + voice + metadata
+* More advanced structured data ...
+
+Further, the creation of data could be prompted at several points in time:
+
+* Proactive: User initiates contribution unprompted (e.g., "Share this chat" button)
+* Reactive: System prompts based on signals (e.g., after trigger word, patterns in usage behavior, ask "What went wrong?")
+* Passive: Automatic collection with prior consent (e.g., telemetry, browser extension)
+* Scheduled: Regular prompts (e.g., weekly "best conversations" review)
+* Task-Based: Specific requests for data types (e.g., "Help us improve math responses")
+
+This choice will likely impact the level of "friction" users experience, roughly:
+
+* Zero-Friction: Purely passive
+* Almost zero-friction: Purely passive with some regular re-consenting process (monthly or yearly "checkup" on sharing settings)
+* Low-Friction: One-click actions with no interruption
+* Medium-Friction: Multi-click actions or actions that redirect to separate interface
+* High-Friction: Multi-step process, account creation, or technical skills required
+
+Data might also be processed at one or more points in time. In practice, there is likely be some degree of "processing" at various steps, but it is important to clarify this to users. This might involve
+
+* Pre-submission: Client-side processing before data leaves user's device
+* On-submission: Real-time processing during the contribution flow
+* Post-submission: Batch processing after data is received
+* Pre-publication: Review and processing before making data public
+* On-demand: Processing happens when data is accessed/downloaded
+
+So, person visits an AI interface (e.g. visits a chatbot product on a website). They sit down, enter a prompt, and then react to the Output (take the information and do something with it, follow up, leave positive or negative feedback, etc.). This is our canonical object of interest: a prompt ("Input"), response ("Output"), and optional follow up data (feedback, more queries and responses, etc.).
+
+Typically, this data must live, for some time, on the user's device. It must also be processed by an AI model ("inference"), which involves sending a payload to a hosted service or some local endpoint (if e.g. user is running open weights on their own device). It may or may not be stored on the server/system (we'll use these interchangeably for now to refer to all the devices controlled by the organization running each module) where the interface is hosted. It may or may not be stored by the server/system where the model is hosted. And finally, a flywheel may send that data to a third location.
+
+This final data could live in a centralized database (e.g. traditional relational database), a public repository (e.g. GitHub, HuggingFace), totally local, or even in some kind of distributed network (IPFS, BitTorrent).
+
+Finally, the resulting flywheel-produced data might be accessed in a number of ways: direct download, API access, a static site with download features, some kind of gated access (using HuggingFace, or other impelmentation), some hybrid of the above, some kind of Wikimedia Enterprise package, etc.
+
+So we have five useful questions for classifying flywheel designs:
+
+* Where data lives: ...
+* When prompted: ...
+* When processed: ...
+* How accessed: ...
+* Friction level: ...
+
+## Must-have elements of a flywheel
+
+Summarizing the above once more, a flywheel designer must:
+
+- choose to either share-by-default or not-share-by-default (note we use this language as "opt in" and "opt out" can actually get confusing in these discussions); if we just say "that app uses opt-in", it can be unclear if that means users are opted in by default or users must opt in to contribute). Is the default behavior upon first sign up or first app use for the initial data to be shared, or not?
+  - share-by-default means that the actual infrastructure of the app is *not* decentralized (for a truly decentralized app, e.g. an interface + model I run entirely locally, share-by-default is impossible)
+  - not-share-by-default allows for several avenues for opting in
+    - App is still centralized, but user toggles a setting. Must trust the operator in this case.
+    - Some additional software running on the user's machine does the contributions at user's behest (browser extension that hits API endpoint when user asks it to)
+        - But the user is responsible for installing this software
+    - User does the sharing manually (user exports and then upload their export; contributions are made via manual peer production-style contributions)
+- choose a level of transparency. Does the app interface, the settings page, the browser extension, etc. tell the user exactly what is happening to data and how it might be used?
+- choose how to motivate users. What kinds of motivations do UX choices appeal to? Are users paid? Is there a reputation system for contributions?
+- choose whether to process contributions. For what: PII? Security concerns? Sensitive content or values conflicts? If yes, choose when to process (on user's device, as part of some "approval process", at regular intervals after data has already been published)
+- choose how to share or publish contributions
+
+If designed carefully, many of these flywheel approaches can be integrated together.
+
+## Some Categories of Architectural Models
+
+With all these design choices in mind, it will be useful to describe the general approaches we might take to build a data flywheel. 
+
+### Standard "PrivateCo" Web App
+
+An obvious option is to simply build a hosted "standard" "PrivateCo" / start-up style web app. If Netflix is successful because of its flywheel, why not just build a public AI data flywheel that looks like a private tech company's product from a technical perspective? Indeed, in some contexts it may make sense share-by-default and simply use the data generated by users directly for R&D (training, eval, etc.).
+
+In this case, the "flywheels" just reads data from the existing production database. While one could argue that the Terms of Service for many existing tech products do mean that users have gone through a kind of informed consent process, there are also serious downsides to the status quo. Many would argue that standard practice in tech (long, difficult to read Terms of Service and Privacy policy documents; opacity about exact details of data collection and usage; general challenges in conveying the complexity of modern data pipelines) make it hard for the standard PrivateCo Web App model to offer truly informed consent for data contribution. (For more on general issues with ToS, see e.g. [Fiesler, Lampe, and Bruckman 2016](https://dl.acm.org/doi/10.1145/2818048.2819931) #todo add more of the "classics" of this genre.)
+
+While some users might even prefer this approach, we believe this would **not** be a good starting place for a public AI data flywheel. We also believe it's important to communicate to users how the public AI interface differs standard practices (for instance, how does a public AI model differ in terms of data use from e.g. using ChatGPT, Gemini, or AI overviews via search).
+
+The defining characteristics of this approach is that data is held by a private entity at all times. Under this approach, we can collect all types of signals, mix proactive and reactive data collection, use telemetry freely, process data whenever we want. It's highly likely under this approach, data from a flywheel would live in centralized, privately governed database.
+
+Answering each of the questions posed above:
+
+* Where data lives: private database
+* When prompted: flexible
+* When processed: flexible
+* How accessed: flexible; likely API
+* Friction level: flexible; likely low
+
+It's also likely we would want to follow corporate practices in locking down the final data, which makes this a bad choice for maximizing publicly visible output. Put simply: while an interesting idea in theory, we probably can't run an AI product that has a prod database that is openly readable by the public.
+
+Within the broad umbrella of taking a "Standard PrivateCo Web App" approach to data flywheels, some archetypes might include:
+
+- Telemetry heavy approach (imagine an LLM chat app with no feedback buttons, but lots of data is collected re: dwell time, conversation length, user responses, etc.)
+- Feedback heavy approach (imagine an LLM chat app where the UX is heavily focused on asking users to use thumbs up / thumbs down buttons, or presenting users with frequent A/B test responses)
+- Hybrid approach 
+
+#### Turn sharing off by default, but offer a one click opt in
+
+One approach to building a flywheel that retains some of the benefits of the "traditional" model is to simply ask users to opt in with one click to make all data open for R&D, and perhaps even public. This approach might lead to a smaller pool of users, but a big pool of data from the users who are willing to make the large commitment to opt in.
+
+This would mean the service operates in a privacy maximizing fashion for most users, but for users who opt-in, researchers with access can "read from the production database" as if they were doing research setting (of course, large private organizations do lots of internal security practices and researchers are typically not *literally* reading from prod without multiple stages of approval, anonymization, etc.)
+
+### Git/Wiki Platform
+
+Another option to build a "very active flywheel" (that arguably stretches the definition because friction will be very high) is to just use peer production or version control software (a "wiki" like Wikipedia or "git" approach) and just ask people to make their contributions using existing contribution avenues (for instance, "editing" a wiki page or making a "pull request" to a version-controlled git repository).
+
+As a very simple and concrete example, this might mean creating a "flywheel" that starts as a blank GitHub repository or blank Wiki page, with lots of open calls and personal asks for people to make "pull requests" to just "stick some data into the repo". Over time, if people decide to contribute, you might end up with some high quality content in the repo, though this is likely to very dependent on who contributes, how motivated they are, etc.
+
+If we choose this approach, we do likely constrain our answers to the above design questions:
+
+* Where data lives: Public repository
+* When prompted: Proactive (user initiates)
+* When processed: Pre-submission (user does it) + optional CI/CD validation
+* How accessed: Probably via direct download (e.g. download raw data from GitHub), options to add web interface
+* Friction level: High (technical knowledge required)
+
+This approach has maximum transparency, built-in versioning, and low cost. But, it is likely to exclude non-technical users and has very high friction even for technical users.
+
+Example Stack: some combo of MediaWiki, GitHub, GitLab, HuggingFace + CI/CD validation
+
+#### Export-based approach
+
+A relate idea is to build a flywheel that leverages existing export features and export mechanisms. Instead of adding feedback buttons or telemetry, flywheel designers could simply create a static site that lets users manually upload exported data from various apps. This would require manual effort (and some friction could be reduced via careful attention to UX, adding features to help standardize data, etc.) but could be powerful in jurisdictions with portability/export rights.
+
+This could lead to something that looks very much like a peer production process, but with a heavily simplified set of actions (primarily, just export, perhaps with some filtering or curation, and upload).
+
+### Web app with intuitive actions that "wrap" Git-style contributions
+
+The option described in Part 2 of this mini-book is to use a Git/Wiki approach, but build a web app with features that allow users to take low friction in-app actions (clicking a special button, entering special command, etc.) that writes to a Wiki / Git repo on the contributor's behalf. We could also build a system so that users can effectively commit data to the source control / wiki system automatically (e.g., "Every day, run an anonymization script on my chat history and then write the output as a new file to a shared, version-controlled server"). In other words, these are ways to "contribute data as if it were a GitHub PR or a Wikipedia edit" without having to learn the exact interfaces of GitHub or Wikipedia.
+
+* Where data lives: Public repository
+* When prompted: Proactive or reactive
+* When processed: On-submission via serverless function
+* How accessed: Git access + static site generation
+* Friction level: Low (automated complexity)
+* Pros: Transparency + usability, serverless scaling
+* Cons: Cold starts, API rate limits, complex error handling
+* Example Stack: Vercel/Netlify + Hugging Face API
+
+
+### Browser Extension
+
+We could also implement a flywheel that relies on users downloading a browser extension. This only reflects a data ingestion choice: can be used with various backend choices above.
+
+The browser extension could faciliate:
+- direct contributions to a database
+- wrapper on top of git-style actions (i.e. instead of a web app that helps users write to a git-repo via the HuggingFace API, have a browser extension that does so!)
+
+### Federated Learning Model
+
+One radically different approach might involve building a flywheel that contributes information via a federated learning. In this world, the flywheel is not actually about sharing raw data directly, but instead about sharing model weights.
+
+* Where data lives: User devices (distributed)
+* When prompted: Passive with consent
+* Information object: Model gradients or aggregated statistics
+* When processed: Pre-submission (on-device)
+* How accessed: Only aggregated model updates available
+* Friction level: Zero after setup
+* Pros: Maximum privacy, no data transfer, infinite scale
+* Cons: Complex implementation, limited debugging, device requirements
+
+
+### Other experimental approaches
+
+Other approaches to building a flywheel might involve more radical approaches to decentralizing the actual data storage, for instance using peer to peer protocols, various crypto/web3 approaches to data sovereignty, etc.
+
+## Frontier approaches: data cooperatives, federated learning, and more
+
+#todo: this could be made crisper.
+
+In many cases, users may want to have data governed by community organizations (e.g., organized by domain/region/language) that hold rights and decide release cadence, licensing defaults, and benefit policies.
+
+Practically, taking a collective/intermediary focused approach has the potential to massively reduce user friction / attention costs. One vision for a low friction data intermediary approach is: users spend some time, say, once a year choosing which intermediaries to join. Upon joining, they can choose to delegate key decision-making and participate in intermediary governance as suits their desires and needs. If joining process is good + governance is good, can achieve good outcomes!
+
+We note that if an implementation of the flywheel is built on top of open-source software, communities can easily choose to deploy their own instance and their own data flywheel and effectively operate entirely parallel, self-governed instances. If they also choose to share opt-in data via similar licensing and preference signal approaches, such datasets could be easily merged -- but with fine-grained adjustments to precise details (e.g., slight modifications on retention, access, release cadence, content moderation, adn so on.) Of course, data co-ops may choose to use quite different technical stacks. This approach is just one among many.
+
+
+### Interactions between these flywheels
+
+#todo
+
+### Transitioning for opt-in flywheel to federated learning
+
+It may be possible to also move from an opt-in data flywheel approach to a federated learning-first approach. Here, model training occurs across user or institutional nodes; only gradients/updates (with privacy tech) are centralized. The dataset remains partitioned or local; central custodian minimized. This approach would:
+
+* Reduces central data custody and breach surface
+* Aligns with data-residency and institutional constraints
+* Enables “learning from data that can’t leave”
+
+But has some major downsides / existing barriers:
+
+* Harder reproducibility and data auditability
+* Complex privacy stack (secure aggregation, DP, client attestation)
+* Benchmarking must be redesigned (federated eval)
+
+This is a bigger leap, but we believe it's important to begin to think about how the implementation of the Public AI Data Flywheels might support communities wishing to transition towards an FL approach.
+
+One rough sketch might look like:
+* Build the MVP defined in Chapter 2
+    * Ship license + AI-preference metadata (MVP).
+    * Maintain gated HF releases and public leaderboards/full data access.
+    * Publish provider-payload transparency and link to provider terms (no guarantees).
+    * Process deletions via HF mechanisms when possible; keep our mirrors in sync.
+* Phase 1 — Co-op pilots
+    * Charter one or two community co-ops; define bylaws, scope, and release cadence.
+    * Spin up many instances of interface + flywheel combos (can fork software directly, or use similar approaches)
+    * Establish a concrete sharing / merging plan
+* And beyond!
+    * Once several independent data communities, are operated, it might be possible to move from lightweight sharing and merging to more serious federation with technical guarantees. Perhaps this might start with federated evaluation and then move to federated training. Much more to do here, out of scope for this document.

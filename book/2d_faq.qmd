@@ -1,0 +1,124 @@
+# Public AI Data Flywheel — User FAQ
+
+This FAQ explains what the data flywheel is, why you might contribute, and how your choices affect privacy, attribution, and downstream use. It is written for people using the OpenWebUI chat at https://chat.publicai.co/.
+
+## TL;DR: Four Data Tiers (Today)
+
+- Tier 1 — Private/Temporary: Use temporary chats or delete chats yourself. Nothing is shared outside the app; stored minimally; you control deletion.
+- Tier 2 — Aggregate‑Only (default): Chats stay private, but we compute de‑identified aggregate stats (e.g., usage counts, broad trends). Nothing is shared outside the app.
+- Tier 3 — Researcher Access (opt‑in): Vetted partners can privately analyze your non‑temporary, non‑deleted chats for evaluation/R&D. No public release; account IDs not shared; partners must honor AI‑use preferences.
+- Tier 4 — Public Contributions (opt‑in per chat): You select specific chats to publish to a public dataset (via PR), choose a license, and attach AI‑use preferences; attribution can be username, pseudonym, or “anonymous.”
+
+You can mix and match: keep default behavior, enable Researcher Access, and still publish only some chats publicly. Note: we are exploring a future fifth tier for responsible, consented asset access using privacy‑preserving tools (see note below).
+
+## What is the “data flywheel” and why does it exist?
+
+The flywheel is a simple feedback loop: people can choose to share selected chats, those contributions are reviewed and organized, and the resulting dataset helps evaluate and improve public AI. Using a Git-backed repository makes the process transparent: every contribution has history, discussion, and a clear license. The rationale is to create high-quality, accountable data for public benefit without asking you to learn a new workflow.
+
+## I want the most privacy possible. How do I get that?
+
+By default, we never share your chats, but we do perform aggregate analysis. For instance, we count the total volume of chat and how many users we have. We may also perform aggregate analyses of chat usage: how long are chats, what are common topics, etc. 
+
+If you want a high degree of privacy, you can use "temporary chats" or you can delete chats yourself at any time.
+
+## I'm OK with sharing a little if it helps out with public AI. What are my options?
+
+There are three ways to share data, based on your interests and comfort level.
+
+If you use the inference utility without temporary mode or deleting chats, you contribute aggregate data. For instance, the fact you even used the interface at all is useful so we can tell public bodies that there is real interest in using public AI models.
+
+If you are OK with researchers using your data directly for research and development, you can enable Researcher Access. This means your data may be shared with vetted research partners for direct evaluation, topic modeling, and related R&D tasks. Your account info will NOT be shared and the chats will not be made public (unless you choose to, see next section).
+
+Finally, you can choose to contribute specific chats to a public repository. Most of this document covers this option. These chats will be public, but you can select a license and also set AI use preferences (you can ask that only organizations who attribute training data use your data, for instance).
+
+So to summarize, there are four options:
+- Make use of temporary chats and deletion to maximize privacy
+- Use the app in "default mode". Your data will never be shared outside the app or made public, but will contribute to aggregate analyses.
+- Turn on research sharing so public AI researchers can use data directly for R&D.
+- Pick notable chats to contribute to public repository, with restrictions that you select. 
+
+Note on future options: we are exploring a fifth option that would provide responsible, consented access to certain assets using privacy‑preserving tools (for example, OpenMined’s DataSite). If introduced, this would allow controlled access by vetted parties under explicit consent and safeguards. We will update this FAQ and in‑product consent flows before enabling any such option.
+
+## What happens when I share a chat?
+
+When you click the share action, the app shows a confirmation screen with exactly what will be shared and which settings apply. If you confirm, the system creates a single JSON record containing the conversation, light metadata about the model and usage, and your chosen license and AI preference signals. That record is submitted as a pull request to a HuggingFace dataset repository where it can be reviewed. If accepted, it becomes part of a public dataset with the same license and preference signals you selected.
+
+## What is the difference between publishing a chat publicly and opting in to Researcher Access?
+
+Publishing a chat publicly means the content and its license are visible to everyone. Others can read it, discuss it, and use it under the terms you chose. Opting in to Researcher Access grants vetted research partners permission to analyze your chats for evaluation and model development without making them public. When Researcher Access is enabled, researchers may analyze chats in your account that are not marked as temporary and have not been deleted at the time of access. The difference is who can see the content and when. If you only want public publication and do not want non‑public research access, keep Researcher Access disabled.
+
+## What privacy protections are in place?
+
+We aim for a balance between usefulness and care. The action warns you not to share confidential or private information and provides a preview before you confirm. Automated checks scan for common identifiers such as emails and financial numbers and can flag items for quarantine. Reviewers can request changes or reject contributions that seem risky. You can choose a pseudonym or “anonymous” for public attribution, and public releases display the attribution string but not your account id. Today the pseudonym is deterministic from your OpenWebUI account id (unsalted), so contributions under a pseudonym can be linked to each other over time. If you want the least linkability, choose “anonymous.”
+
+No automated system can guarantee perfect redaction. If you are unsure, please edit the chat before sharing or decline to share. When in doubt, prefer synthetic or anonymized examples. If you want to retract data later on, we will help you do that, but we must warn you that because the data is public it may not be possible to delete any copies that exist.
+
+## What data about me is stored?
+
+For public contributions, the dataset includes the chat content, timestamps, model information, your selected license and AI preference signals, and the attribution string you chose. Internally, we store a random contribution id and, if you choose “pseudonym,” we derive a stable pseudonym from your OpenWebUI account id. We do not publish your account information. If you opt in to Researcher Access, vetted partners may analyze your chats (excluding temporary or deleted chats) for evaluation and QA without making them public.
+
+## Who can see my data and where is it stored?
+
+Public contributions live as pull requests and merged records in a HuggingFace dataset repository. Anyone can view merged public content and its history. Items under review are visible to reviewers and, where practical, to the public in PR form. Content that triggers a privacy concern (or any other concerns) may be quarantined for private review. If you enable Researcher Access, vetted partners may analyze your chats privately for evaluation and model development.
+
+## Will my chat be used to train models?
+
+That depends on the AI preference signals and license you choose. Preference signals such as `train-genai=n` express that you do not want a contribution used for training. Responsible users of the dataset should honor these signals and the license terms. Preference signals are not a technical barrier; they function as a clear, machine-readable policy that downstream tools and institutions can enforce. We use them to keep evaluation‑only subsets separate from training sets. If you enable Researcher Access, partners must honor these preferences for any analyses they perform.
+
+Preset options (Content-Usage expressions with CC signals as exceptions):
+- Training family:
+  - `train-genai=n` (deny training)
+  - `train-genai=n;exceptions=cc-cr` (deny training unless Credit)
+  - `train-genai=n;exceptions=cc-cr-dc` (deny training unless Credit + Direct Contribution)
+  - `train-genai=n;exceptions=cc-cr-ec` (deny training unless Credit + Ecosystem Contribution)
+  - `train-genai=n;exceptions=cc-cr-op` (deny training unless Credit + Open)
+- General AI use family:
+  - `ai-use=n` (deny AI use)
+  - `ai-use=n;exceptions=cc-cr` (deny AI use unless Credit)
+  - `ai-use=n;exceptions=cc-cr-dc` (… unless Credit + Direct Contribution)
+  - `ai-use=n;exceptions=cc-cr-ec` (… unless Credit + Ecosystem Contribution)
+  - `ai-use=n;exceptions=cc-cr-op` (… unless Credit + Open)
+
+Default preset: `train-genai=n;exceptions=cc-cr` (deny training unless Credit).
+
+## How do licenses work here?
+
+You choose a default license in the app (for example, CC0-1.0, CC-BY-4.0, or CC-BY-SA-4.0). That license is recorded with each contribution and governs how others can use it. If you want attribution when others use your content, choose a license that requires it. If you want the broadest possible reuse, choose a permissive option. You can change your default for future contributions at any time.
+
+## Do you perform aggregate analysis of chats?
+
+We may compute aggregate, de-identified statistics across chats to understand system performance, reliability, and safety. Examples include counts, rates, and broad trends. Aggregate analysis is designed to avoid re-identifying individuals and to inform product quality and operations.
+
+If you prefer not to leave any record tied to your account, use temporary chats and avoid saving conversations. You can also delete individual chats and, at any time, delete your account.
+
+## How can I fully opt out?
+
+If you never want your content used in public datasets or internal research, do not enable sharing and do not enable Researcher Access. Use temporary chats so conversations are not saved to your account, or delete chats when you finish. You can delete your account at any time from account settings. Deleting your account removes account-linked data we control. It does not unpublish contributions that were previously made public under an open license.
+
+## Can I change my mind after sharing?
+
+You can withdraw future consent by turning off sharing and disabling Researcher Access. For items already submitted, comment on the pull request or contact support to request changes. Public contributions that have been merged and redistributed under an open license may continue to circulate outside our control; we will reflect removals in our canonical dataset and communicate changes downstream where possible.
+
+## What are my choices for identity and credit?
+
+You can publish under your username, a custom pseudonym, or “anonymous.” Public pages display the attribution string you chose. If you want credit linked to a third-party account, you can also submit directly from your own HuggingFace account by opening pull requests yourself.
+
+## Why is the pseudonym deterministic?
+
+A deterministic pseudonym creates a stable identity that lets you accrue credit over time without exposing your account id. It helps reviewers and researchers recognize consistent contributors, makes moderation and feedback easier, and enables simple deduplication and analytics. The tradeoff is linkability: contributions made under the same pseudonym can be connected to each other within this system. If you prefer the least linkability, choose “anonymous” instead of “pseudonym” for public attribution.
+
+## What should I avoid sharing?
+
+Do not submit private, confidential, or regulated information about yourself or others. Avoid personal identifiers, financial information, and any content you do not have the right to share under your chosen license. If a conversation requires private details, do not share it. Edit the content to remove sensitive parts or submit a synthetic example instead.
+
+## How do I set or change my settings?
+
+In OpenWebUI, open Controls (Functions), enable or disable sharing, choose your default license and AI preference signals, and set your attribution. You can also enable automatic feedback to streamline contributions. These settings apply to future shares and are restated on the confirmation screen for each contribution.
+
+## How do I report a problem or request removal?
+
+Open an issue or comment on the relevant pull request with a clear description, or contact support through the chat app. For urgent privacy concerns, say that in the subject so we can prioritize review and quarantine where needed.
+
+---
+
+If you have questions not covered here, let us know in the chat or open a discussion on the dataset repository. Your feedback shapes how the flywheel evolves.

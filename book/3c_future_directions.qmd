@@ -1,0 +1,21 @@
+# Future Directions
+
+This section sketches near-term areas to extend the book and its accompanying materials. Please open issues or PRs to propose additions.
+
+Here are just a few ideas:
+
+## Content Expansions
+- Additional case studies: public-sector deployments, civic tech pilots, domain-specific flywheels (health, education, climate).
+- Deeper methods chapters: data governance patterns, preference signals, evaluation protocols, and reproducibility practices.
+- Community processes: contributor pathways, governance models, and decision-making templates.
+
+## Tooling & Infrastructure
+- Consent and data rights flows: prototypes and reusable modules for informed consent, redaction, and data lifecycle controls.
+- Evaluation harness: standardized benchmarks, metrics, and reporting for public AI systems; guidance on dataset release strategies.
+- Legal/policy pack: practical checklists, model terms, and jurisdictional notes for public AI programs.
+
+## Roadmap & Calls for Contribution
+- Identify gaps: add issues tagging “help wanted” for chapters, examples, and figures.
+- Build examples: minimal, runnable demos tied to book sections.
+- Iterate: refine structure in response to reader feedback and real deployments.
+

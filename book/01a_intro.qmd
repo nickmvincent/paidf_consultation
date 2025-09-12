@@ -1,0 +1,56 @@
+# Introduction
+
+> Key insight: a public AI data flywheel is a system that enables a data collection feedback loop that embeds the principles of "public AI" -- notably, transparency and accountability.
+
+## What is a data flywheel?
+
+What is a data flywheel? Nvidia gives us [this](https://www.nvidia.com/en-sg/glossary/data-flywheel/) definition: "A data flywheel is a feedback loop where data collected from interactions or processes is used to continuously refine AI models." [^1] 
+
+[^1]: For more examples of blogs on data flywheels, see: [@liu_data_2024], [@shankar_data_2024], [@roche_what_2024].
+
+In general, a "data flywheel" is a system or set of systems that capture and/or incentivize data. A "flywheel" generally differs from a more general data collection system because the flywheel is embedded into some kind of application (as opposed to e.g. "standalone" data labeling tasks). So, if I just post a Google form to the Internet and say, "Hey, feel free to use this form to send me data!", that's just a form, not a "flywheel".
+
+Generally, most data collection systems lean more towards utilizing either 
+
+* "sensor-style collection" (passive, instruments like cameras, microphones, or logging software, all of which lack an active "submit data" step) or 
+* "form-style collection" (active, requiring somebody to click "submit"). 
+
+Historically, flywheels tend to imply a passive approach to data collection, but this is not necessarily a requirement. (More on this in @sec-pipeworks).
+
+## What is a public AI data flywheel?
+
+First, what is "public AI"? The public AI network gives us this definition in a whitepaper from [@jackson_public_2024]: AI with 
+
+> "Public Access – Certain capabilities are so important for participation in public life that access to them should be universal. Public AI provides affordable access to these tools so that everyone can realize their potential."
+> "Public Accountability – Public AI earns trust by ensuring ultimate control of development rests with the public, giving everyone a chance to participate in shaping the future."
+> "Permanent Public Goods – Public AI is funded and operated in a way to maintain the public goods it produces permanently, enabling innovators to safely build on a firm foundation."
+
+For more on the public AI concept, see also Mozilla's work (including the [web page](https://www.mozillafoundation.org/en/research/library/public-ai/) and paper [@marda2024public]). See also several workshop papers (RegML @ NeurIPS 2023 [@vincent2023alternative]; CodeML @ ICML 2025 [@tan2025if]; Workshop on Canadian Internet Policy [@vincentcanada]).
+
+Our focus in this mini-book is building "public AI" flywheels. To summarize heavily -- if we try to achieve all the principles laid out in the large body work that tries to define "public AI" (and we should try!), we will face some unique challenges in the implementation of data flywheels.
+
+In building public AI data flywheels, we are trying to create a feedback loop to improve AI by creating and collecting high-quality data (more on this in @sec-why). However, the public AI principles mean that we likely want to start from a position of very high accessibility and very high accountability relative to other technology organizations and products. This means we need to provide an accessible explanation of exactly what happens to any data a user creates and give people real agency over the shape of the data pipeline. Ideally, public AI builders should also endeavor to make as many components of our stack as close as possible to public goods, which creates challenges around sustaining effort and funding.
+
+Of course, it's worth noting that some particular subset of the broad public (for instance, a particular city or state) could deliberate and make a collective decision that they prefer a more "traditional approach" to data flywheels. Very concretely, we could imagine a state conducting a referendum, and asking the public if they'd like a "public AI" product that follows industry standard practices around data and flywheels (sacrificing some degree of accessibility and/or accountability for other benefits). This might mean that the state deploys an AI chatbot with nearly the same data collection practices and privacy policies as organizations like Google or Anthropic.
+
+In this mini-book, we are taking the stance that it's best to start from a position of leaning heavily towards a highly accessible and accountable flywheel. We start by minimizing data collection and retention (["data minimization"](https://en.wikipedia.org/wiki/Data_minimization)); data that is used directly for AI research and development (R&D) should be provided via an opt-in by highly informed users.
+
+## Core Principles
+
+We can translate the core principles of public AI to the data flywheel domain and arrive at roughly four requirements: 
+
+* Transparency for informed consent: Users must be fully informed about the models at play, the organizations who are building models, and the ramifications of any contributions to the flywheel. Ideally, users will also be informed about the training data underlying the models they use. A detailed FAQ and some kind of consent module (ideally going above and beyond standard Terms of Service[^2]) are required before any data is shared. To some extent, maximally informed consent will require the active expenditure of resources to improve the public's AI literacy (i.e. we need to build AI literacy focused systems and perhaps even pay people for their attention). We need systems that really do inform people. Luckily, that's something it seems like AI can help with!
+
+[^2]: See e.g. Terms we serve with [@rakova2023terms].
+
+* Data Rights: A public AI data flywheel should empower users with control over their data, mirroring GDPR principles and similar regulations (this is also practically important for compliance). This includes the right to access (`Art. 15`), rectify (`Art. 16`), erase when possible (`Art. 17`), and port data (`Art. 20`). One exemplar project we might look to for inspiration around the implementation of data rights and legal terms is Mozilla's [Common Voice](https://commonvoice.mozilla.org/) [@ardila2019common].
+
+  * We note that data rights can conflict with a "fully open" ethos; we will attempt to mitigate these tensions to the best extent possible.
+  * We also note that public AI faces some unique challenges with cross-jurisdiction compliance; we discuss this at a high-level later on in @sec-ec.
+
+* Balancing reputation and pseudonymity: To the extent possible, we believe it is valuable to offer people the ability to contribute data with some kind of "real account" attached, so people can earn credit and reputation **if they want to**. But this must be balanced with the benefits of also enabling pseudonymity or even anonymous contribution. See e.g. [@mcdonald2019privacy] + [blog post](https://mako.cc/copyrighteous/new-research-on-how-anonymity-is-perceived-in-open-collaboration), [@tran2020anonymity], [@hwang2025trust]). 
+
+  * In our MVP (discussed in Section 2), an account with an OpenWebUI instance is required to make contributions, but users can choose to use a pseudonym (not unique; can for instance be "anonymous"). A hashed user id will be stored for internal purposes, but any public data releases will only use the pseudonym.
+
+* Purpose Limitation & Licensing: Users should be able to specify their preferences for how their data is used (e.g., for public display? for evaluation? for future model training?). This can be captured using (new) [IETF AI Use Preferences](https://datatracker.ietf.org/wg/aipref/about/) and [Creative Commons Preference Signals](https://github.com/creativecommons/cc-signals), or other approaches that emerge. We will discuss below how this might extend to other preference signal proposals and/or technical approaches to gating data.
+  * This is critical for answering a likely FAQ around public AI data -- if you succeed in creating actually useful training data or new benchmarks, won't private labs just immediately use that data as well?
