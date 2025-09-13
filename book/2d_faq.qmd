@@ -6,7 +6,7 @@ This FAQ explains what the data flywheel is, why you might contribute, and how y
 
 - Tier 1 — Private/Temporary: Use temporary chats or delete chats yourself. Nothing is shared outside the app; stored minimally; you control deletion.
 - Tier 2 — Aggregate‑Only (default): Chats stay private, but we compute de‑identified aggregate stats (e.g., usage counts, broad trends). Nothing is shared outside the app.
-- Tier 3 — Researcher Access (opt‑in): Vetted partners can privately analyze your non‑temporary, non‑deleted chats for evaluation/R&D. No public release; account IDs not shared; partners must honor AI‑use preferences.
+- Tier 3 — Researcher Access (opt‑in): Research team can privately analyze your non‑temporary, non‑deleted chats for evaluation/R&D. No public release; account IDs not shared; partners must honor AI‑use preferences.
 - Tier 4 — Public Contributions (opt‑in per chat): You select specific chats to publish to a public dataset (via PR), choose a license, and attach AI‑use preferences; attribution can be username, pseudonym, or “anonymous.”
 
 You can mix and match: keep default behavior, enable Researcher Access, and still publish only some chats publicly. Note: we are exploring a future fifth tier for responsible, consented asset access using privacy‑preserving tools (see note below).
@@ -55,11 +55,11 @@ No automated system can guarantee perfect redaction. If you are unsure, please e
 
 ## What data about me is stored?
 
-For public contributions, the dataset includes the chat content, timestamps, model information, your selected license and AI preference signals, and the attribution string you chose. Internally, we store a random contribution id and, if you choose “pseudonym,” we derive a stable pseudonym from your OpenWebUI account id. We do not publish your account information. If you opt in to Researcher Access, vetted partners may analyze your chats (excluding temporary or deleted chats) for evaluation and QA without making them public.
+For public contributions, the dataset includes the chat content, timestamps, model information, your selected license and AI preference signals, and the attribution string you chose. Internally, we store a random contribution id and, if you choose “pseudonym,” we derive a stable pseudonym from your OpenWebUI account id. We do not publish your account information. If you opt in to Researcher Access, research team may analyze your chats (excluding temporary or deleted chats) for evaluation and QA without making them public.
 
 ## Who can see my data and where is it stored?
 
-Public contributions live as pull requests and merged records in a HuggingFace dataset repository. Anyone can view merged public content and its history. Items under review are visible to reviewers and, where practical, to the public in PR form. Content that triggers a privacy concern (or any other concerns) may be quarantined for private review. If you enable Researcher Access, vetted partners may analyze your chats privately for evaluation and model development.
+Public contributions live as pull requests and merged records in a HuggingFace dataset repository. Anyone can view merged public content and its history. Items under review are visible to reviewers and, where practical, to the public in PR form. Content that triggers a privacy concern (or any other concerns) may be quarantined for private review. If you enable Researcher Access, research team may analyze your chats privately for evaluation and model development.
 
 ## Will my chat be used to train models?
 

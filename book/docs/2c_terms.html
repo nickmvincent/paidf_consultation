@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Data Flywheels and Public AI - 10&nbsp; Terms and Privacy</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./2d_faq.html" rel="next">
+<link href="./2b_life_of_a_chat.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./2a_mvp.html">Case Study: Low friction peer production</a></li><li class="breadcrumb-item"><a href="./2c_terms.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Terms and Privacy</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Data Flywheels and Public AI</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Concepts &amp; Rationale</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01a_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b_why.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Why collect data?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c_pipeworks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">A Democratic Data Pipeworks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01d_leverage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Flywheels and Bargaining Power</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01e_options_for_flywheel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Flywheel design space</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01f_ethics_compliance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Ethics and Compliance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01g_upstream.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Upstream data and data contribution</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Case Study: Low friction peer production</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2a_mvp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">The OpenWebUI Action MVP</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2b_life_of_a_chat.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Life of a Chat</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2c_terms.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Terms and Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2d_faq.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Public AI Data Flywheel — User FAQ</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./2e_code.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Code</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Updating this book</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3a_contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Contributing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3b_ai_guidelines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Guidelines for Using AI</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./3c_future_directions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Future Directions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix1_llm_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Appendix 1: LLM Data Schemas</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix2_prefsig.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2 — Preference Signals for AI Data Use (CC signals + IETF AI Preferences)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix3_example_legalterms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 3: LLM Policy Docs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix4_diffable_terms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Diffable Terms</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#terms-of-service" id="toc-terms-of-service" class="nav-link active" data-scroll-target="#terms-of-service"><span class="header-section-number">10.1</span> 1. Terms of Service</a>
+  <ul class="collapse">
+  <li><a href="#about-these-terms" id="toc-about-these-terms" class="nav-link" data-scroll-target="#about-these-terms"><span class="header-section-number">10.1.1</span> 1.1 About these Terms</a></li>
+  <li><a href="#account-terms" id="toc-account-terms" class="nav-link" data-scroll-target="#account-terms"><span class="header-section-number">10.1.2</span> 1.2 Account Terms</a></li>
+  <li><a href="#description-of-the-service" id="toc-description-of-the-service" class="nav-link" data-scroll-target="#description-of-the-service"><span class="header-section-number">10.1.3</span> 1.3 Description of the Service</a></li>
+  <li><a href="#responsible-use-guidelines" id="toc-responsible-use-guidelines" class="nav-link" data-scroll-target="#responsible-use-guidelines"><span class="header-section-number">10.1.4</span> 1.4 Responsible Use Guidelines</a></li>
+  <li><a href="#third-party-providers" id="toc-third-party-providers" class="nav-link" data-scroll-target="#third-party-providers"><span class="header-section-number">10.1.5</span> 1.5 Third-Party Providers</a></li>
+  <li><a href="#availability-and-changes" id="toc-availability-and-changes" class="nav-link" data-scroll-target="#availability-and-changes"><span class="header-section-number">10.1.6</span> 1.6 Availability and Changes</a></li>
+  <li><a href="#ip-inputs-and-outputs" id="toc-ip-inputs-and-outputs" class="nav-link" data-scroll-target="#ip-inputs-and-outputs"><span class="header-section-number">10.1.7</span> 1.7 IP; Inputs and Outputs</a></li>
+  <li><a href="#feedback-license" id="toc-feedback-license" class="nav-link" data-scroll-target="#feedback-license"><span class="header-section-number">10.1.8</span> 1.8 Feedback License</a></li>
+  <li><a href="#enforcement-and-appeals" id="toc-enforcement-and-appeals" class="nav-link" data-scroll-target="#enforcement-and-appeals"><span class="header-section-number">10.1.9</span> 1.9 Enforcement and Appeals</a></li>
+  <li><a href="#export-controls-and-sanctions" id="toc-export-controls-and-sanctions" class="nav-link" data-scroll-target="#export-controls-and-sanctions"><span class="header-section-number">10.1.10</span> 1.10 Export Controls and Sanctions</a></li>
+  <li><a href="#disclaimers" id="toc-disclaimers" class="nav-link" data-scroll-target="#disclaimers"><span class="header-section-number">10.1.11</span> 1.11 Disclaimers</a></li>
+  <li><a href="#limitation-of-liability-and-indemnity" id="toc-limitation-of-liability-and-indemnity" class="nav-link" data-scroll-target="#limitation-of-liability-and-indemnity"><span class="header-section-number">10.1.12</span> 1.12 Limitation of Liability and Indemnity</a></li>
+  <li><a href="#governing-law-and-dispute-resolution" id="toc-governing-law-and-dispute-resolution" class="nav-link" data-scroll-target="#governing-law-and-dispute-resolution"><span class="header-section-number">10.1.13</span> 1.13 Governing Law and Dispute Resolution</a></li>
+  <li><a href="#notices-of-infringement-dmca" id="toc-notices-of-infringement-dmca" class="nav-link" data-scroll-target="#notices-of-infringement-dmca"><span class="header-section-number">10.1.14</span> 1.14 Notices of Infringement (DMCA)</a></li>
+  </ul></li>
+  <li><a href="#privacy-policy" id="toc-privacy-policy" class="nav-link" data-scroll-target="#privacy-policy"><span class="header-section-number">10.2</span> 2. Privacy Policy</a>
+  <ul class="collapse">
+  <li><a href="#scope-and-roles" id="toc-scope-and-roles" class="nav-link" data-scroll-target="#scope-and-roles"><span class="header-section-number">10.2.1</span> 2.1 Scope and Roles</a></li>
+  <li><a href="#data-we-process" id="toc-data-we-process" class="nav-link" data-scroll-target="#data-we-process"><span class="header-section-number">10.2.2</span> 2.2 Data We Process</a></li>
+  <li><a href="#special-program-data-flywheel-opt-in" id="toc-special-program-data-flywheel-opt-in" class="nav-link" data-scroll-target="#special-program-data-flywheel-opt-in"><span class="header-section-number">10.2.3</span> 2.3 Special Program: Data Flywheel (Opt-In)</a></li>
+  <li><a href="#a-researcher-access-additional-opt-in" id="toc-a-researcher-access-additional-opt-in" class="nav-link" data-scroll-target="#a-researcher-access-additional-opt-in"><span class="header-section-number">10.2.4</span> 2.3A Researcher Access (Additional Opt-In)</a></li>
+  <li><a href="#b-responsible-asset-access-planned" id="toc-b-responsible-asset-access-planned" class="nav-link" data-scroll-target="#b-responsible-asset-access-planned"><span class="header-section-number">10.2.5</span> 2.3B Responsible Asset Access (Planned)</a></li>
+  <li><a href="#how-we-use-your-data" id="toc-how-we-use-your-data" class="nav-link" data-scroll-target="#how-we-use-your-data"><span class="header-section-number">10.2.6</span> 2.4 How We Use Your Data</a></li>
+  <li><a href="#retention-deletion-and-export" id="toc-retention-deletion-and-export" class="nav-link" data-scroll-target="#retention-deletion-and-export"><span class="header-section-number">10.2.7</span> 2.5 Retention, Deletion, and Export</a></li>
+  <li><a href="#incident-response-breach-notification" id="toc-incident-response-breach-notification" class="nav-link" data-scroll-target="#incident-response-breach-notification"><span class="header-section-number">10.2.8</span> 2.6 Incident Response &amp; Breach Notification</a></li>
+  <li><a href="#changes-to-this-policy" id="toc-changes-to-this-policy" class="nav-link" data-scroll-target="#changes-to-this-policy"><span class="header-section-number">10.2.9</span> 2.7 Changes to this Policy</a></li>
+  <li><a href="#cookie-policy" id="toc-cookie-policy" class="nav-link" data-scroll-target="#cookie-policy"><span class="header-section-number">10.2.10</span> 2.8 Cookie Policy</a></li>
+  <li><a href="#international-users-transfers-and-gdpr" id="toc-international-users-transfers-and-gdpr" class="nav-link" data-scroll-target="#international-users-transfers-and-gdpr"><span class="header-section-number">10.2.11</span> 2.9 International Users, Transfers, and GDPR</a></li>
+  <li><a href="#childrens-privacy" id="toc-childrens-privacy" class="nav-link" data-scroll-target="#childrens-privacy"><span class="header-section-number">10.2.12</span> 2.10 Children’s Privacy</a></li>
+  <li><a href="#security-measures" id="toc-security-measures" class="nav-link" data-scroll-target="#security-measures"><span class="header-section-number">10.2.13</span> 2.11 Security Measures</a></li>
+  <li><a href="#regional-rights-us-state-supplement" id="toc-regional-rights-us-state-supplement" class="nav-link" data-scroll-target="#regional-rights-us-state-supplement"><span class="header-section-number">10.2.14</span> 2.12 Regional Rights (US State Supplement)</a></li>
+  <li><a href="#subprocessors" id="toc-subprocessors" class="nav-link" data-scroll-target="#subprocessors"><span class="header-section-number">10.2.15</span> 2.13 Subprocessors</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./2a_mvp.html">Case Study: Low friction peer production</a></li><li class="breadcrumb-item"><a href="./2c_terms.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Terms and Privacy</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Terms and Privacy</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>For reference, this chapter include the full text of the the Terms and Privacy document for publicai.co (Sep 12, 2025.)</p>
+<hr>
+<section id="terms-of-service" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="terms-of-service"><span class="header-section-number">10.1</span> 1. Terms of Service</h2>
+<section id="about-these-terms" class="level3" data-number="10.1.1">
+<h3 data-number="10.1.1" class="anchored" data-anchor-id="about-these-terms"><span class="header-section-number">10.1.1</span> 1.1 About these Terms</h3>
+<p>When we say “Company”, “we”, “our”, or “us” in this document, we are referring to the nonprofit 501(c)(3) <strong>Metagov Inc</strong>.</p>
+<p>When we say “Services”, we mean our web application, available via the website https://chat.publicai.co/ and our API Gateway Developer Portal.</p>
+<p>When we say “Partners”, we mean the external organizations that provide the AI models that our Services use.</p>
+<p>When we say “You” or “your”, we are referring to the people that own an account with our Services.</p>
+<p>We may update these Terms of Service (“Terms”) in the future. We will share past versions of our Terms. Whenever we make a significant change to our policies, we will refresh the date at the top of this page and notify users of the Services directly via the website.</p>
+<p>When you use our Services, now or in the future, you are agreeing to the latest Terms. There may be times when we do not exercise or enforce a right or provision of the Terms; however, that does not mean we are waiving that right or provision. These Terms do contain a limitation of our liability.</p>
+<p>If you violate any of the Terms, we may terminate your account. That’s a broad statement and it means you need to place a lot of trust in us. We do our best to deserve that trust by being open about who we are, how we work, and keeping an open door to your feedback.</p>
+<p>These Terms are open source, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapted from the <a href="https://github.com/basecamp/policies">Basecamp open-source policies</a> / <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+</section>
+<section id="account-terms" class="level3" data-number="10.1.2">
+<h3 data-number="10.1.2" class="anchored" data-anchor-id="account-terms"><span class="header-section-number">10.1.2</span> 1.2 Account Terms</h3>
+<p>You are responsible for maintaining the security of your account and password. The Company cannot and will not be liable for any loss or damage from your failure to comply with this security obligation.</p>
+<p>You are responsible for all content posted to and activity that occurs under your account, including content posted by and activity of any users in your account.</p>
+<p>You must be a human. Accounts registered by “bots” or other automated methods are not permitted.</p>
+<p>You must be at least 18 years old to use this Service.</p>
+</section>
+<section id="description-of-the-service" class="level3" data-number="10.1.3">
+<h3 data-number="10.1.3" class="anchored" data-anchor-id="description-of-the-service"><span class="header-section-number">10.1.3</span> 1.3 Description of the Service</h3>
+<p>The Services include hosted applications, demos, and other AI‑powered features that let you submit prompts and other content (“Inputs”) and receive generated responses (“Outputs”). The Services are designed primarily for research and educational use and are not a replacement for human decision‑making. Your Inputs and related metadata may be transmitted to external AI providers you enable to generate Outputs.</p>
+</section>
+<section id="responsible-use-guidelines" class="level3" data-number="10.1.4">
+<h3 data-number="10.1.4" class="anchored" data-anchor-id="responsible-use-guidelines"><span class="header-section-number">10.1.4</span> 1.4 Responsible Use Guidelines</h3>
+<p>Use the Services responsibly. They are intended for research and education and not as a substitute for professional judgment. In addition to applicable law, you agree not to use the Services for the following disallowed use cases (examples are illustrative, not exhaustive):</p>
+<ul>
+<li>Violence and threats: Incitement or encouragement of violence; promoting self‑harm; sexual exploitation (including sexualization of minors); hate speech.</li>
+<li>Antisocial and antidemocratic uses: Harassment or doxing; insensitive content targeting victims; intentionally sowing division; perpetuating harmful stereotypes; attempts to characterize identity (e.g., inferring race or gender); graphic sexual or torture depictions; political manipulation.</li>
+<li>Deceit: Fraud, phishing, or evading the law; spam; misrepresentation (e.g., passing automated content as human without disclosure); misinformation that causes harm.</li>
+<li>Security or privacy attacks: Spearphishing; creating or disseminating malware; attempts to extract personal information or defeat model safeguards.</li>
+<li>Unsafe automation: Posting to social media without human oversight; systems that hide that content is generated by AI.</li>
+<li>Decision‑making without human review: AI‑based social scoring by public authorities; systems making consequential decisions about people (credit, employment, education, housing, insurance, legal, or medical) without adequate human‑in‑the‑loop review.</li>
+<li>Other harms: Manipulative redirection of attention; tools for plagiarism or academic dishonesty; political campaigning or lobbying.</li>
+</ul>
+</section>
+<section id="third-party-providers" class="level3" data-number="10.1.5">
+<h3 data-number="10.1.5" class="anchored" data-anchor-id="third-party-providers"><span class="header-section-number">10.1.5</span> 1.5 Third-Party Providers</h3>
+<p>Our Services may route Prompts and related data to external providers. When using our Services, you will need to select specific AI models and AI model providers to use. In some cases, your Prompt will be processed via a subprocessor like a cloud services organization that provides compute resources. In other cases, your Prompt will be sent directly to an AI developer to produce an output. You are responsible for reviewing and complying with applicable third-party terms. We do not control providers’ retention, training, or other uses once data is sent to them.</p>
+<p>Our AI model providers and cloud service providers are listed below under “Subprocessors”.</p>
+</section>
+<section id="availability-and-changes" class="level3" data-number="10.1.6">
+<h3 data-number="10.1.6" class="anchored" data-anchor-id="availability-and-changes"><span class="header-section-number">10.1.6</span> 1.6 Availability and Changes</h3>
+<p>Our Services may change, suspend, or discontinue at any time without liability. We may update features, models, or integrations periodically. Your use of the Services is at your sole risk. We provide these Services on an “as is” and “as available” basis. We do not offer service-level agreements (SLAs) for our Services.</p>
+</section>
+<section id="ip-inputs-and-outputs" class="level3" data-number="10.1.7">
+<h3 data-number="10.1.7" class="anchored" data-anchor-id="ip-inputs-and-outputs"><span class="header-section-number">10.1.7</span> 1.7 IP; Inputs and Outputs</h3>
+<p>As between you and us, and to the extent allowed by law, you own your Inputs. Subject to your compliance with these Terms, you own the Outputs you generate. Outputs may not be unique; the same or similar Outputs may be generated by others. You grant us a limited, non‑exclusive license to use, reproduce, and process your Inputs and Outputs as needed to provide, secure, and improve the Services (and, if you explicitly opt in, to contribute to the Data Flywheel).</p>
+</section>
+<section id="feedback-license" class="level3" data-number="10.1.8">
+<h3 data-number="10.1.8" class="anchored" data-anchor-id="feedback-license"><span class="header-section-number">10.1.8</span> 1.8 Feedback License</h3>
+<p>If you provide feedback, you grant us a perpetual, worldwide, royalty-free license to use it to improve the Services.</p>
+</section>
+<section id="enforcement-and-appeals" class="level3" data-number="10.1.9">
+<h3 data-number="10.1.9" class="anchored" data-anchor-id="enforcement-and-appeals"><span class="header-section-number">10.1.9</span> 1.9 Enforcement and Appeals</h3>
+<p>We have the right to suspend or terminate your account and refuse any and all current or future use of our Services for any reason at any time. Suspension means you will not be able to access the account or any content in the account. Termination will furthermore result in the deletion of your account or your access to your account, and the forfeiture and relinquishment of all content in your account. We also reserve the right to refuse the use of the Services to anyone for any reason at any time.</p>
+</section>
+<section id="export-controls-and-sanctions" class="level3" data-number="10.1.10">
+<h3 data-number="10.1.10" class="anchored" data-anchor-id="export-controls-and-sanctions"><span class="header-section-number">10.1.10</span> 1.10 Export Controls and Sanctions</h3>
+<p>You must comply with applicable export, re-export, and sanctions laws. You represent you are not prohibited from receiving the Services.</p>
+</section>
+<section id="disclaimers" class="level3" data-number="10.1.11">
+<h3 data-number="10.1.11" class="anchored" data-anchor-id="disclaimers"><span class="header-section-number">10.1.11</span> 1.11 Disclaimers</h3>
+<p>The Services, including any AI features, are provided “as is” and “as available” for research and educational use. Outputs may contain errors or appear authoritative while being wrong. To the maximum extent permitted by law, we disclaim all warranties (including merchantability, fitness for a particular purpose, and non‑infringement). Use independent judgment and verify important results.</p>
+<p>Outputs are for informational purposes only and are not a substitute for professional advice. The Services do not provide medical, legal, financial, or other professional services. Do not rely on Outputs without independent verification by a qualified professional.</p>
+<p>You will not use the Services in high‑risk environments where failure could lead to death, personal injury, or environmental or property damage (including medical diagnosis/treatment, autonomous vehicles, critical infrastructure, or weapons).</p>
+<p>Do not use any Output as the sole source for decisions that have legal or material effects on a person (including credit, employment, education, housing, insurance, legal, or medical decisions).</p>
+</section>
+<section id="limitation-of-liability-and-indemnity" class="level3" data-number="10.1.12">
+<h3 data-number="10.1.12" class="anchored" data-anchor-id="limitation-of-liability-and-indemnity"><span class="header-section-number">10.1.12</span> 1.12 Limitation of Liability and Indemnity</h3>
+<p>You expressly understand and agree that the Company shall not be liable, in law or in equity, to you or to any third party for any direct, indirect, incidental, lost profits, special, consequential, punitive or exemplary damages, including, but not limited to, damages for loss of profits, goodwill, use, data or other intangible losses (even if the Company has been advised of the possibility of such damages), resulting from: (i) the use or the inability to use the Services; (ii) the cost of procurement of substitute goods and services resulting from any goods, data, information or services purchased or obtained or messages received or transactions entered into through or from the Services; (iii) unauthorized access to or alteration of your transmissions or data; (iv) statements or conduct of any third party on the service; (v) or any other matter relating to these Terms or the Services, whether as a breach of contract, tort (including negligence whether active or passive), or any other theory of liability.</p>
+<p>To the extent permitted by law, our aggregate liability will not exceed the greater of USD $100 or the fees paid by you to us for the Services in the 12 months before the event. The foregoing does not limit liability for willful misconduct or where not permitted by law. Exclusive venue and governing law: Commonwealth of Massachusetts.</p>
+<p>You agree to indemnify us against claims arising from your use of the Services, your content, or violation of these Terms or laws.</p>
+</section>
+<section id="governing-law-and-dispute-resolution" class="level3" data-number="10.1.13">
+<h3 data-number="10.1.13" class="anchored" data-anchor-id="governing-law-and-dispute-resolution"><span class="header-section-number">10.1.13</span> 1.13 Governing Law and Dispute Resolution</h3>
+<p>These Terms are governed by <strong>Massachusetts</strong> law, excluding its conflict-of-laws rules. Disputes will be resolved in <strong>Massachusetts</strong>.</p>
+</section>
+<section id="notices-of-infringement-dmca" class="level3" data-number="10.1.14">
+<h3 data-number="10.1.14" class="anchored" data-anchor-id="notices-of-infringement-dmca"><span class="header-section-number">10.1.14</span> 1.14 Notices of Infringement (DMCA)</h3>
+<p>If you believe content available through the Services infringes your rights, please submit a notice under our DMCA/notice‑and‑takedown process to our designated contact. Valid notices should include sufficient detail to identify the material and your rights claim. We may notify the affected user and, where appropriate, allow a counter‑notice.</p>
+</section>
+</section>
+<section id="privacy-policy" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="privacy-policy"><span class="header-section-number">10.2</span> 2. Privacy Policy</h2>
+<p>This Privacy Policy explains how we collect, use, share, and protect information when operating the Services.</p>
+<p>If you do not agree with the terms of this Privacy Policy, you must not access or use any Services.</p>
+<section id="scope-and-roles" class="level3" data-number="10.2.1">
+<h3 data-number="10.2.1" class="anchored" data-anchor-id="scope-and-roles"><span class="header-section-number">10.2.1</span> 2.1 Scope and Roles</h3>
+<p>“Metagov” is the organization that acts as the “controller” of personal data; external providers act as separate controllers under their terms.</p>
+</section>
+<section id="data-we-process" class="level3" data-number="10.2.2">
+<h3 data-number="10.2.2" class="anchored" data-anchor-id="data-we-process"><span class="header-section-number">10.2.2</span> 2.2 Data We Process</h3>
+<p>We collect: - <strong>Account data</strong>: Email, username, profile settings. Optionally, you may store your name and birth date. - <strong>Chat data</strong>: Prompts, outputs, and any other content you upload such as text, files, images, and audio. You may also create metadata about a chat, such as “feedback” or “tags”. - <strong>Communications</strong>: If you communicate with us, such as via email, we may collect personal data such as your name, contact information, and the contents of the messages you send. - <strong>Log Data</strong>: We may collect information that your browser or device automatically sends when you use our Service. This may include the details about your device, your IP address, your browser type, browser settings, and the date and time of your request. - <strong>Usage Data</strong>: We may collect information about your use of the Services, such as the features you use and the actions you take, your time zone, country, the dates and times of access, and your user agent and version. - <strong>Cookies</strong>: We use cookies to improve your experience with our Services. If you use our Services without creating an account, we may store some of the information described in this policy with cookies, for example to help maintain your preferences across browsing sessions. - <strong>Account Information</strong>: We offer the ability to log in using your Google account, if you elect to do so. If you log in with your Google account, the personal data we collect may depend on your Google privacy settings.</p>
+<p>If, during your use of our Services, you provide us with any personal data relating to a third party (e.g.&nbsp;your spouse, children, parents, and/or friends), by submitting such personal data to us, you represent to us that you have obtained the consent of such third party to you providing us with their personal data, and for the collection, use and disclosure of their personal data for all purposes set out herein and by or for the benefit of the persons referenced herein.</p>
+<p>Our backend uses the source-available “OpenWebUI software”, and exact database implementation details are available via the OpenWebUI source code.</p>
+</section>
+<section id="special-program-data-flywheel-opt-in" class="level3" data-number="10.2.3">
+<h3 data-number="10.2.3" class="anchored" data-anchor-id="special-program-data-flywheel-opt-in"><span class="header-section-number">10.2.3</span> 2.3 Special Program: Data Flywheel (Opt-In)</h3>
+<p>With consent, you can submit contributions (implemented as “pull requests” to a Hugging Face dataset repository) to a public dataset under open licensing. Withdrawal stops future collection, but past public releases generally cannot be fully retracted. The legal basis for flywheel participation is consent, with legitimate interests for safety where applicable. An in‑product consent module explains operator, storage, license, AI‑use preferences, irreversibility, and rights.</p>
+<p>Licenses: when you contribute, you must choose a license for each item: <code>CC0-1.0</code>, <code>CC-BY-4.0</code>, or <code>CC-BY-SA-4.0</code>. Your chosen license governs downstream use of that public contribution.</p>
+<p>Attribution: public releases display an attribution string you select in-product (your username, a pseudonym, or “anonymous”). If you choose a pseudonym, today it is a deterministic, unsalted value derived from your OpenWebUI account id; this enables consistent credit and moderation but makes contributions under the same pseudonym linkable to each other. If you prefer the least linkability, choose “anonymous.” We do not publish your underlying account id.</p>
+<p>AI preference signals: you may attach AI-use preferences (e.g., “do not train”) to each public contribution. These are machine-readable expressions of intent that responsible downstream users should honor; they are not a technical enforcement mechanism.</p>
+<p>See more in the Program-Specific Terms for the Flywheel.</p>
+</section>
+<section id="a-researcher-access-additional-opt-in" class="level3" data-number="10.2.4">
+<h3 data-number="10.2.4" class="anchored" data-anchor-id="a-researcher-access-additional-opt-in"><span class="header-section-number">10.2.4</span> 2.3A Researcher Access (Additional Opt-In)</h3>
+<p>Separately from public contributions, you may enable “Researcher Access” so vetted research partners can analyze your chats for public-interest evaluation and model development without making your chats public.</p>
+<ul>
+<li>Scope: when enabled, Researcher Access covers chats in your account that are not marked as temporary and have not been deleted at the time of access. It does not publish your chats. Account identifiers are not shared with partners.</li>
+<li>Purpose limits: evaluation, quality assurance, topic modeling, safety analysis, and related research tasks. No public redistribution of raw chat text.</li>
+<li>AI-use preferences: where applicable, we transmit machine‑readable AI‑use preferences associated with your account or contribution and instruct partners to honor them (e.g., no training when you select “DoNotTrain”). These are policy signals; they are not a technical enforcement mechanism.</li>
+<li>Recipients: limited to our research team, which may include researchers from partner institutions. Research team is bound by purpose limits and required safeguards.</li>
+<li>Retention: partners must store data only as long as necessary for the approved research purpose and delete upon completion or within 180 days, whichever is sooner, unless longer retention is required by law and disclosed to us.</li>
+<li>Withdrawal: turning off Researcher Access stops future sharing. We will instruct partners to delete unneeded copies and derived artifacts where feasible, but prior analyses and irreversibly aggregated statistics may persist.</li>
+</ul>
+<p>This program is optional and independent from the public Data Flywheel. You may enable either, both, or neither.</p>
+</section>
+<section id="b-responsible-asset-access-planned" class="level3" data-number="10.2.5">
+<h3 data-number="10.2.5" class="anchored" data-anchor-id="b-responsible-asset-access-planned"><span class="header-section-number">10.2.5</span> 2.3B Responsible Asset Access (Planned)</h3>
+<p>We are exploring an additional, consent‑based program that would provide controlled access to certain underlying assets using privacy‑preserving tooling (for example, OpenMined’s DataSite). Participation would be strictly opt‑in and gated by explicit, in‑product consent with purpose limits, auditing, and required safeguards. Today, there are four tiers for handling your data and contributions (private/temporary, aggregate‑only, Researcher Access, and public contributions). If launched, this would become a fifth tier. We will update these Terms and present a dedicated consent flow before enabling any such program.</p>
+</section>
+<section id="how-we-use-your-data" class="level3" data-number="10.2.6">
+<h3 data-number="10.2.6" class="anchored" data-anchor-id="how-we-use-your-data"><span class="header-section-number">10.2.6</span> 2.4 How We Use Your Data</h3>
+<p>We use information to: - Provide, secure, and maintain the Services - Prevent abuse and enforce our terms - Comply with legal obligations - With your consent, contribute to the Data Flywheel program</p>
+<p>In order to operate the Services, we send your Prompts to subprocessors so that you can receive an AI Output. These subprocessors are listed in this document (under “Subprocessors”) and include both model providers (the organization who built the AI models our Services use) and cloud service providers.</p>
+<p><strong>Your data protection:</strong> - We do not sell or rent your personal data. We share only what is necessary with subprocessors to operate, secure, and improve the Services as described in this Policy. - We may send your Prompts to outside providers as required to operate the Services. - Individual chat sharing to researchers only occurs if you opt in to the Researcher Access program; public release only occurs if you opt in to the Data Flywheel program. - Security reviews are conducted under legitimate interests with strict access controls.</p>
+<p>We may share <strong>aggregated, non-identifying statistics</strong> with Partners, which may include: - Academic research institutions - Open source AI development communities<br>
+- Nonprofit organizations aligned with our mission</p>
+<p><strong>What aggregate data includes:</strong> - Total usage volume, growth metrics, user retention, engagement patterns - General topic distributions (e.g., “15% educational queries”) - Model performance statistics - Safety and abuse prevention metrics</p>
+<p><strong>What it NEVER includes:</strong> - Individual usernames, emails, or identifiers - Specific chat content, prompts, or files - Any data from fewer than 100 users - Information that could reasonably identify you</p>
+<p>This aggregate sharing helps improve AI systems for everyone while protecting your privacy.</p>
+</section>
+<section id="retention-deletion-and-export" class="level3" data-number="10.2.7">
+<h3 data-number="10.2.7" class="anchored" data-anchor-id="retention-deletion-and-export"><span class="header-section-number">10.2.7</span> 2.5 Retention, Deletion, and Export</h3>
+<p>We temporarily retain technical logs (such as system activity and usage records) to help us ensure security, monitor performance, and improve our services. These logs are stored for no longer than 90 days. After that period, we permanently delete the raw logs and retain only aggregated, anonymized data that cannot reasonably be used to identify you.</p>
+<p>Deleted chats are removed from active systems within 30 days, subject to legal holds (duration of legal proceedings plus 1 year). Safety/abuse data retained as necessary.</p>
+<p>Depending on your region, you may have rights to access, rectification, erasure, portability, restriction/objection, and consent withdrawal. We make these available via two avenues: self-service within our Service for export and deletion, and by contacting us via email using <strong>[<a href="mailto:hello@publicai.co">hello@publicai.co</a>]</strong>.</p>
+<p>Currently, our Service supports exporting all chats as JSON directly from the Settings menu. Users can also delete all chats directly from the Settings menu.</p>
+<p>For Data Subject Access Requests (DSAR), you can submit requests to <strong><a href="mailto:hello@publicai.co">hello@publicai.co</a></strong>. Response within 30 days (extendable by 60 for complexity). Identity verification required.</p>
+<p>Our Services offer users the option to contribute to external projects, such as a “Public AI Data Flywheel”. These offerings involve making public contributions which are handled under a separate retention and publication policy. Participation will be gated via an explicit opt-in and consent procedure.</p>
+</section>
+<section id="incident-response-breach-notification" class="level3" data-number="10.2.8">
+<h3 data-number="10.2.8" class="anchored" data-anchor-id="incident-response-breach-notification"><span class="header-section-number">10.2.8</span> 2.6 Incident Response &amp; Breach Notification</h3>
+<p>We investigate incidents, mitigate risk, and notify affected users and authorities without undue delay and, where GDPR applies, within 72 hours when required.</p>
+<p>We assess legal requests for validity, seek to narrow scope, and provide notice unless prohibited. Data may be placed under legal hold until resolved.</p>
+</section>
+<section id="changes-to-this-policy" class="level3" data-number="10.2.9">
+<h3 data-number="10.2.9" class="anchored" data-anchor-id="changes-to-this-policy"><span class="header-section-number">10.2.9</span> 2.7 Changes to this Policy</h3>
+<p>We may update this Policy. Material changes will be communicated directly on our website.</p>
+</section>
+<section id="cookie-policy" class="level3" data-number="10.2.10">
+<h3 data-number="10.2.10" class="anchored" data-anchor-id="cookie-policy"><span class="header-section-number">10.2.10</span> 2.8 Cookie Policy</h3>
+<p>We use persistent first-party cookies and some third-party cookies to store certain preferences, make it easier for you to use our applications, as well as support some analytics.</p>
+<p>A cookie is a piece of text stored by your browser. It may help remember login information and site preferences. It might also collect information such as your browser type, operating system, web pages visited, duration of visit, content viewed, and other click-stream data. You can adjust cookie retention settings and accept or block individual cookies in your browser settings, although our apps won’t work and other aspects of our service may not function properly if you turn cookies off.</p>
+</section>
+<section id="international-users-transfers-and-gdpr" class="level3" data-number="10.2.11">
+<h3 data-number="10.2.11" class="anchored" data-anchor-id="international-users-transfers-and-gdpr"><span class="header-section-number">10.2.11</span> 2.9 International Users, Transfers, and GDPR</h3>
+<p>We are a US-based nonprofit. We welcome users from around the world but want to be transparent about our limitations:</p>
+<p><strong>What we DO commit to:</strong> - Honor all data deletion requests within 30 days - Practice data minimization (we only collect what’s needed) - Provide data export tools - Never sell or rent your personal data - Respond to privacy requests at hello@publicai.co</p>
+<p><strong>What we DON’T currently offer:</strong> - Formal Data Processing Agreements (DPAs) - EU Standard Contractual Clauses - EU/UK representatives - Localized data storage outside the US</p>
+<p>If you’re in the EU/UK and these formal mechanisms are required for your use case, this service may not be suitable for you. We’re a small nonprofit focused on advancing open AI research with consideration for privacy rather than enterprise compliance frameworks. Organizations or individuals requiring formal GDPR compliance documentation should not use our Service.</p>
+<p>For the purposes of the EU General Data Protection Regulation (GDPR), we act as a controller for personal data processed by the Service, including your chats (account data and chat data), participation in Researcher Access, and contributions to the Public AI Data Flywheel. This means we determine how such data is collected, processed, redacted, licensed (for public contributions), and released.</p>
+<p>When you interact with external model providers through our Service, those providers act as independent controllers of your data. They determine their own purposes and means of processing, including whether to retain prompts, responses, and related metadata for research, safety, or service improvement. We do not direct or control how they handle your data, and no Data Processing Agreements are in place for those providers.</p>
+<p>For Researcher Access, vetted research partners act as our processors: they process data under our instructions and for limited purposes (evaluation and related research tasks), and they are contractually obligated to implement appropriate safeguards, honor our deletion instructions, and not further disclose your data.</p>
+<p>Because model providers are independent controllers, your data rights must be exercised separately with each provider. We encourage you to review their privacy notices and terms to understand how they handle your information.</p>
+</section>
+<section id="childrens-privacy" class="level3" data-number="10.2.12">
+<h3 data-number="10.2.12" class="anchored" data-anchor-id="childrens-privacy"><span class="header-section-number">10.2.12</span> 2.10 Children’s Privacy</h3>
+<p>The Services are not directed to children. We do not knowingly collect personal data from children under 18. If you believe a child provided personal data, contact us for deletion.</p>
+</section>
+<section id="security-measures" class="level3" data-number="10.2.13">
+<h3 data-number="10.2.13" class="anchored" data-anchor-id="security-measures"><span class="header-section-number">10.2.13</span> 2.11 Security Measures</h3>
+<p>We implement reasonable security measures for a small nonprofit: - Access controls and least privilege principles - MFA on administrator accounts<br>
+- Regular security updates - Encrypted data transmission (HTTPS)</p>
+<p><strong>Current limitations:</strong> - No encryption at rest (planned when OpenWebUI supports it) - No formal security audits or certifications - Backups are retained for 90 days for disaster recovery</p>
+<p>This is a research service, not enterprise infrastructure. Please don’t use it for sensitive data.</p>
+</section>
+<section id="regional-rights-us-state-supplement" class="level3" data-number="10.2.14">
+<h3 data-number="10.2.14" class="anchored" data-anchor-id="regional-rights-us-state-supplement"><span class="header-section-number">10.2.14</span> 2.12 Regional Rights (US State Supplement)</h3>
+<p>For residents of California, Colorado, Connecticut, Utah, and Virginia: We do not “sell” or “share” personal information as defined by these laws and do not use personal data for targeted advertising. You have rights to access, delete, correct, portability, and appeal adverse decisions (state-specific). We will not discriminate for exercising rights. Submit requests at hello@publicai.co.</p>
+</section>
+<section id="subprocessors" class="level3" data-number="10.2.15">
+<h3 data-number="10.2.15" class="anchored" data-anchor-id="subprocessors"><span class="header-section-number">10.2.15</span> 2.13 Subprocessors</h3>
+<p>Note: Some entities listed below act as independent controllers rather than subprocessors; see Section 2.9 for roles and responsibilities.</p>
+<p>Model providers (independent controllers; see 2.9) are: - Swiss AI Initiative (https://www.swiss-ai.org/) - AI Singapore</p>
+<p>Cloud service providers are: - AWS - Exoscale - Swiss National Supercomputing Center - Australian National Computational Infrastructure - Cudo Compute - Vercel</p>
+<p>Analytics: - Mixpanel</p>
+<p>Public data hosting: - HuggingFace</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./2b_life_of_a_chat.html" class="pagination-link  aria-label=" &lt;span="" life="" of="" a="" chat&lt;="" span&gt;"="">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Life of a Chat</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./2d_faq.html" class="pagination-link" aria-label="<span class='chapter-number'>11</span>&nbsp; <span class='chapter-title'>Public AI Data Flywheel — User FAQ</span>">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Public AI Data Flywheel — User FAQ</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

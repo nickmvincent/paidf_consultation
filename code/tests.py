@@ -278,6 +278,21 @@ class FlywheelActionFlowTests(unittest.TestCase):
         content2 = last_message_content(events2)
         self.assertIn("Test Mode: PR Preview", content2)
 
+    def test_pseudonym_appears_in_preview(self):
+        # Enable pseudonym mode and ensure preview attribution matches deterministic handle
+        self.action.user_valves.attribution_mode = "pseudonym"
+        user = {"valves": self.action.user_valves, "id": "user-pseudo-xyz"}
+        expected = self.action._deterministic_pseudonym(user)
+
+        events = []
+        asyncio.run(run_action(self.action, self.chat_id, [], user, events))
+        content = last_message_content(events)
+        self.assertIn("<<<SHARE_PREVIEW_START>>>", content)
+        contrib = self.action._extract_json_from_preview(content)
+        self.assertIsNotNone(contrib)
+        self.assertEqual(contrib.get("attribution_mode"), "pseudonym")
+        self.assertEqual(contrib.get("attribution"), expected)
+
     def test_feedback_association_filters_by_chat_id(self):
         # Build initial preview and capture counts
         self.action.user_valves.attribution_mode = "manual_hf"

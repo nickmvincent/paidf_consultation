@@ -48,3 +48,38 @@ Tips:
 - If your UI labels differ, adjust selectors or add test IDs; the script favors text‑based selectors and includes fallbacks.
 - Default target URL is hardcoded (`BASE_URL` in the script). Change it if your instance runs elsewhere.
 
+## Usage Flows
+
+This summarizes the primary user flows for the Flywheel action (`flywheel.py`). It reflects the current implementation and intended UX.
+
+- Consent off: Opt‑in disabled
+  - Open action → shows a short setup screen explaining how to enable sharing, pick attribution, license, and AI Preference, with links to Data FAQ and Privacy Policy.
+  - No preview or PR is created until `opt_in_enabled = True`.
+
+- Consent on: First click (preview)
+  - Runs privacy scan; enforces min/max message counts.
+  - Builds a preview that includes: assessment (good/bad/mixed from feedback counts), message count, attribution display, AI Preference, tags, feedback samples, and a public sharing warning (Researcher Access note shown only if ON).
+  - Normalizes tags from all sources (DB `chatidtag`, `chat.meta.tags`, and `chat.chat.tags`).
+  - Creates a Share Preview JSON block with the exact contribution payload (including `response_labels`, which map specific assistant messages to good/bad using feedback `meta.message_id` or `meta.message_index`).
+
+- Consent on: Second click (confirm + send)
+  - Just‑in‑time refresh: re‑reads tags and feedback for the chat, recomputes assessment, and updates the payload before sending.
+  - If tags/feedback changed since preview, shows a small success toast (“Latest tags/feedback grabbed …”) and proceeds without requiring another click.
+  - Test mode if either (a) `attribution_mode = manual_hf` or (b) no valid Hugging Face credentials; otherwise attempts a real PR.
+  - If `sanity_check_repo = True` and credentials exist, runs preflight; on failure, shows an error notification and stops.
+  - On successful PR creation, shows a confirmation with link and records a de‑dup guard for 5 minutes to avoid repeat submissions.
+
+- Attribution modes
+  - Anonymous: `attribution = "Anonymous"`.
+  - Pseudonym: deterministic handle derived from `__user__.id` (stable, unsalted).
+  - Manual HF: contribution is simulated (test mode); power users can later create PRs manually.
+
+- Researcher Access toggle
+  - OFF: public warning is concise (“You are about to share public dataset data.”).
+  - ON: appends a note indicating research team may privately analyze non‑temporary, non‑deleted chats for evaluation/R&D.
+
+- Edge cases and guards
+  - Too short/long: preview will not build until message count is within `[min_messages, max_messages]`.
+  - Dedup: attempting to share the same chat within ~5 minutes after a successful PR shows a warning with a link to the prior PR.
+  - Errors: invalid preview JSON or PR creation errors are surfaced as notifications.
+

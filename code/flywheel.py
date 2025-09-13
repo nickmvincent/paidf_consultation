@@ -27,32 +27,27 @@ from pydantic import BaseModel, Field
 SETUP_TEMPLATE = """
 # Share Chat Publicly
 
-Enable sharing and choose attribution:
+Enable sharing and pick how your name appears.
 
-- **anonymous**: truly anonymous
-- **pseudonym**: stable, deterministic, pre-generated handle from your OpenWebUI account id (not editable; helps accrue reputation and moderation; you can claim later)
-- **manual_hf**: if you're a power user you can open your own PRs (on the roadmap: integrate directly in the chat UI)
+- anonymous: least linkability
+- pseudonym: deterministic handle from your account id; useful if you want to keep track of your contributions or claim credit later
+- manual_hf: only select this if you're already a GitHub or HuggingFace user: you can manually open your own PR!
 
-**Quick Setup**
-1) Controls → Functions → Share to Flywheel
-2) Set `opt_in_enabled = True`
-3) Choose attribution: anonymous / pseudonym / manual_hf
-4) Pick license & AI Preference (e.g., `train-genai=n;exceptions=cc-cr`)
-5) Click **Share** again
+Quick setup
+1) Controls → Valves → Functions → Share to Flywheel
+2) Toggle Opt In ON (Green)
+3) Choose attribution and license
+4) Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`)
+5) Click Share again
+6) Optional: you can also toggle Researcher Access on.
 
-**Data FAQ:** {faq_url} • **Privacy Policy:** {privacy_policy_url}
-\n\nNote: “pseudonym” is pre-generated and deterministic (unsalted) from your account id and cannot be customized. If you want the least linkability across contributions, choose “anonymous.”
-\n\nAI Preference presets use IETF Content-Usage with CC Signals as exceptions. Two families are available:
-- Training: `train-genai=n` (deny) or `train-genai=n;exceptions=cc-cr|cc-cr-dc|cc-cr-ec|cc-cr-op`
-- General AI Use: `ai-use=n` (deny) or `ai-use=n;exceptions=cc-cr|cc-cr-dc|cc-cr-ec|cc-cr-op`
+Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
+
 """
 
 # Visible warning block (ALWAYS VISIBLE)
 PUBLIC_DATA_WARNING = (
-    "**⚠️ You are about to share public dataset data.** "
-    "You can also enable Researcher Access to allow vetted partners to analyze your chats privately for evaluation and R&D (no public posting of chat text). "
-    "When Researcher Access is enabled, researchers may analyze chats in your account that are not temporary and have not been deleted. "
-    "These choices are independent: you can enable public sharing, Researcher Access, both, or neither."
+    "**⚠️ You are about to share public dataset data.**"
 )
 
 # Summarized header shown above details
@@ -64,9 +59,9 @@ PREVIEW_HEADER = (
 # Everything else placed in details
 GRABBED_SECTION_TEMPLATE = """
 <details>
-<summary>What I fetched for this share</summary>
+<summary>Tags/feedbacks fetched for this chat</summary>
 
-- **Tags** (from `chatidtag`): {tags_line}
+- **Tags**: {tags_line}
 - **Feedback counts**: 👍 {good} • 👎 {bad} → **{reason_upper}**
 - **Feedback samples** (up to 5):
 ~~~json
@@ -77,7 +72,7 @@ GRABBED_SECTION_TEMPLATE = """
 
 SHARE_JSON_BLOCK = """
 <details>
-<summary>Share Preview JSON</summary>
+<summary>Share Preview JSON (exactly what will be sent to HuggingFace)</summary>
 
 ~~~json
 <<<SHARE_PREVIEW_START>>>
@@ -105,52 +100,32 @@ NER_PLACEHOLDER_BLOCK = """
 """
 
 PREVIEW_TEMPLATE = """
-\n# Ready to Share: "{title}"
+
+# Ready to Share: "{title}"
 
 {public_data_warning}
-
-{preview_header}
-
-<details>
-<summary>Preview details</summary>
-
-**Privacy**: {privacy_status}{privacy_note}
-
-{grabbed_section}
 
 {tip_line}
 
-</details>
-
-**Data FAQ:** {faq_url} • **Privacy Policy:** {privacy_policy_url}
-
-{share_json_block}
-
-{privacy_block}
-{ner_block}
-
-**Next Step**: Click the Share button again to {next_verb} a Pull Request.
-"""
-
-REFRESHED_TEMPLATE = """
-# Preview Updated (state changed)
-
-{public_data_warning}
+Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
 <details>
-<summary>Updated details</summary>
+<summary>Details</summary>
+
+{preview_header}
+
+Privacy: {privacy_status}{privacy_note}
+
+{privacy_block}
 
 {grabbed_section}
 
-~~~json
-<<<SHARE_PREVIEW_START>>>
-{json_str}
-<<<SHARE_PREVIEW_END>>>
-~~~
-
-**Next Step**: Click Share again if everything looks right.
-
 </details>
+
+{share_json_block}
+{ner_block}
+
+**Next Step**: Click the Share button again to {next_verb} contribute.
 """
 
 TEST_MODE_RESULT = """
@@ -204,17 +179,14 @@ Submitted via the Flywheel OpenWebUI plugin.
 """
 
 TIP_LINE = (
-    "**Tip:** Update **tags** and **feedback** in the UI, then click **Share** again. "
+    "**Tip:** Update **tags** and **feedback** in the UI to add more detail to your contribution. "
     "We’ll auto‑grab the latest tags/feedback right before sending.\n"
-    "Identity note: ‘pseudonym’ is pre-generated and deterministic (unsalted) from your account id and is not a custom display name. For least linkability, choose ‘anonymous.’\n"
-    "AI Preference is an IETF Content-Usage expression (e.g., train-genai=n;exceptions=cc-cr) with CC Signals as exceptions; responsible downstream users should honor these signals."
 )
 
 
 # ======================================================================
 # Types
 # ======================================================================
-
 
 class Contribution(TypedDict, total=True):
     id: str
@@ -380,7 +352,7 @@ class Action:
         researcher_opt_in: bool = Field(
             default=False,
             description=(
-                "Researcher Access: allow vetted partners to analyze your non-temporary, non-deleted chats "
+                "Researcher Access: allow research team to analyze your non-temporary, non-deleted chats "
                 "for evaluation and R&D without making them public. Independent of public sharing; "
                 "you can disable anytime. Partners are instructed to honor your AI preferences."
             ),
@@ -400,6 +372,15 @@ class Action:
     def _debug(self, *args):
         if self.valves.debug_mode:
             print("[Flywheel:DEBUG]", *args)
+
+    def _public_data_warning(self, user_valves: "Action.UserValves") -> str:
+        base = PUBLIC_DATA_WARNING
+        if getattr(user_valves, "researcher_opt_in", False):
+            return (
+                base
+                + " Researcher Access is ON: research team may privately analyze your non-temporary, non-deleted chats."
+            )
+        return base + " You are about to share a single chat. To share all chats with research team, you can toggle Research Access on in Controls."
 
     # ------------------------------------------------------------------
     # Dedup guard
@@ -849,20 +830,6 @@ class Action:
                 return None
         return None
 
-    def _extract_int(self, *vals) -> Optional[int]:
-        for v in vals:
-            try:
-                if v is None:
-                    continue
-                if isinstance(v, (int, float)):
-                    return int(v)
-                s = str(v).strip()
-                if s and s.lstrip("-+").isdigit():
-                    return int(s)
-            except Exception:
-                continue
-        return None
-
     def _map_response_labels(
         self,
         raw_messages: List[Dict[str, Any]],
@@ -1042,7 +1009,7 @@ class Action:
 
                 # attribution
                 attribution, verification = self._resolve_attribution(
-                    self.user_valves, __user__
+                    user_valves, __user__
                 )
 
                 # compute reason from saved feedbacks
@@ -1099,13 +1066,13 @@ class Action:
                         "sharing_reason": reason,
                         "sharing_tag": sharing_tag,
                         "all_tags": norm_tags,
-                        "license": self.user_valves.license,
-                        "ai_preference": self.user_valves.ai_preference,
+                        "license": user_valves.license,
+                        "ai_preference": user_valves.ai_preference,
                         "attribution": attribution,
-                        "attribution_mode": self.user_valves.attribution_mode,
+                        "attribution_mode": user_valves.attribution_mode,
                         "verification": verification,
                         "researcher_opt_in": bool(
-                            getattr(self.user_valves, "researcher_opt_in", False)
+                            getattr(user_valves, "researcher_opt_in", False)
                         ),
                         "ai_preference_note": "Signal only; does not override explicit publication.",
                         "ai_preference_time": datetime.now(timezone.utc).isoformat(),
@@ -1123,16 +1090,7 @@ class Action:
                 have_hf_creds = bool(
                     self.valves.default_hf_token and self.valves.dataset_repo
                 )
-                manual_mode = self.user_valves.attribution_mode == "manual_hf"
-                mode_label = (
-                    "🧪 Test Mode (manual_hf selected)"
-                    if manual_mode
-                    else (
-                        "🧪 Test Mode (no HF credentials found)"
-                        if not have_hf_creds
-                        else "🌐 Ready to Create Pull Request"
-                    )
-                )
+                manual_mode = user_valves.attribution_mode == "manual_hf"
                 next_verb = (
                     "simulate" if (manual_mode or not have_hf_creds) else "create"
                 )
@@ -1162,14 +1120,13 @@ class Action:
 
                 preview_md = PREVIEW_TEMPLATE.format(
                     title=chat["title"],
-                    public_data_warning=PUBLIC_DATA_WARNING,
+                    public_data_warning=self._public_data_warning(user_valves),
                     preview_header=PREVIEW_HEADER.format(
                         reason=reason,
                         sharing_tag=sharing_tag,
                         num_messages=len(clean_messages),
-                        ai_preference=self.user_valves.ai_preference,
+                        ai_preference=user_valves.ai_preference,
                         attribution=attribution,
-                        mode_label=mode_label,
                     ),
                     privacy_status=privacy_status,
                     privacy_note=privacy_note,
@@ -1250,7 +1207,7 @@ class Action:
                 # Always refresh tags/feedback just-in-time, and proceed
                 changed = (preview_tags != fresh_tags) or (preview_feedback != fresh_feedback)
 
-                attribution, verification = self._resolve_attribution(self.user_valves, __user__)
+                attribution, verification = self._resolve_attribution(user_valves, __user__)
                 contribution.update(
                     {
                         "clean_content": fresh_messages,
@@ -1262,8 +1219,8 @@ class Action:
                         "sharing_reason": new_reason,
                         "attribution": attribution,
                         "verification": verification,
-                        "license": self.user_valves.license,
-                        "ai_preference": self.user_valves.ai_preference,
+                        "license": user_valves.license,
+                        "ai_preference": user_valves.ai_preference,
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                         "source_chat_id": (body or {}).get("chat_id"),
                     }
@@ -1299,7 +1256,7 @@ class Action:
                 # proceed to PR (mock if creds missing or manual_hf)
                 hf_token = self.valves.default_hf_token
                 have_hf_creds = bool(hf_token and self.valves.dataset_repo)
-                manual_mode = self.user_valves.attribution_mode == "manual_hf"
+                manual_mode = user_valves.attribution_mode == "manual_hf"
 
                 if have_hf_creds and not manual_mode and self.valves.sanity_check_repo:
                     pf = self._hf_preflight(hf_token)
