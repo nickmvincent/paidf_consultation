@@ -27,14 +27,16 @@ from pydantic import BaseModel, Field
 SETUP_TEMPLATE = """
 # Sharing chats to help public AI
 
-You can send specific chats to a public repository and/or you can
-toggle Researcher Access on so the research team can use your chats directly for research purposes beyond aggregate analysis (researcher access does not make any chats public).
+You can send specific chats to a public repository to share your good, bad, or interesting chats and help build better public AI. These chats can be used by anyone, subject to certain "AI preference signals" and "licenses" you attach to the chats.
 
-By default, your chats are not used directly by directly and are only ever analyzed in an aggregate, anonymous fashion (for instance, to measure the volume of total messages or the prevalence of a high-level topic like "coding").
-You can always delete chats at any time or use temporary mode.
+You can also opt in to "Researcher Access" so the Public aI research team can privately use your chats for research and development (R&D) purposes like training and evaluation.
+
+By default, your chats are not used directly for R&D. They are only ever analyzed in an aggregate, anonymous fashion (for instance, to measure the volume of total messages or the prevalence of high-level topics like "coding").
+
+You can always delete chats at any time or use temporary mode to ensure chats are not stored or used for any purpose whatsoever.
 
 How to setup sharing:
-1) Controls (top right) → Valves → Functions → Share to Flywheel
+1) Controls (top right) → Valves → Functions → Sharing
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own HuggingFace account)
 4) Choose a license.
@@ -355,7 +357,7 @@ class Action:
             description=(
                 "Researcher Access: allow research team to analyze your non-temporary, non-deleted chats "
                 "for evaluation and R&D without making them public. Independent of public sharing; "
-                "you can disable anytime. This is the end of the sharing settings. Below Chat Controls are additional advance options!"
+                "you can disable anytime. This is the end of the sharing settings. The Chat Controls below are additional advance options!"
             ),
         )
 
@@ -381,7 +383,7 @@ class Action:
                 base
                 + " Researcher Access is ON: research team may privately analyze your non-temporary, non-deleted chats."
             )
-        return base + " You are about to share a single chat. To share all chats with research team, you can toggle Research Access on in Controls."
+        return base + " You are about to share a single chat publicly. To share all chats privately with research team, you can toggle Research Access on in Controls."
 
     # ------------------------------------------------------------------
     # Dedup guard
