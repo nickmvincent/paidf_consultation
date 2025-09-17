@@ -229,7 +229,6 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         "attribution",
         "attribution_mode",
         "verification",
-        "researcher_opt_in",
         "ai_preference_note",
         "ai_preference_time",
         "contributed_at",
@@ -436,6 +435,24 @@ class Action:
             )
         content = json.dumps(digest_basis, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(content.encode()).hexdigest()[:16]
+
+    def _sanitize_contribution_for_export(
+        self, contribution: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Return a copy safe for sharing externally.
+        - Remove internal/sensitive fields
+        - Add a brief note about content_hash purpose
+        """
+        out = dict(contribution)
+        # Remove fields we do not want to publish
+        out.pop("researcher_opt_in", None)
+        out.pop("source_chat_id", None)
+        # Add note about content_hash for transparency
+        if out.get("content_hash") and not out.get("content_hash_note"):
+            out["content_hash_note"] = (
+                "Shared to help detect duplicates and verify integrity without exposing raw text."
+            )
+        return out
 
     # Deterministic pseudonym from user id only
     def _deterministic_pseudonym(self, user_obj: Dict[str, Any]) -> str:
@@ -733,7 +750,8 @@ class Action:
 
             api = HfApi()
             file_path = f"contributions/{contribution['id']}.json"
-            json_content = json.dumps(contribution, indent=2, ensure_ascii=False)
+            safe_contribution = self._sanitize_contribution_for_export(contribution)
+            json_content = json.dumps(safe_contribution, indent=2, ensure_ascii=False)
 
             pr_title = "[{sharing_reason}] Contribution ({attribution})".format(
                 sharing_reason=contribution["sharing_reason"],
@@ -790,8 +808,22 @@ class Action:
     # Message cleaning (preserve model/tool_calls and id if present)
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         clean = []
+        def _is_injected_preview(content: str) -> bool:
+            if not isinstance(content, str):
+                return False
+            markers = (
+                "<<<SHARE_PREVIEW_START>>>",
+                "<<<SHARE_PREVIEW_END>>>",
+                "# Ready to Share:",
+                "# ✅ Test Mode: PR Preview",
+                "Contribution sent! Thank you!",
+            )
+            return any(m in content for m in markers)
         for msg in messages:
             if isinstance(msg, dict) and "role" in msg and "content" in msg:
+                # Skip any preview/results messages injected by this action
+                if _is_injected_preview(msg.get("content")):
+                    continue
                 cm = {"role": msg["role"], "content": msg["content"]}
                 if "id" in msg:
                     cm["id"] = msg["id"]
@@ -1087,7 +1119,9 @@ class Action:
                         }
                 )
 
-                json_str = json.dumps(contribution, indent=2, ensure_ascii=False)
+                # Show exactly what will be sent (sanitized for export)
+                export_contribution = self._sanitize_contribution_for_export(contribution)
+                json_str = json.dumps(export_contribution, indent=2, ensure_ascii=False)
 
                 # Mock-vs-Real: implicit based on creds presence (manual_hf forces mock/manual)
                 have_hf_creds = bool(
@@ -1225,7 +1259,6 @@ class Action:
                         "license": user_valves.license,
                         "ai_preference": user_valves.ai_preference,
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
-                        "source_chat_id": (body or {}).get("chat_id"),
                     }
                 )
                 try:
@@ -1324,7 +1357,9 @@ class Action:
                         return
 
                     pr_result = self._create_pull_request(
-                        contribution, hf_token, self.valves.dataset_repo
+                        self._sanitize_contribution_for_export(contribution),
+                        hf_token,
+                        self.valves.dataset_repo,
                     )
                     if pr_result["success"]:
                         if pr_result.get("pr_number"):
