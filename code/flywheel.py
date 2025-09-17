@@ -25,21 +25,22 @@ from pydantic import BaseModel, Field
 # ======================================================================
 
 SETUP_TEMPLATE = """
-# Share Chat Publicly
+# Sharing chats to help public AI
 
-Enable sharing and pick how your name appears.
+You can send specific chats to a public repository and/or you can
+toggle Researcher Access on so the research team can use your chats directly for research purposes beyond aggregate analysis (researcher access does not make any chats public).
 
-- anonymous: least linkability
-- pseudonym: deterministic handle from your account id; useful if you want to keep track of your contributions or claim credit later
-- manual_hf: only select this if you're already a GitHub or HuggingFace user: you can manually open your own PR!
+By default, your chats are not used directly by directly and are only ever analyzed in an aggregate, anonymous fashion (for instance, to measure the volume of total messages or the prevalence of a high-level topic like "coding").
+You can always delete chats at any time or use temporary mode.
 
-Quick setup
-1) Controls → Valves → Functions → Share to Flywheel
-2) Toggle Opt In ON (Green)
-3) Choose attribution and license
-4) Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`)
-5) Click Share again
+How to setup sharing:
+1) Controls (top right) → Valves → Functions → Share to Flywheel
+2) Toggle "Public Sharing Available" ON (Green)
+3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own HuggingFace account)
+4) Choose a license.
+5) Experimental: Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`). This will be updated to support additional preference signals and licenses.
 6) Optional: you can also toggle Researcher Access on.
+7) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
@@ -47,7 +48,7 @@ Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
 # Visible warning block (ALWAYS VISIBLE)
 PUBLIC_DATA_WARNING = (
-    "**⚠️ You are about to share public dataset data.**"
+    "**⚠️ You are about to share a chat publicly.**"
 )
 
 # Summarized header shown above details
@@ -296,8 +297,8 @@ class Action:
         )
 
     class UserValves(BaseModel):
-        opt_in_enabled: bool = Field(
-            default=False, description="Enable sharing workflow"
+        public_sharing_available: bool = Field(
+            default=False, description="Enable public sharing workflow"
         )
 
         # Attribution: simplified
@@ -354,7 +355,7 @@ class Action:
             description=(
                 "Researcher Access: allow research team to analyze your non-temporary, non-deleted chats "
                 "for evaluation and R&D without making them public. Independent of public sharing; "
-                "you can disable anytime. Partners are instructed to honor your AI preferences."
+                "you can disable anytime. This is the end of the sharing settings. Below Chat Controls are additional advance options!"
             ),
         )
 
@@ -919,7 +920,7 @@ class Action:
             return
 
         # Entry / setup screen
-        if not user_valves or not user_valves.opt_in_enabled:
+        if not user_valves or not user_valves.public_sharing_available:
             await __event_emitter__(
                 {
                     "type": "message",
