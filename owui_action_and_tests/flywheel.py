@@ -87,7 +87,6 @@ Privacy Scan (counts)
 ~~~json
 {privacy_json}
 ~~~
-</details>
 """
 
 NER_PLACEHOLDER_BLOCK = """
@@ -854,31 +853,51 @@ class Action:
 
     # Message cleaning (preserve model/tool_calls and id if present)
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        clean = []
-        def _is_injected_preview(content: str) -> bool:
+        """Return a simplified message list, trimming any appended preview/setup
+        template text from only the last message. This avoids cutting off
+        legitimate prior content while excluding consent/preview blobs.
+
+        NOTE: We keep basic fields and do not handle advanced features (e.g.,
+        tool call reconstruction) yet. See README for follow-ups.
+        """
+        clean: List[Dict[str, Any]] = []
+
+        def _trim_last_message_content(content: str) -> str:
             if not isinstance(content, str):
-                return False
+                return content
             markers = (
-                "<<<SHARE_PREVIEW_START>>>",
-                "<<<SHARE_PREVIEW_END>>>",
+                "# Share Chat Publicly (Hugging Face)",
                 "# Ready to Share:",
-                "# ✅ Test Mode: PR Preview",
-                "Contribution sent! Thank you!",
             )
-            return any(m in content for m in markers)
-        for msg in messages:
-            if isinstance(msg, dict) and "role" in msg and "content" in msg:
-                # Skip any preview/results messages injected by this action
-                if _is_injected_preview(msg.get("content")):
+            # Find the first occurrence of any marker and slice content before it
+            cut = None
+            for m in markers:
+                idx = content.find(m)
+                if idx != -1:
+                    cut = idx if cut is None else min(cut, idx)
+            if cut is not None:
+                return content[:cut].rstrip()
+            return content
+
+        last_idx = len(messages) - 1
+        for i, msg in enumerate(messages):
+            if not (isinstance(msg, dict) and "role" in msg and "content" in msg):
+                continue
+            content = msg.get("content")
+            if i == last_idx and isinstance(content, str):
+                content = _trim_last_message_content(content)
+                if not content:
+                    # If nothing remains after trimming, drop the last message entirely
                     continue
-                cm = {"role": msg["role"], "content": msg["content"]}
-                if "id" in msg:
-                    cm["id"] = msg["id"]
-                if "model" in msg:
-                    cm["model"] = msg["model"]
-                if "tool_calls" in msg:
-                    cm["tool_calls"] = msg["tool_calls"]
-                clean.append(cm)
+            cm = {"role": msg["role"], "content": content}
+            # Preserve a few common fields for continuity (advanced handling later)
+            if "id" in msg:
+                cm["id"] = msg["id"]
+            if "model" in msg:
+                cm["model"] = msg["model"]
+            if "tool_calls" in msg:
+                cm["tool_calls"] = msg["tool_calls"]
+            clean.append(cm)
         return clean
 
     def _detect_workflow_stage(
