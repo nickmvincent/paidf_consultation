@@ -36,8 +36,8 @@ Now you start a new chat!
 
 - Your chat history keeps track of all the Input/Output pairings, organized by "Chats"
   - By default, nobody outside of the Utility Interface can see your chats. We only access them internally as needed to operate the service and investigate security or legal issues.
-  - We may share high‑level, aggregate statistics about usage (for example, total volume or broad topic distributions) without exposing individual chat content.
-  - You can opt in to two separate programs: (1) Researcher Access, which allows vetted research partners to analyze your chats for public‑interest evaluation and R&D without making them public; and/or (2) the public Data Flywheel, which lets you contribute specific chats to a public repository under a license you choose. These are independent choices—you can enable either, both, or neither.
+  - We may compute high‑level, aggregate statistics about usage (for example, total volume or broad topic distributions) without exposing individual chat content.
+  - You can opt in to the public Data Flywheel: choose specific chats to contribute to a public Hugging Face dataset under a license you select. This is a per‑chat, public opt‑in. Private research access is not part of the initial launch.
 
 - You can delete Chats at any time
 

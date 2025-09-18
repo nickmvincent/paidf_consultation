@@ -54,11 +54,11 @@ This summarizes the primary user flows for the Flywheel action (`flywheel.py`). 
 
 - Consent off: Opt‑in disabled
   - Open action → shows a short setup screen explaining how to enable sharing, pick attribution, license, and AI Preference, with links to Data FAQ and Privacy Policy.
-  - No preview or PR is created until `opt_in_enabled = True`.
+  - No preview or PR is created until `public_sharing_available = True`.
 
 - Consent on: First click (preview)
   - Runs privacy scan; enforces min/max message counts.
-  - Builds a preview that includes: assessment (good/bad/mixed from feedback counts), message count, attribution display, AI Preference, tags, feedback samples, and a public sharing warning (Researcher Access note shown only if ON).
+  - Builds a preview that includes: assessment (good/bad/mixed from feedback counts), message count, attribution display, AI Preference, tags, feedback samples, and a public sharing warning.
   - Normalizes tags from all sources (DB `chatidtag`, `chat.meta.tags`, and `chat.chat.tags`).
   - Creates a Share Preview JSON block with the exact contribution payload (including `response_labels`, which map specific assistant messages to good/bad using feedback `meta.message_id` or `meta.message_index`).
 
@@ -74,12 +74,9 @@ This summarizes the primary user flows for the Flywheel action (`flywheel.py`). 
   - Pseudonym: deterministic handle derived from `__user__.id` (stable, unsalted).
   - Manual HF: contribution is simulated (test mode); power users can later create PRs manually.
 
-- Researcher Access toggle
-  - OFF: public warning is concise (“You are about to share public dataset data.”).
-  - ON: appends a note indicating research team may privately analyze non‑temporary, non‑deleted chats for evaluation/R&D.
+Note: Private “Researcher Access” is not available in the initial launch; only per‑chat public opt‑in to Hugging Face is supported.
 
 - Edge cases and guards
   - Too short/long: preview will not build until message count is within `[min_messages, max_messages]`.
   - Dedup: attempting to share the same chat within ~5 minutes after a successful PR shows a warning with a link to the prior PR.
   - Errors: invalid preview JSON or PR creation errors are surfaced as notifications.
-

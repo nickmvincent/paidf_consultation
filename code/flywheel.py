@@ -25,24 +25,21 @@ from pydantic import BaseModel, Field
 # ======================================================================
 
 SETUP_TEMPLATE = """
-# Sharing chats to help public AI
+# Share Chat Publicly (Hugging Face)
 
-You can send specific chats to a public repository to share your good, bad, or interesting chats and help build better public AI. These chats can be used by anyone, subject to certain "AI preference signals" and "licenses" you attach to the chats.
+You can send specific chats to a public repository to share your good, bad, or interesting chats and help build better public AI. These chats can be used by anyone, subject to the "AI preference signals" and "licenses" you attach to the chats.
 
-You can also opt in to "Researcher Access" so the Public aI research team can privately use your chats for research and development (R&D) purposes like training and evaluation.
+By default, your chats are not used directly for R&D. We may compute de‑identified aggregate stats (for example, total message volume) to operate the service.
 
-By default, your chats are not used directly for R&D. They are only ever analyzed in an aggregate, anonymous fashion (for instance, to measure the volume of total messages or the prevalence of high-level topics like "coding").
+You can always delete chats at any time or use temporary mode to ensure chats are not stored or used for any purpose.
 
-You can always delete chats at any time or use temporary mode to ensure chats are not stored or used for any purpose whatsoever.
-
-How to setup sharing:
+How to setup public sharing:
 1) Controls (top right) → Valves → Functions → Sharing
 2) Toggle "Public Sharing Available" ON (Green)
-3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own HuggingFace account)
+3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
 4) Choose a license.
-5) Experimental: Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`). This will be updated to support additional preference signals and licenses.
-6) Optional: you can also toggle Researcher Access on.
-7) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
+5) Optional: Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`).
+6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
@@ -175,7 +172,6 @@ PR_DESCRIPTION_TEMPLATE = """## Contribution Details
 
 **Attribution Mode**: {attribution_mode}
 **Verification**: {verification_json}
-**Researcher Access (opt-in)**: {researcher_opt_in}
 **Tags**: {tags_preview}
 
 Submitted via the Flywheel OpenWebUI plugin.
@@ -205,7 +201,6 @@ class Contribution(TypedDict, total=True):
     attribution: str
     attribution_mode: Literal["anonymous", "pseudonym", "manual_hf"]
     verification: Dict[str, Any]
-    researcher_opt_in: bool
     ai_preference_note: str
     ai_preference_time: str
     contributed_at: str
@@ -351,14 +346,7 @@ class Action:
                 "Example: ‘train-genai=n;exceptions=cc-cr’ denies training unless Credit is provided."
             ),
         )
-        researcher_opt_in: bool = Field(
-            default=False,
-            description=(
-                "Researcher Access: allow research team to analyze your non-temporary, non-deleted chats "
-                "for evaluation and R&D without making them public. Independent of public sharing; "
-                "you can disable anytime. This is the end of the sharing settings. The Chat Controls below are additional advance options!"
-            ),
-        )
+        # Note: Private researcher access is not available in the initial launch.
 
     def __init__(self):
         self.valves = self.Valves()
@@ -376,13 +364,7 @@ class Action:
             print("[Flywheel:DEBUG]", *args)
 
     def _public_data_warning(self, user_valves: "Action.UserValves") -> str:
-        base = PUBLIC_DATA_WARNING
-        if getattr(user_valves, "researcher_opt_in", False):
-            return (
-                base
-                + " Researcher Access is ON: research team may privately analyze your non-temporary, non-deleted chats."
-            )
-        return base + " You are about to share a single chat publicly. To share all chats privately with research team, you can toggle Research Access on in Controls."
+        return PUBLIC_DATA_WARNING
 
     # ------------------------------------------------------------------
     # Dedup guard
@@ -445,7 +427,6 @@ class Action:
         """
         out = dict(contribution)
         # Remove fields we do not want to publish
-        out.pop("researcher_opt_in", None)
         out.pop("source_chat_id", None)
         # Add note about content_hash for transparency
         if out.get("content_hash") and not out.get("content_hash_note"):
@@ -770,7 +751,6 @@ class Action:
                 verification_json=json.dumps(
                     contribution.get("verification", {}), ensure_ascii=False
                 ),
-                researcher_opt_in=contribution.get("researcher_opt_in", False),
                 tags_preview=", ".join(
                     "`{}`".format(t) for t in contribution["all_tags"][:10]
                 ),
@@ -1106,9 +1086,6 @@ class Action:
                         "attribution": attribution,
                         "attribution_mode": user_valves.attribution_mode,
                         "verification": verification,
-                        "researcher_opt_in": bool(
-                            getattr(user_valves, "researcher_opt_in", False)
-                        ),
                         "ai_preference_note": "Signal only; does not override explicit publication.",
                         "ai_preference_time": datetime.now(timezone.utc).isoformat(),
                         "contributed_at": datetime.now(timezone.utc).isoformat(),

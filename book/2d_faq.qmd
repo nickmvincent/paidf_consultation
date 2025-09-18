@@ -2,14 +2,13 @@
 
 This FAQ explains what the data flywheel is, why you might contribute, and how your choices affect privacy, attribution, and downstream use. It is written for people using the OpenWebUI chat at https://chat.publicai.co/.
 
-## TL;DR: Four Data Tiers (Today)
+## TL;DR: Data Options (Initial Launch)
 
-- Tier 1 — Private/Temporary: Use temporary chats or delete chats yourself. Nothing is shared outside the app; stored minimally; you control deletion.
-- Tier 2 — Aggregate‑Only (default): Chats stay private, but we compute de‑identified aggregate stats (e.g., usage counts, broad trends). Nothing is shared outside the app.
-- Tier 3 — Researcher Access (opt‑in): Research team can privately analyze your non‑temporary, non‑deleted chats for evaluation/R&D. No public release; account IDs not shared; partners must honor AI‑use preferences.
-- Tier 4 — Public Contributions (opt‑in per chat): You select specific chats to publish to a public dataset (via PR), choose a license, and attach AI‑use preferences; attribution can be username, pseudonym, or “anonymous.”
+- Private/Temporary: Use temporary chats or delete chats yourself. Nothing is shared outside the app; stored minimally; you control deletion.
+- Aggregate‑Only (default): Chats stay private, but we compute de‑identified aggregate stats (e.g., usage counts, broad trends). Nothing is shared outside the app.
+- Public Contributions (opt‑in per chat): You select specific chats to publish to a public dataset (via PR), choose a license, and attach AI‑use preferences; attribution can be username, pseudonym, or “anonymous.”
 
-You can mix and match: keep default behavior, enable Researcher Access, and still publish only some chats publicly. Note: we are exploring a future fifth tier for responsible, consented asset access using privacy‑preserving tools (see note below).
+Note: Private “Researcher Access” is not part of the initial launch. We are focusing on a single, clear feature: public opt‑in sharing to Hugging Face.
 
 ## What is the “data flywheel” and why does it exist?
 
@@ -23,29 +22,20 @@ If you want a high degree of privacy, you can use "temporary chats" or you can d
 
 ## I'm OK with sharing a little if it helps out with public AI. What are my options?
 
-There are three ways to share data, based on your interests and comfort level.
+There are two ways to contribute beyond private use:
 
-If you use the inference utility without temporary mode or deleting chats, you contribute aggregate data. For instance, the fact you even used the interface at all is useful so we can tell public bodies that there is real interest in using public AI models.
+- Use the inference utility in default mode (non‑temporary): your activity contributes only to aggregate statistics that help operate and improve the service.
+- Opt in per chat to contribute to a public repository. Most of this document covers this option. These chats will be public, but you can select a license and also set AI‑use preferences.
 
-If you are OK with researchers using your data directly for research and development, you can enable Researcher Access. This means your data may be shared with vetted research partners for direct evaluation, topic modeling, and related R&D tasks. Your account info will NOT be shared and the chats will not be made public (unless you choose to, see next section).
-
-Finally, you can choose to contribute specific chats to a public repository. Most of this document covers this option. These chats will be public, but you can select a license and also set AI use preferences (you can ask that only organizations who attribute training data use your data, for instance).
-
-So to summarize, there are four options:
-- Make use of temporary chats and deletion to maximize privacy
-- Use the app in "default mode". Your data will never be shared outside the app or made public, but will contribute to aggregate analyses.
-- Turn on research sharing so public AI researchers can use data directly for R&D.
-- Pick notable chats to contribute to public repository, with restrictions that you select. 
-
-Note on future options: we are exploring a fifth option that would provide responsible, consented access to certain assets using privacy‑preserving tools (for example, OpenMined’s DataSite). If introduced, this would allow controlled access by vetted parties under explicit consent and safeguards. We will update this FAQ and in‑product consent flows before enabling any such option.
+Note on future options: we are exploring a possible program for responsible, consented asset access using privacy‑preserving tools. If introduced, it would have a dedicated consent flow and clear safeguards. It is not part of the initial launch.
 
 ## What happens when I share a chat?
 
 When you click the share action, the app shows a confirmation screen with exactly what will be shared and which settings apply. If you confirm, the system creates a single JSON record containing the conversation, light metadata about the model and usage, and your chosen license and AI preference signals. That record is submitted as a pull request to a HuggingFace dataset repository where it can be reviewed. If accepted, it becomes part of a public dataset with the same license and preference signals you selected.
 
-## What is the difference between publishing a chat publicly and opting in to Researcher Access?
+## What is the difference between public sharing and everything else?
 
-Publishing a chat publicly means the content and its license are visible to everyone. Others can read it, discuss it, and use it under the terms you chose. Opting in to Researcher Access grants vetted research partners permission to analyze your chats for evaluation and model development without making them public. When Researcher Access is enabled, researchers may analyze chats in your account that are not marked as temporary and have not been deleted at the time of access. The difference is who can see the content and when. If you only want public publication and do not want non‑public research access, keep Researcher Access disabled.
+Public sharing publishes specific chats to a Hugging Face dataset under the license and AI‑use preferences you select. Everything else remains private to your account (aside from de‑identified aggregate metrics that help operate the service).
 
 ## What privacy protections are in place?
 
@@ -55,15 +45,15 @@ No automated system can guarantee perfect redaction. If you are unsure, please e
 
 ## What data about me is stored?
 
-For public contributions, the dataset includes the chat content, timestamps, model information, your selected license and AI preference signals, and the attribution string you chose. Internally, we store a random contribution id and, if you choose “pseudonym,” we derive a stable pseudonym from your OpenWebUI account id. We do not publish your account information. If you opt in to Researcher Access, research team may analyze your chats (excluding temporary or deleted chats) for evaluation and QA without making them public.
+For public contributions, the dataset includes the chat content, timestamps, model information, your selected license and AI preference signals, and the attribution string you chose. Internally, we store a random contribution id and, if you choose “pseudonym,” we derive a stable pseudonym from your OpenWebUI account id. We do not publish your account information.
 
 ## Who can see my data and where is it stored?
 
-Public contributions live as pull requests and merged records in a HuggingFace dataset repository. Anyone can view merged public content and its history. Items under review are visible to reviewers and, where practical, to the public in PR form. Content that triggers a privacy concern (or any other concerns) may be quarantined for private review. If you enable Researcher Access, research team may analyze your chats privately for evaluation and model development.
+Public contributions live as pull requests and merged records in a Hugging Face dataset repository. Anyone can view merged public content and its history. Items under review are visible to reviewers and, where practical, to the public in PR form. Content that triggers a privacy concern (or any other concerns) may be quarantined for private review.
 
 ## Will my chat be used to train models?
 
-That depends on the AI preference signals and license you choose. Preference signals such as `train-genai=n` express that you do not want a contribution used for training. Responsible users of the dataset should honor these signals and the license terms. Preference signals are not a technical barrier; they function as a clear, machine-readable policy that downstream tools and institutions can enforce. We use them to keep evaluation‑only subsets separate from training sets. If you enable Researcher Access, partners must honor these preferences for any analyses they perform.
+That depends on the AI preference signals and license you choose. Preference signals such as `train-genai=n` express that you do not want a contribution used for training. Responsible users of the dataset should honor these signals and the license terms. Preference signals are not a technical barrier; they function as a clear, machine‑readable policy that downstream tools and institutions can enforce. We use them to keep evaluation‑only subsets separate from training sets.
 
 Preset options (Content-Usage expressions with CC signals as exceptions):
 - Training family:

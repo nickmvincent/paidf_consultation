@@ -173,7 +173,6 @@ class FlywheelHelperTests(unittest.TestCase):
             "attribution": "a",
             "attribution_mode": "anonymous",
             "verification": {},
-            "researcher_opt_in": False,
             "ai_preference_note": "n",
             "ai_preference_time": "t",
             "contributed_at": "t",
@@ -232,14 +231,16 @@ class FlywheelActionFlowTests(unittest.TestCase):
 
         self.action = Action()
         self.action.db_path = self.db_path
-        self.action.user_valves.opt_in_enabled = True
+        # Enable public sharing for tests
+        self.action.user_valves.public_sharing_available = True
         self.user = {"valves": self.action.user_valves, "id": "user-123"}
 
     def tearDown(self):
         self.tmpdir.cleanup()
 
     def test_entry_requires_opt_in(self):
-        self.action.user_valves.opt_in_enabled = False
+        # Disable public sharing to trigger setup screen
+        self.action.user_valves.public_sharing_available = False
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
         self.assertIn("message", event_types(events))
