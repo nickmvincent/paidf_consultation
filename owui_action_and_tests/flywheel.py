@@ -46,7 +46,7 @@ How to setup public sharing:
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
 4) Choose a license.
-5) Optional: Choose AI Preference (e.g., `train-genai=n;exceptions=cc-cr`).
+5) Optional: Set AI Preference (manual). You can write a plain‑language preference or a Content‑Usage expression. See CC Signals (https://creativecommons.org/ai/cc-signals/) and RSL (https://rslstandard.org/). Default: "Require attribution to the best of your ability (BOTH: CC Signals + RSL)".
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -405,33 +405,16 @@ class Action:
                 "CC-BY-SA-4.0 = attribution + share-alike."
             ),
         )
-        # Presets following CC signals as exceptions (IETF Content-Usage)
-        # Training family:
-        # - "train-genai=n" (deny training)
-        # - "train-genai=n;exceptions=cc-cr" (deny unless Credit)
-        # - "train-genai=n;exceptions=cc-cr-dc" (deny unless Credit+Direct Contribution)
-        # - "train-genai=n;exceptions=cc-cr-ec" (deny unless Credit+Ecosystem)
-        # - "train-genai=n;exceptions=cc-cr-op" (deny unless Credit+Open)
-        # General AI-use family:
-        # - "ai-use=n" (deny AI use)
-        # - "ai-use=n;exceptions=cc-cr|cc-cr-dc|cc-cr-ec|cc-cr-op"
-        ai_preference: Literal[
-            "train-genai=n",
-            "train-genai=n;exceptions=cc-cr",
-            "train-genai=n;exceptions=cc-cr-dc",
-            "train-genai=n;exceptions=cc-cr-ec",
-            "train-genai=n;exceptions=cc-cr-op",
-            "ai-use=n",
-            "ai-use=n;exceptions=cc-cr",
-            "ai-use=n;exceptions=cc-cr-dc",
-            "ai-use=n;exceptions=cc-cr-ec",
-            "ai-use=n;exceptions=cc-cr-op",
-        ] = Field(
-            default="train-genai=n;exceptions=cc-cr",
+        # Preference signals (manual entry). Accept free‑text or Content‑Usage expressions.
+        # Include references to CC Signals and RSL so users can author their own signals.
+        ai_preference: str = Field(
+            default=(
+                "Require attribution to the best of your ability (BOTH: CC Signals + RSL)"
+            ),
             description=(
-                "AI Preference (Content-Usage expression): choose a training-focused option (train-genai=…) "
-                "or a general AI-use option (ai-use=…). ‘exceptions=cc-cr*’ encodes CC Signals reciprocity. "
-                "Example: ‘train-genai=n;exceptions=cc-cr’ denies training unless Credit is provided."
+                "AI Preference (manual): enter a Content‑Usage expression or plain language. "
+                "See CC Signals: https://creativecommons.org/ai/cc-signals/ and RSL Standard: https://rslstandard.org/. "
+                "Sensible default requests attribution on a best‑effort basis under BOTH schemes."
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
