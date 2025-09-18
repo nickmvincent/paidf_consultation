@@ -24,6 +24,14 @@ from pydantic import BaseModel, Field
 # TEMPLATES (edit here)
 # ======================================================================
 
+# Markers used to trim injected preview/setup text from the last message only.
+# Keep these short and specific to top-level headings so we don't match
+# normal conversation text.
+TRIM_MARKERS: Tuple[str, str] = (
+    "# Share Chat Publicly (Hugging Face)",
+    "# Ready to Share:",
+)
+
 SETUP_TEMPLATE = """
 # Share Chat Publicly (Hugging Face)
 
@@ -446,14 +454,17 @@ class Action:
     def _public_data_warning(self, user_valves: "Action.UserValves") -> str:
         return PUBLIC_DATA_WARNING
 
-    # ------------------------------------------------------------------
-    # Dedup guard
-    # ------------------------------------------------------------------
+# ------------------------------------------------------------------
+# Dedup guard
+# ------------------------------------------------------------------
+    # Minimum gap to consider two submissions duplicates (in minutes)
+    DUP_WINDOW_MINUTES = 5
+
     def _check_duplicate_submission(self, chat_id: str) -> Tuple[bool, str]:
         if chat_id in self.recent_submissions:
             last_submit_time, pr_number = self.recent_submissions[chat_id]
             time_diff = datetime.now(timezone.utc) - last_submit_time
-            if time_diff < timedelta(minutes=5):
+            if time_diff < timedelta(minutes=self.DUP_WINDOW_MINUTES):
                 seconds_ago = int(time_diff.total_seconds())
                 pr_url = f"https://huggingface.co/datasets/{self.valves.dataset_repo}/discussions/{pr_number}"
                 return (
@@ -853,25 +864,28 @@ class Action:
 
     # Message cleaning (preserve model/tool_calls and id if present)
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Return a simplified message list, trimming any appended preview/setup
-        template text from only the last message. This avoids cutting off
-        legitimate prior content while excluding consent/preview blobs.
+        """Return a simplified message list.
 
-        NOTE: We keep basic fields and do not handle advanced features (e.g.,
-        tool call reconstruction) yet. See README for follow-ups.
+        Behavior:
+        - Only the last message is scanned for known template headings (TRIM_MARKERS).
+        - If found, keep content strictly before the first heading; drop the rest.
+        - If nothing remains after trimming, drop the last message entirely.
+
+        Transparency: We intentionally avoid complicated heuristics here to make
+        behavior easy to reason about. This reduces accidental removal of normal
+        chat content and keeps the flow predictable.
+
+        Note: We preserve common fields (`id`, `model`, `tool_calls`) but do not
+        reconstruct tool call flows yet. See README for planned improvements.
         """
         clean: List[Dict[str, Any]] = []
 
         def _trim_last_message_content(content: str) -> str:
             if not isinstance(content, str):
                 return content
-            markers = (
-                "# Share Chat Publicly (Hugging Face)",
-                "# Ready to Share:",
-            )
             # Find the first occurrence of any marker and slice content before it
             cut = None
-            for m in markers:
+            for m in TRIM_MARKERS:
                 idx = content.find(m)
                 if idx != -1:
                     cut = idx if cut is None else min(cut, idx)
@@ -903,10 +917,16 @@ class Action:
     def _detect_workflow_stage(
         self, messages: List[Dict[str, Any]]
     ) -> Tuple[str, Optional[str]]:
-        depth = 25
+        """Detect whether we are on the first run (build preview) or
+        confirmation step (submit).
+
+        Looks back up to WORKFLOW_SCAN_DEPTH messages for the JSON preview
+        sentinels we render in the first run preview.
+        """
+        WORKFLOW_SCAN_DEPTH = 25
         if not messages:
             return "first_run", None
-        for msg in reversed(messages[-depth:]):
+        for msg in reversed(messages[-WORKFLOW_SCAN_DEPTH:]):
             content = msg.get("content", "") or ""
             if (
                 "<<<SHARE_PREVIEW_START>>>" in content
@@ -919,6 +939,10 @@ class Action:
         return "first_run", None
 
     def _extract_json_from_preview(self, content: str) -> Optional[Dict[str, Any]]:
+        """Extract the JSON payload between the preview sentinels.
+
+        Returns None if not found or if parsing fails.
+        """
         m = re.search(
             r"<<<SHARE_PREVIEW_START>>>\s*(.*?)\s*<<<SHARE_PREVIEW_END>>>",
             content,
