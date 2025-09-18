@@ -52,8 +52,8 @@ PUBLIC_DATA_WARNING = (
 
 # Summarized header shown above details
 PREVIEW_HEADER = (
-    "**Assessment**: **{reason}** (`{sharing_tag}`). **Messages**: {num_messages}."
-    "**AI Preference**: {ai_preference} • **Contributor**: {attribution}"
+    "**Assessment**: **{reason}** (`{sharing_tag}`); **Messages in your chat**: {num_messages}; "
+    "**AI Preference Selected**: {ai_preference};  **How you show up**: {attribution}"
 )
 
 # Everything else placed in details
