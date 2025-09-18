@@ -83,9 +83,7 @@ SHARE_JSON_BLOCK = """
 """
 
 PRIVACY_BLOCK = """
-<details>
-<summary>Privacy Scan (counts)</summary>
-
+Privacy Scan (counts)
 ~~~json
 {privacy_json}
 ~~~
@@ -109,12 +107,14 @@ PREVIEW_TEMPLATE = """
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
+Privacy: {privacy_status}{privacy_note}
+
+
 <details>
 <summary>Details</summary>
 
 {preview_header}
 
-Privacy: {privacy_status}{privacy_note}
 
 {privacy_block}
 
@@ -181,6 +181,87 @@ TIP_LINE = (
     "**Tip:** Update **tags** and **feedback** in the UI to add more detail to your contribution. "
     "We’ll auto‑grab the latest tags/feedback right before sending.\n"
 )
+
+
+# privacy_patterns.py
+PRIVACY_PATTERNS = {
+    # Phone numbers - more precise matching
+    # International: enforce overall length 8–14 digits (excluding '+'), tolerate separators
+    "phone_intl": (
+        r"(?<!\d)\+(?:"
+        r"(?:[1-9])(?:[-.\s]?\d){7,13}"  # 1-digit country code
+        r"|(?:[1-9]\d)(?:[-.\s]?\d){6,12}"  # 2-digit country code
+        r"|(?:[1-9]\d{2})(?:[-.\s]?\d){5,11}"  # 3-digit country code
+        r")(?!\d)"
+    ),
+    "phone_us": r"(?<!\d)(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)",
+    # US digits only (no separators). Accept any NXX (0–9) but enforce [2-9] for area code.
+    "phone_us_no_sep": r"(?<!\d)(?:\+?1)?(?:[2-9]\d{2}\d{7})(?!\d)",
+    
+    # Email - robust local and domain rules; disallow leading/trailing dot and consecutive dots in local part
+    # Also ensure we don't match when preceded/followed by local-part chars (avoid '.startswithdot@...')
+    "email": (
+        r"(?<![A-Za-z0-9._%+-])"  # hard boundary before
+        r"[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?"  # local atom without leading/trailing dot
+        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?)*"  # dot-separated atoms; no consecutive dots
+        r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"  # domain labels; no leading/trailing hyphen
+        r"(?![A-Za-z0-9._%+-])"  # hard boundary after
+    ),
+    
+    # SSN - with format variations and invalid range exclusion
+    "ssn": r"(?<!\d)(?!000|666|9\d{2})\d{3}[-\s]?(?!00)\d{2}[-\s]?(?!0000)\d{4}(?!\d)",
+    
+    # IP Address - IPv4 with better boundary detection; prevent matching inside longer dotted sequences
+    "ip_address": r"(?<!\d)(?<!\.)(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?!\.\d)(?!\d)",
+    
+    # IPv6 Address - supports full and compressed forms (excludes IPv4-mapped)
+    "ipv6_address": (
+        r"(?<![A-Za-z0-9:])("  # hard boundary before (not hex/colon)
+        r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,7}:"
+        r"|:(?::[A-Fa-f0-9]{1,4}){1,7}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}"
+        r"|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}"
+        r"|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}"
+        r")(?!(?:[A-Za-z0-9:.]))"  # hard boundary after; don't allow '.' to avoid IPv4-mapped
+    ),
+    
+    # AWS Keys - force case-sensitive even with IGNORECASE in tests; accept 20 or 21 total length for 'ASIA' variants
+    "aws_access_key": r"\b(?-i:(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16,17})\b",
+    "aws_secret_key": r"\b[A-Za-z0-9/+=]{40}\b",
+    
+    # Private Keys - multiple formats
+    "private_key": r"-----BEGIN\s+(?:RSA\s+)?(?:PRIVATE|ENCRYPTED)\s+KEY-----",
+    
+    # API Keys - common patterns with better specificity
+    "api_key_stripe": r"\b(?:sk|pk)_(?:test_|live_)?[A-Za-z0-9]{24,}\b",
+    "api_key_generic": r"\b(?:api[-_]?key|apikey|access[-_]?token)[-_:\s]*[A-Za-z0-9+/]{32,}\b",
+    
+    # Street Address - expanded street types
+    "street_address": r"\b\d{1,5}\s+(?:[NSEW]\.?\s+)?[A-Za-z0-9\s\-\.]{2,30}\s+(?:St(?:reet)?|Ave(?:nue)?|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr(?:ive)?|Ct|Court|Cir(?:cle)?|Pl(?:aza)?|Way|Pkwy|Parkway|Pike|Ter(?:race)?|Trail|Path|Loop|Run|Pass|Cross(?:ing)?|Sq(?:uare)?)\b",
+    
+    # Credit Card - with Luhn validation support (checked in code/tests)
+    "credit_card": r"\b(?:\d[-\s]?){13,19}\b",
+    
+    # Bank Account/Routing Numbers
+    "routing_number": r"\b(?:ABA|Routing)[-:\s]*\d{9}\b",
+    # IBAN: restrict to known IBAN country codes to avoid false positives (e.g., US)
+    "iban": (
+        r"\b(?:AL|AD|AT|AZ|BH|BE|BA|BR|BG|CR|HR|CY|CZ|DK|DO|EE|FO|FI|FR|GE|DE|GI|GR|GL|GT|HU|IS|IE|IL|IT|JO|KZ|KW|LV|LB|LI|LT|LU|MT|MR|MU|MC|MD|ME|NL|NO|PK|PS|PL|PT|QA|RO|SM|SA|RS|SK|SI|ES|SE|CH|TN|TR|AE|GB|VG|XK)\d{2}[A-Z0-9]{4,30}\b"
+    ),
+    
+    # Government IDs - more specific patterns
+    "us_passport": r"\b(?:[0-9]{9}|[A-Z][0-9]{8})\b",
+    "ein": r"\b\d{2}-\d{7}\b",
+    "medicare": r"\b[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{4}\b",
+    
+    # Crypto addresses
+    "bitcoin_address": r"\b(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b",
+    "ethereum_address": r"\b0x[a-fA-F0-9]{40}\b",
+}
 
 
 # ======================================================================
@@ -489,27 +570,13 @@ class Action:
         return total % 10 == 0
 
     def _check_privacy(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-        patterns = {
-            "phone_intl": r"(?<!\d)\+\d{1,3}[-.\s]?\d{1,4}(?:[-.\s]?\d{2,4}){2,}(?!\d)",
-            "phone_us": r"(?<!\d)(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}(?!\d)",
-            "email": r"\b[A-Za-z0-9][A-Za-z0-9._%+-]{0,63}@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
-            "ssn": r"(?<!\d)\d{3}-\d{2}-\d{4}(?!\d)",
-            "ip_address": r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b",
-            "aws_key": r"\b(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16}\b",
-            "private_key": r"-----BEGIN(?: [A-Z]+)? PRIVATE KEY-----",
-            "api_key": r"\b(?:sk|pk|api(?:[_-]?key)?)[_-]?[A-Za-z0-9]{16,}\b",
-            "street_address": r"\b\d{1,5}\s+[A-Za-z0-9.\-]+\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr|Drive|Ct|Court|Cir|Circle|Pl|Plaza)\b",
-            "passport": r"\b[A-Z]{1,2}\d{6,9}\b",
-            "drivers_license": r"\b[A-Z]{1,2}\d{5,8}\b",
-            "bank_account": r"\b(?:Account #?:?\s*)\d{8,17}\b",
-            "credit_card": r"(?:\b(?:\d[ -]?){13,19}\b)",
-        }
+    
         counts: Dict[str, int] = {}
         for msg in messages:
             text = msg.get("content") or ""
             if not text:
                 continue
-            for name, pat in patterns.items():
+            for name, pat in PRIVACY_PATTERNS.items():
                 matches = re.findall(pat, text, flags=re.IGNORECASE)
                 if not matches:
                     continue
@@ -1010,7 +1077,7 @@ class Action:
                 privacy_status = (
                     "✅ No obvious personal data detected"
                     if not privacy["has_issues"]
-                    else "⚠️ Potential personal data detected"
+                    else "⚠️ Potential personal data detected (expand 'Details')"
                 )
                 privacy_note = ""
                 if privacy["has_issues"]:
