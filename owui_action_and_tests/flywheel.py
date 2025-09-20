@@ -46,7 +46,7 @@ How to setup public sharing:
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
 4) Choose a license.
-5) Optional: Choose AI Preference (CC Signals) from the dropdown. Default is Ecosystem reciprocity (requires credit and invests back in shared tools). See CC Signals (https://creativecommons.org/ai/cc-signals/), RSL (https://rslstandard.org/), and our FAQ ({faq_url}). RSL integration is coming.
+5) Optional: Choose AI Preference (CC Signals). Default: Ecosystem reciprocity (…;cc-cr-ec). See our FAQ ({faq_url}) for all options and details. Learn more: CC Signals (https://creativecommons.org/ai/cc-signals/) • RSL (https://rslstandard.org/). RSL integration is coming.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -445,10 +445,9 @@ class Action:
         ] = Field(
             default="train-genai=n;exceptions=cc-cr-ec",
             description=(
-                "AI Preference (CC Signals): choose a training‑focused option (train-genai=…) or a general AI‑use option (ai-use=…).\n"
-                "Definitions — train-genai=n: deny training; +exceptions=cc-cr: allow with Credit (attribution); +cc-cr-dc: Credit + Direct Contribution reciprocity; +cc-cr-ec: Credit + Ecosystem reciprocity; +cc-cr-op: Credit + Open reciprocity.\n"
-                "Default is Ecosystem reciprocity (…;cc-cr-ec) because it encourages attribution and contributions that benefit the broader community and tooling ecosystem.\n"
-                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ • Our FAQ (see link in setup)."
+                "AI Preference (CC Signals). Default: Ecosystem reciprocity (…;cc-cr-ec) — encourages attribution and community contributions. "
+                "Choose training‑focused (train-genai=…) or general AI‑use (ai-use=…). See FAQ for full details. "
+                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/."
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
