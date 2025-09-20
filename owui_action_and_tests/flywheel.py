@@ -46,7 +46,7 @@ How to setup public sharing:
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
 4) Choose a license.
-5) Optional: Set AI Preference (manual). You can write a plain‑language preference or a Content‑Usage expression. See CC Signals (https://creativecommons.org/ai/cc-signals/) and RSL (https://rslstandard.org/). Default: "Require attribution to the best of your ability (BOTH: CC Signals + RSL)".
+5) Optional: Choose AI Preference (CC Signals) from the dropdown. Default is Ecosystem reciprocity (requires credit and invests back in shared tools). See CC Signals (https://creativecommons.org/ai/cc-signals/), RSL (https://rslstandard.org/), and our FAQ ({faq_url}). RSL integration is coming.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -271,6 +271,21 @@ PRIVACY_PATTERNS = {
 }
 
 
+# CC Preference Signal definitions used for human‑readable preview
+AI_PREFERENCE_DEFS: Dict[str, str] = {
+    "train-genai=n": "Deny training.",
+    "train-genai=n;exceptions=cc-cr": "Allow training with Credit (attribution).",
+    "train-genai=n;exceptions=cc-cr-dc": "Allow with Credit + Direct Contribution reciprocity.",
+    "train-genai=n;exceptions=cc-cr-ec": "Allow with Credit + Ecosystem reciprocity.",
+    "train-genai=n;exceptions=cc-cr-op": "Allow with Credit + Open reciprocity.",
+    "ai-use=n": "Deny AI use.",
+    "ai-use=n;exceptions=cc-cr": "Allow AI use with Credit (attribution).",
+    "ai-use=n;exceptions=cc-cr-dc": "Allow with Credit + Direct Contribution reciprocity.",
+    "ai-use=n;exceptions=cc-cr-ec": "Allow with Credit + Ecosystem reciprocity.",
+    "ai-use=n;exceptions=cc-cr-op": "Allow with Credit + Open reciprocity.",
+}
+
+
 # ======================================================================
 # Types
 # ======================================================================
@@ -405,16 +420,35 @@ class Action:
                 "CC-BY-SA-4.0 = attribution + share-alike."
             ),
         )
-        # Preference signals (manual entry). Accept free‑text or Content‑Usage expressions.
-        # Include references to CC Signals and RSL so users can author their own signals.
-        ai_preference: str = Field(
-            default=(
-                "Require attribution to the best of your ability (BOTH: CC Signals + RSL)"
-            ),
+        # CC Preference Signals (dropdown). Integration with RSL is coming; see links below.
+        # Training-focused options:
+        # - "train-genai=n": Deny training.
+        # - "train-genai=n;exceptions=cc-cr": Deny unless Credit (attribution) is provided.
+        # - "train-genai=n;exceptions=cc-cr-dc": Deny unless Credit + Direct Contribution reciprocity.
+        # - "train-genai=n;exceptions=cc-cr-ec": Deny unless Credit + Ecosystem reciprocity.
+        # - "train-genai=n;exceptions=cc-cr-op": Deny unless Credit + Open reciprocity.
+        # General AI-use options:
+        # - "ai-use=n": Deny AI use.
+        # - "ai-use=n;exceptions=cc-cr[ -dc | -ec | -op ]": Deny AI use unless the listed CC Signals reciprocity terms are met.
+        # Reference: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ (integration coming)
+        ai_preference: Literal[
+            "train-genai=n",
+            "train-genai=n;exceptions=cc-cr",
+            "train-genai=n;exceptions=cc-cr-dc",
+            "train-genai=n;exceptions=cc-cr-ec",
+            "train-genai=n;exceptions=cc-cr-op",
+            "ai-use=n",
+            "ai-use=n;exceptions=cc-cr",
+            "ai-use=n;exceptions=cc-cr-dc",
+            "ai-use=n;exceptions=cc-cr-ec",
+            "ai-use=n;exceptions=cc-cr-op",
+        ] = Field(
+            default="train-genai=n;exceptions=cc-cr-ec",
             description=(
-                "AI Preference (manual): enter a Content‑Usage expression or plain language. "
-                "See CC Signals: https://creativecommons.org/ai/cc-signals/ and RSL Standard: https://rslstandard.org/. "
-                "Sensible default requests attribution on a best‑effort basis under BOTH schemes."
+                "AI Preference (CC Signals): choose a training‑focused option (train-genai=…) or a general AI‑use option (ai-use=…).\n"
+                "Definitions — train-genai=n: deny training; +exceptions=cc-cr: allow with Credit (attribution); +cc-cr-dc: Credit + Direct Contribution reciprocity; +cc-cr-ec: Credit + Ecosystem reciprocity; +cc-cr-op: Credit + Open reciprocity.\n"
+                "Default is Ecosystem reciprocity (…;cc-cr-ec) because it encourages attribution and contributions that benefit the broader community and tooling ecosystem.\n"
+                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ • Our FAQ (see link in setup)."
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
@@ -593,6 +627,12 @@ class Action:
             "enabled": False,
             "note": "NER placeholder; community extension welcome.",
         }
+
+    def _ai_pref_definition(self, pref: str) -> str:
+        try:
+            return AI_PREFERENCE_DEFS.get(pref, "")
+        except Exception:
+            return ""
 
     # DB helpers (single-path queries)
     def _get_full_chat_data(self, chat_id: str) -> Dict[str, Any]:
@@ -1225,6 +1265,12 @@ class Action:
                     else ""
                 )
 
+                # Human-readable definition appended to selected preference
+                _pref_def = self._ai_pref_definition(user_valves.ai_preference)
+                _pref_display = (
+                    f"{user_valves.ai_preference} — {_pref_def}" if _pref_def else user_valves.ai_preference
+                )
+
                 preview_md = PREVIEW_TEMPLATE.format(
                     title=chat["title"],
                     public_data_warning=self._public_data_warning(user_valves),
@@ -1232,7 +1278,7 @@ class Action:
                         reason=reason,
                         sharing_tag=sharing_tag,
                         num_messages=len(clean_messages),
-                        ai_preference=user_valves.ai_preference,
+                        ai_preference=_pref_display,
                         attribution=attribution,
                     ),
                     privacy_status=privacy_status,
