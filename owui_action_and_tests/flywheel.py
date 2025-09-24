@@ -125,6 +125,7 @@ Privacy: {privacy_status}{privacy_note}
 
 
 {license_intent_block}
+{ai_thoughts_block}
 
 {privacy_block}
 
@@ -149,11 +150,11 @@ TEST_MODE_RESULT = """
 - ID: `{contrib_id}`
 - Assessment: {sharing_reason}
 - Messages: {num_messages}
-- License (fallback): {license}
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
-- AI Preference Signals (experimental): {ai_preference}
-- Contributor Display: {attribution}
+- Contributor Thoughts (AI): {ai_thoughts}
+ - AI Preference Signals (experimental): {ai_preference}
+ - Contributor Display: {attribution}
 """
 
 PR_CREATED_RESULT = """
@@ -166,11 +167,11 @@ PR_CREATED_RESULT = """
 - ID: `{contrib_id}`
 - Assessment: {sharing_reason}
 - Messages: {num_messages}
-- License (fallback): {license}
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
-- AI Preference Signals (experimental): {ai_preference}
-- Contributor Display: {attribution}
+- Contributor Thoughts (AI): {ai_thoughts}
+ - AI Preference Signals (experimental): {ai_preference}
+ - Contributor Display: {attribution}
 """
 
 PR_DESCRIPTION_TEMPLATE = """## Contribution Details
@@ -179,9 +180,10 @@ PR_DESCRIPTION_TEMPLATE = """## Contribution Details
 **Messages**: {num_messages}
 **Attribution (declared)**: {attribution}
 
-**License (fallback)**: {license}
 **Licensing Intent (declarative)**: {license_intent}
 **Licensing Note**: {license_intent_note}
+**Contributor Thoughts (AI)**:
+{ai_thoughts}
 **AI Preference Signals (experimental)**: {ai_preference}
 **Content Hash**: `{content_hash}`
 **Submitted**: {submitted_at}
@@ -306,7 +308,10 @@ class Contribution(TypedDict, total=True):
     sharing_reason: Literal["good", "bad", "mixed"]
     sharing_tag: Literal["dataset-good", "dataset-bad", "dataset-mixed"]
     all_tags: List[str]
-    license: Literal["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]
+    # Declarative licensing intent (replaces legacy license)
+    license_intent: str
+    license_intent_note: str
+    ai_thoughts: str
     # IETF Content-Usage expression (preset), e.g.,
     # "train-genai=n" or "train-genai=n;exceptions=cc-cr"
     ai_preference: str
@@ -331,7 +336,9 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         "sharing_reason",
         "sharing_tag",
         "all_tags",
-        "license",
+        "license_intent",
+        "license_intent_note",
+        "ai_thoughts",
         "ai_preference",
         "attribution",
         "attribution_mode",
@@ -356,8 +363,12 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         )
     if c["attribution_mode"] not in ("anonymous", "pseudonym", "manual_hf"):
         raise ValueError("attribution_mode invalid")
-    if c["license"] not in ("CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"):
-        raise ValueError("license invalid")
+    if not isinstance(c["license_intent"], str) or not c["license_intent"].strip():
+        raise ValueError("license_intent must be a non-empty string")
+    if not isinstance(c.get("license_intent_note"), str):
+        raise ValueError("license_intent_note must be a string")
+    if not isinstance(c.get("ai_thoughts"), str):
+        raise ValueError("ai_thoughts must be a string")
     if not isinstance(c["ai_preference"], str) or not c["ai_preference"].strip():
         raise ValueError("ai_preference must be a non-empty string (Content-Usage expression)")
     if not isinstance(c["clean_content"], list) or not c["clean_content"]:
@@ -420,18 +431,6 @@ class Action:
             ),
         )
 
-        # Legacy license (formal). Kept as a fallback for compatibility with current datasets;
-        # we additionally capture a declarative licensing intent below and will translate it later.
-        license: Literal["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"] = Field(
-            default="CC0-1.0",
-            description=(
-                "License for public contributions: "
-                "CC0-1.0 = public domain dedication; "
-                "CC-BY-4.0 = attribution required; "
-                "CC-BY-SA-4.0 = attribution + share-alike."
-            ),
-        )
-
         # New: Declarative licensing intent (menu) + optional note.
         # These selections communicate the contributor's intent today; we'll translate
         # them into concrete licenses/policies as the ecosystem settles (e.g., datalicenses.org).
@@ -454,6 +453,13 @@ class Action:
             default="",
             description=(
                 "Optional note to clarify your licensing intent (e.g., what counts as reciprocity, acceptable open‑source licenses, or public body scope)."
+            ),
+        )
+        # New: open-ended contributor thoughts about AI, stored alongside contribution
+        ai_thoughts: str = Field(
+            default="",
+            description=(
+                "Optional: Your open‑ended thoughts about AI to include with the contribution."
             ),
         )
         # Experimental: AI Preference Signals (CC Signals); options and defaults may evolve. Integration with RSL is coming; see links below.
@@ -878,9 +884,9 @@ class Action:
                 sharing_tag=contribution["sharing_tag"],
                 num_messages=len(contribution["clean_content"]),
                 attribution=contribution.get("attribution", "anonymous"),
-                license=contribution["license"],
                 license_intent=contribution.get("license_intent", "unspecified"),
                 license_intent_note=contribution.get("license_intent_note", "—") or "—",
+                ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
                 ai_preference=contribution.get("ai_preference", "Credit"),
                 content_hash=contribution.get("content_hash", "N/A"),
                 submitted_at=contribution["contributed_at"],
@@ -1251,9 +1257,9 @@ class Action:
                         "sharing_reason": reason,
                         "sharing_tag": sharing_tag,
                         "all_tags": norm_tags,
-                        "license": user_valves.license,
                         "license_intent": user_valves.license_intent,
                         "license_intent_note": user_valves.license_intent_note,
+                        "ai_thoughts": user_valves.ai_thoughts,
                         "ai_preference": user_valves.ai_preference,
                         "attribution": attribution,
                         "attribution_mode": user_valves.attribution_mode,
@@ -1335,6 +1341,9 @@ class Action:
                             user_valves.license_intent or "unspecified",
                             (user_valves.license_intent_note or "—"),
                         )
+                    ),
+                    ai_thoughts_block=(
+                        "- Contributor Thoughts (AI): {}\n".format(user_valves.ai_thoughts.strip()) if (user_valves.ai_thoughts or "").strip() else ""
                     ),
                     next_verb=next_verb,
                 )
@@ -1418,9 +1427,9 @@ class Action:
                         "sharing_reason": new_reason,
                         "attribution": attribution,
                         "verification": verification,
-                        "license": user_valves.license,
                         "license_intent": user_valves.license_intent,
                         "license_intent_note": user_valves.license_intent_note,
+                        "ai_thoughts": user_valves.ai_thoughts,
                         "ai_preference": user_valves.ai_preference,
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                     }
@@ -1501,9 +1510,9 @@ class Action:
                         contrib_id=contribution["id"],
                         sharing_reason=contribution["sharing_reason"],
                         num_messages=len(contribution["clean_content"]),
-                        license=contribution["license"],
                         license_intent=contribution.get("license_intent", "unspecified"),
                         license_intent_note=contribution.get("license_intent_note", "—") or "—",
+                        ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
                         ai_preference=contribution.get("ai_preference", "Credit"),
                         attribution=contribution.get("attribution", "anonymous"),
                     )
@@ -1538,9 +1547,9 @@ class Action:
                             contrib_id=contribution["id"],
                             sharing_reason=contribution["sharing_reason"],
                             num_messages=len(contribution["clean_content"]),
-                            license=contribution["license"],
                             license_intent=contribution.get("license_intent", "unspecified"),
                             license_intent_note=contribution.get("license_intent_note", "—") or "—",
+                            ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
                             ai_preference=contribution.get("ai_preference", "Credit"),
                             attribution=contribution.get("attribution", "anonymous"),
                         )
