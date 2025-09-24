@@ -30,6 +30,7 @@ HUGGINGFACE_DATASET_DISCUSSION_URL = (
 DATALICENSES_URL = "https://datalicenses.org"
 DEFAULT_FAQ_URL = "https://example.com/flywheel-faq"
 DEFAULT_PRIVACY_POLICY_URL = "https://example.com/privacy"
+PUBLICAI_GITHUB_URL = "https://github.com/publicai"
 
 
 # ======================================================================
@@ -122,6 +123,8 @@ PREVIEW_TEMPLATE = """
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
 
 Privacy: {privacy_status}{privacy_note}
+
+{intent_note_block}
 
 
 <details>
@@ -1189,7 +1192,7 @@ class Action:
                     share_json_block=share_json_block,
                     privacy_block=privacy_block,
                     license_intent_block=(
-                    "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., {})._.".format(
+                        "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., {})._.".format(
                             user_valves.license_intent or "unspecified",
                             (user_valves.license_intent_note or "—"),
                             DATALICENSES_URL,
@@ -1197,6 +1200,13 @@ class Action:
                     ),
                     ai_thoughts_block=(
                         "- Contributor Thoughts (AI): {}\n".format(user_valves.ai_thoughts.strip()) if (user_valves.ai_thoughts or "").strip() else ""
+                    ),
+                    intent_note_block=(
+                        """
+                        Note on Licensing Intents and AI Thoughts
+                        
+                        We capture your natural‑language licensing intent and any optional thoughts on AI. As standards mature, we will translate these into concrete licenses and/or AI‑use preference signals. For now, there is no firm legal contract: submissions are published publicly on Hugging Face with a lightweight contributor agreement and may be mirrored later on a static site with anti‑scraping. As the Public AI movement grows, we’ll formalize this. Iterating on licenses and signals is a great way to contribute — join us on GitHub: {publicai_github_url}
+                        """.strip().format(publicai_github_url=PUBLICAI_GITHUB_URL)
                     ),
                     next_verb=next_verb,
                 )
