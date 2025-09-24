@@ -402,7 +402,7 @@ class Action:
         hf_user_token: str = Field(
             default="",
             description=(
-                "Your Hugging Face write token (kept locally; never published). "
+                "Your Hugging Face write token; (Never published; this action is open source so you can see exactly what we're doing with the token!). "
                 "Create/manage at https://huggingface.co/docs/hub/en/security-tokens"
             ),
         )
