@@ -8,7 +8,6 @@ icon_url: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAw
 """
 
 import json
-import os
 import re
 import secrets
 import sqlite3
@@ -98,12 +97,6 @@ Privacy Scan (counts)
 ~~~
 """
 
-NER_PLACEHOLDER_BLOCK = """
-<details>
-<summary>Entity Flags (placeholder)</summary>
-{ner_note}
-</details>
-"""
 
 PREVIEW_TEMPLATE = """
 
@@ -134,7 +127,6 @@ Privacy: {privacy_status}{privacy_note}
 </details>
 
 {share_json_block}
-{ner_block}
 
 **Next Step**: Click the Share button again to {next_verb} contribute.
 """
@@ -201,40 +193,27 @@ TIP_LINE = (
 )
 
 
-# privacy_patterns.py
 PRIVACY_PATTERNS = {
-    # Phone numbers - more precise matching
-    # International: enforce overall length 8–14 digits (excluding '+'), tolerate separators
     "phone_intl": (
         r"(?<!\d)\+(?:"
-        r"(?:[1-9])(?:[-.\s]?\d){7,13}"  # 1-digit country code
-        r"|(?:[1-9]\d)(?:[-.\s]?\d){6,12}"  # 2-digit country code
-        r"|(?:[1-9]\d{2})(?:[-.\s]?\d){5,11}"  # 3-digit country code
+        r"(?:[1-9])(?:[-.\s]?\d){7,13}"
+        r"|(?:[1-9]\d)(?:[-.\s]?\d){6,12}"
+        r"|(?:[1-9]\d{2})(?:[-.\s]?\d){5,11}"
         r")(?!\d)"
     ),
     "phone_us": r"(?<!\d)(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)",
-    # US digits only (no separators). Accept any NXX (0–9) but enforce [2-9] for area code.
     "phone_us_no_sep": r"(?<!\d)(?:\+?1)?(?:[2-9]\d{2}\d{7})(?!\d)",
-    
-    # Email - robust local and domain rules; disallow leading/trailing dot and consecutive dots in local part
-    # Also ensure we don't match when preceded/followed by local-part chars (avoid '.startswithdot@...')
     "email": (
-        r"(?<![A-Za-z0-9._%+-])"  # hard boundary before
-        r"[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?"  # local atom without leading/trailing dot
-        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?)*"  # dot-separated atoms; no consecutive dots
-        r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"  # domain labels; no leading/trailing hyphen
-        r"(?![A-Za-z0-9._%+-])"  # hard boundary after
+        r"(?<![A-Za-z0-9._%+-])"
+        r"[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?"
+        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?)*"
+        r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"
+        r"(?![A-Za-z0-9._%+-])"
     ),
-    
-    # SSN - with format variations and invalid range exclusion
     "ssn": r"(?<!\d)(?!000|666|9\d{2})\d{3}[-\s]?(?!00)\d{2}[-\s]?(?!0000)\d{4}(?!\d)",
-    
-    # IP Address - IPv4 with better boundary detection; prevent matching inside longer dotted sequences
     "ip_address": r"(?<!\d)(?<!\.)(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?!\.\d)(?!\d)",
-    
-    # IPv6 Address - supports full and compressed forms (excludes IPv4-mapped)
     "ipv6_address": (
-        r"(?<![A-Za-z0-9:])("  # hard boundary before (not hex/colon)
+        r"(?<![A-Za-z0-9:])(" 
         r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}"
         r"|(?:[A-Fa-f0-9]{1,4}:){1,7}:"
         r"|:(?::[A-Fa-f0-9]{1,4}){1,7}"
@@ -244,39 +223,22 @@ PRIVACY_PATTERNS = {
         r"|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}"
         r"|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}"
         r"|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}"
-        r")(?!(?:[A-Za-z0-9:.]))"  # hard boundary after; don't allow '.' to avoid IPv4-mapped
+        r")(?!(?:[A-Za-z0-9:.]))"
     ),
-    
-    # AWS Keys - force case-sensitive even with IGNORECASE in tests; accept 20 or 21 total length for 'ASIA' variants
     "aws_access_key": r"\b(?-i:(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16,17})\b",
     "aws_secret_key": r"\b[A-Za-z0-9/+=]{40}\b",
-    
-    # Private Keys - multiple formats
     "private_key": r"-----BEGIN\s+(?:RSA\s+)?(?:PRIVATE|ENCRYPTED)\s+KEY-----",
-    
-    # API Keys - common patterns with better specificity
     "api_key_stripe": r"\b(?:sk|pk)_(?:test_|live_)?[A-Za-z0-9]{24,}\b",
     "api_key_generic": r"\b(?:api[-_]?key|apikey|access[-_]?token)[-_:\s]*[A-Za-z0-9+/]{32,}\b",
-    
-    # Street Address - expanded street types
     "street_address": r"\b\d{1,5}\s+(?:[NSEW]\.?\s+)?[A-Za-z0-9\s\-\.]{2,30}\s+(?:St(?:reet)?|Ave(?:nue)?|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr(?:ive)?|Ct|Court|Cir(?:cle)?|Pl(?:aza)?|Way|Pkwy|Parkway|Pike|Ter(?:race)?|Trail|Path|Loop|Run|Pass|Cross(?:ing)?|Sq(?:uare)?)\b",
-    
-    # Credit Card - with Luhn validation support (checked in code/tests)
     "credit_card": r"\b(?:\d[-\s]?){13,19}\b",
-    
-    # Bank Account/Routing Numbers
     "routing_number": r"\b(?:ABA|Routing)[-:\s]*\d{9}\b",
-    # IBAN: restrict to known IBAN country codes to avoid false positives (e.g., US)
     "iban": (
         r"\b(?:AL|AD|AT|AZ|BH|BE|BA|BR|BG|CR|HR|CY|CZ|DK|DO|EE|FO|FI|FR|GE|DE|GI|GR|GL|GT|HU|IS|IE|IL|IT|JO|KZ|KW|LV|LB|LI|LT|LU|MT|MR|MU|MC|MD|ME|NL|NO|PK|PS|PL|PT|QA|RO|SM|SA|RS|SK|SI|ES|SE|CH|TN|TR|AE|GB|VG|XK)\d{2}[A-Z0-9]{4,30}\b"
     ),
-    
-    # Government IDs - more specific patterns
     "us_passport": r"\b(?:[0-9]{9}|[A-Z][0-9]{8})\b",
     "ein": r"\b\d{2}-\d{7}\b",
     "medicare": r"\b[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{4}\b",
-    
-    # Crypto addresses
     "bitcoin_address": r"\b(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b",
     "ethereum_address": r"\b0x[a-fA-F0-9]{40}\b",
 }
@@ -393,9 +355,6 @@ class Action:
         dataset_repo: str = Field(
             default="publicai/shared-chats", description="Dataset repo (owner/name)"
         )
-        debug_mode: bool = Field(
-            default=True, description="Print debug diagnostics to console"
-        )
         sanity_check_repo: bool = Field(
             default=True, description="Preflight: verify repo exists and token perms"
         )
@@ -411,9 +370,7 @@ class Action:
         max_messages: int = Field(
             default=100, description="Maximum messages allowed per share (lowered)"
         )
-        enable_ner_check: bool = Field(
-            default=False, description="(Placeholder) NER check in preview"
-        )
+        
 
     class UserValves(BaseModel):
         public_sharing_available: bool = Field(
@@ -462,17 +419,7 @@ class Action:
                 "Optional: Your open‑ended thoughts about AI to include with the contribution."
             ),
         )
-        # Experimental: AI Preference Signals (CC Signals); options and defaults may evolve. Integration with RSL is coming; see links below.
-        # Training-focused options:
-        # - "train-genai=n": Deny training.
-        # - "train-genai=n;exceptions=cc-cr": Deny unless Credit (attribution) is provided.
-        # - "train-genai=n;exceptions=cc-cr-dc": Deny unless Credit + Direct Contribution reciprocity.
-        # - "train-genai=n;exceptions=cc-cr-ec": Deny unless Credit + Ecosystem reciprocity.
-        # - "train-genai=n;exceptions=cc-cr-op": Deny unless Credit + Open reciprocity.
-        # General AI-use options:
-        # - "ai-use=n": Deny AI use.
-        # - "ai-use=n;exceptions=cc-cr[ -dc | -ec | -op ]": Deny AI use unless the listed CC Signals reciprocity terms are met.
-        # Reference: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ (integration coming)
+        # Experimental: AI Preference Signals (CC Signals). Options may evolve.
         ai_preference: Literal[
             "train-genai=n",
             "train-genai=n;exceptions=cc-cr",
@@ -501,13 +448,6 @@ class Action:
         self.recent_submissions: Dict[str, Tuple[datetime, str]] = (
             {}
         )  # chat_id -> (timestamp, pr_number)
-
-    # ------------------------------------------------------------------
-    # Debug
-    # ------------------------------------------------------------------
-    def _debug(self, *args):
-        if self.valves.debug_mode:
-            print("[Flywheel:DEBUG]", *args)
 
     def _public_data_warning(self, user_valves: "Action.UserValves") -> str:
         return PUBLIC_DATA_WARNING
@@ -662,12 +602,6 @@ class Action:
             "note": "Heuristic only; review before sharing.",
         }
 
-    # Placeholder NER
-    def _ner_placeholder(self) -> Dict[str, Any]:
-        return {
-            "enabled": False,
-            "note": "NER placeholder; community extension welcome.",
-        }
 
     def _ai_pref_definition(self, pref: str) -> str:
         try:
@@ -675,7 +609,7 @@ class Action:
         except Exception:
             return ""
 
-    # DB helpers (single-path queries)
+    # DB helpers
     def _get_full_chat_data(self, chat_id: str) -> Dict[str, Any]:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -851,10 +785,6 @@ class Action:
                     "owner": getattr(repo, "owner", None),
                     "private": getattr(repo, "private", None),
                 }
-            # except HfHubHTTPError as he:
-            #     sc = getattr(he.response, "status_code", None)
-            #     out["ok"] = False
-            #     out["errors"].append(f"repo_info failed (HTTP {sc})")
             except Exception as e:
                 out["ok"] = False
                 out["errors"].append(f"repo_info failed: {e}")
@@ -922,34 +852,18 @@ class Action:
                 else getattr(commit_info, "pr_url", "Check repository")
             )
             return {"success": True, "pr_number": pr_num, "pr_url": pr_url}
-        # except HfHubHTTPError as he:
-        #     sc = getattr(he.response, "status_code", None)
-        #     return {"success": False, "error": "HfHubHTTPError {}: {}".format(sc, he)}
         except Exception as e:
             return {"success": False, "error": "{}: {}".format(type(e).__name__, e)}
 
-    # Message cleaning (preserve model/tool_calls and id if present)
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Return a simplified message list.
-
-        Behavior:
-        - Only the last message is scanned for known template headings (TRIM_MARKERS).
-        - If found, keep content strictly before the first heading; drop the rest.
-        - If nothing remains after trimming, drop the last message entirely.
-
-        Transparency: We intentionally avoid complicated heuristics here to make
-        behavior easy to reason about. This reduces accidental removal of normal
-        chat content and keeps the flow predictable.
-
-        Note: We preserve common fields (`id`, `model`, `tool_calls`) but do not
-        reconstruct tool call flows yet. See README for planned improvements.
+        """Simplify messages; trim preview markers from the last message.
+        Preserves `id`, `model`, and `tool_calls` if present.
         """
         clean: List[Dict[str, Any]] = []
 
         def _trim_last_message_content(content: str) -> str:
             if not isinstance(content, str):
                 return content
-            # Find the first occurrence of any marker and slice content before it
             cut = None
             for m in TRIM_MARKERS:
                 idx = content.find(m)
@@ -967,10 +881,8 @@ class Action:
             if i == last_idx and isinstance(content, str):
                 content = _trim_last_message_content(content)
                 if not content:
-                    # If nothing remains after trimming, drop the last message entirely
                     continue
             cm = {"role": msg["role"], "content": content}
-            # Preserve a few common fields for continuity (advanced handling later)
             if "id" in msg:
                 cm["id"] = msg["id"]
             if "model" in msg:
@@ -983,12 +895,7 @@ class Action:
     def _detect_workflow_stage(
         self, messages: List[Dict[str, Any]]
     ) -> Tuple[str, Optional[str]]:
-        """Detect whether we are on the first run (build preview) or
-        confirmation step (submit).
-
-        Looks back up to WORKFLOW_SCAN_DEPTH messages for the JSON preview
-        sentinels we render in the first run preview.
-        """
+        """Detect first_run vs confirm_run by scanning for preview sentinels."""
         WORKFLOW_SCAN_DEPTH = 25
         if not messages:
             return "first_run", None
@@ -1005,10 +912,7 @@ class Action:
         return "first_run", None
 
     def _extract_json_from_preview(self, content: str) -> Optional[Dict[str, Any]]:
-        """Extract the JSON payload between the preview sentinels.
-
-        Returns None if not found or if parsing fails.
-        """
+        """Extract JSON payload between preview sentinels (or None)."""
         m = re.search(
             r"<<<SHARE_PREVIEW_START>>>\s*(.*?)\s*<<<SHARE_PREVIEW_END>>>",
             content,
@@ -1195,8 +1099,6 @@ class Action:
                         types_str
                     )
 
-                # NER placeholder
-                ner_result = self._ner_placeholder()
 
                 # attribution
                 attribution, verification = self._resolve_attribution(
@@ -1304,11 +1206,6 @@ class Action:
                 privacy_block = PRIVACY_BLOCK.format(
                     privacy_json=json.dumps(privacy, indent=2)
                 )
-                ner_block = (
-                    NER_PLACEHOLDER_BLOCK.format(ner_note=ner_result.get("note", ""))
-                    if ner_result.get("enabled")
-                    else ""
-                )
 
                 # Human-readable definition appended to selected preference
                 _pref_def = self._ai_pref_definition(user_valves.ai_preference)
@@ -1335,7 +1232,6 @@ class Action:
                     privacy_policy_url=self.valves.privacy_policy_url,
                     share_json_block=share_json_block,
                     privacy_block=privacy_block,
-                    ner_block=ner_block,
                     license_intent_block=(
                         "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., datalicenses.org)._".format(
                             user_valves.license_intent or "unspecified",
