@@ -43,9 +43,9 @@ You can always delete chats at any time or use temporary mode to ensure chats ar
 How to setup public sharing:
 1) Controls (top right) → Valves → Functions → Sharing
 2) Toggle "Public Sharing Available" ON (Green)
-3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
+3) Choose how you show up: Anonymous, Deterministic Pseudonym, or your Hugging Face account (requires a write token; learn more: https://huggingface.co/docs/hub/en/security-tokens)
 4) Choose a Data Licensing Intent (declarative). Examples: "AI developers who open‑source only", "AI developers who contribute back to the ecosystem", "Public bodies only". We will translate these intents into enforceable options as the ecosystem stabilizes (see datalicenses.org and related efforts). For now, this captures your intent alongside the contribution.
-5) No extra settings needed: we will translate your declarative licensing intent into enforceable options (e.g., emerging AI-use signals like CC Signals, or policies at datalicenses.org) as standards mature.
+5) Optional: Link your Hugging Face account to author PRs as you. Create a short‑lived write token at https://huggingface.co/settings/tokens, paste it, and we will verify it locally. Tokens are stored per‑user and never published.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -60,7 +60,8 @@ PUBLIC_DATA_WARNING = (
 # Summarized header shown above details
 PREVIEW_HEADER = (
     "**Assessment**: **{reason}** (`{sharing_tag}`); **Messages**: {num_messages}; "
-    "**Licensing Intent**: {license_intent}; **How you show up**: {attribution}"
+    "**Licensing Intent**: {license_intent}; **How you show up**: {attribution}; "
+    "**Submitting via**: {submit_via}"
 )
 
 # Everything else placed in details
@@ -144,7 +145,8 @@ TEST_MODE_RESULT = """
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
 - Contributor Thoughts (AI): {ai_thoughts}
- - Contributor Display: {attribution}
+ - Submitting via: {submit_via}
+  - Contributor Display: {attribution}
 """
 
 PR_CREATED_RESULT = """
@@ -160,6 +162,7 @@ PR_CREATED_RESULT = """
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
 - Contributor Thoughts (AI): {ai_thoughts}
+ - Submitting via: {submit_via}
   - Contributor Display: {attribution}
 """
 
@@ -177,6 +180,7 @@ PR_DESCRIPTION_TEMPLATE = """## Contribution Details
 **Submitted**: {submitted_at}
 
 **Attribution Mode**: {attribution_mode}
+**Submitting via**: {submit_via}
 **Verification**: {verification_json}
 **Tags**: {tags_preview}
 
@@ -260,7 +264,7 @@ class Contribution(TypedDict, total=True):
     license_intent_note: str
     ai_thoughts: str
     attribution: str
-    attribution_mode: Literal["anonymous", "pseudonym", "manual_hf"]
+    attribution_mode: Literal["anonymous", "pseudonym", "huggingface"]
     verification: Dict[str, Any]
     contributed_at: str
     content_hash: str
@@ -300,7 +304,7 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         raise ValueError(
             "sharing_tag must be 'dataset-good' | 'dataset-bad' | 'dataset-mixed'"
         )
-    if c["attribution_mode"] not in ("anonymous", "pseudonym", "manual_hf"):
+    if c["attribution_mode"] not in ("anonymous", "pseudonym", "huggingface"):
         raise ValueError("attribution_mode invalid")
     if not isinstance(c["license_intent"], str) or not c["license_intent"].strip():
         raise ValueError("license_intent must be a non-empty string")
@@ -353,13 +357,13 @@ class Action:
         )
 
         # Attribution: simplified
-        attribution_mode: Literal["anonymous", "pseudonym", "manual_hf"] = Field(
+        attribution_mode: Literal["anonymous", "pseudonym", "huggingface"] = Field(
             default="anonymous",
             description=(
-                "How your name appears on public contributions: "
+                "How your name appears: "
                 "anonymous = least linkability; "
-                "pseudonym = deterministic (unsalted) handle from your account id (stable across contributions); "
-                "manual_hf = you submit from your own Hugging Face account."
+                "pseudonym = deterministic handle from your account id; "
+                "huggingface = submit PRs using your Hugging Face account (requires write token)."
             ),
         )
 
@@ -392,6 +396,14 @@ class Action:
             default="",
             description=(
                 "Optional: Your open‑ended thoughts about AI to include with the contribution."
+            ),
+        )
+
+        hf_user_token: str = Field(
+            default="",
+            description=(
+                "Your Hugging Face write token (kept locally; never published). "
+                "Create/manage at https://huggingface.co/docs/hub/en/security-tokens"
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
@@ -706,11 +718,8 @@ class Action:
         if mode == "pseudonym":
             name = self._deterministic_pseudonym(user_obj)
             return name, {"type": "pseudonym", "status": "deterministic"}
-        if mode == "manual_hf":
-            return "Manual HF (Power User)", {
-                "type": "hf",
-                "status": "manual_pr_required",
-            }
+        if mode == "huggingface":
+            return "Hugging Face account", {"type": "hf", "status": "token_required"}
         return "Anonymous", {"type": "none", "status": "unverified"}
 
     # HF preflight & PR
@@ -771,6 +780,7 @@ class Action:
                 content_hash=contribution.get("content_hash", "N/A"),
                 submitted_at=contribution["contributed_at"],
                 attribution_mode=contribution.get("attribution_mode", "anonymous"),
+                submit_via=contribution.get("submit_via", "app account"),
                 verification_json=json.dumps(
                     contribution.get("verification", {}), ensure_ascii=False
                 ),
@@ -1127,14 +1137,17 @@ class Action:
                 export_contribution = self._sanitize_contribution_for_export(contribution)
                 json_str = json.dumps(export_contribution, indent=2, ensure_ascii=False)
 
-                # Mock-vs-Real: implicit based on creds presence (manual_hf forces mock/manual)
-                have_hf_creds = bool(
-                    self.valves.default_hf_token and self.valves.dataset_repo
+                # Determine submission route for preview
+                use_user_token = (
+                    user_valves.attribution_mode == "huggingface" and (user_valves.hf_user_token or "").strip()
                 )
-                manual_mode = user_valves.attribution_mode == "manual_hf"
-                next_verb = (
-                    "simulate" if (manual_mode or not have_hf_creds) else "create"
+                have_app_token = bool(self.valves.default_hf_token and self.valves.dataset_repo)
+                submit_via = (
+                    "your Hugging Face account" if use_user_token else (
+                        "app account" if have_app_token else "simulation"
+                    )
                 )
+                next_verb = ("create" if (use_user_token or have_app_token) else "simulate")
 
                 # Blocks
                 grabbed_section = GRABBED_SECTION_TEMPLATE.format(
@@ -1164,6 +1177,7 @@ class Action:
                         num_messages=len(clean_messages),
                         license_intent=(user_valves.license_intent or "unspecified"),
                         attribution=attribution,
+                        submit_via=submit_via,
                     ),
                     privacy_status=privacy_status,
                     privacy_note=privacy_note,
@@ -1299,9 +1313,14 @@ class Action:
                     )
 
                 # proceed to PR (mock if creds missing or manual_hf)
-                hf_token = self.valves.default_hf_token
+                # Choose token: prefer user-linked when attribution_mode is huggingface
+                use_user_token = (
+                    user_valves.attribution_mode == "huggingface" and (user_valves.hf_user_token or "").strip()
+                )
+                hf_token = user_valves.hf_user_token if use_user_token else self.valves.default_hf_token
                 have_hf_creds = bool(hf_token and self.valves.dataset_repo)
-                manual_mode = user_valves.attribution_mode == "manual_hf"
+                # Manual mode only when user requested huggingface but token missing
+                manual_mode = (user_valves.attribution_mode == "huggingface" and not use_user_token)
 
                 if have_hf_creds and not manual_mode and self.valves.sanity_check_repo:
                     pf = self._hf_preflight(hf_token)
@@ -1349,6 +1368,7 @@ class Action:
                         license_intent=contribution.get("license_intent", "unspecified"),
                         license_intent_note=contribution.get("license_intent_note", "—") or "—",
                         ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
+                        submit_via=("your Hugging Face account" if use_user_token else ("app account" if self.valves.default_hf_token else "simulation")),
                         attribution=contribution.get("attribution", "anonymous"),
                     )
                 else:
@@ -1366,8 +1386,13 @@ class Action:
                         )
                         return
 
+                    # include submit_via in contribution for PR description
+                    export_contribution = self._sanitize_contribution_for_export({
+                        **contribution,
+                        "submit_via": ("your Hugging Face account" if use_user_token else "app account"),
+                    })
                     pr_result = self._create_pull_request(
-                        self._sanitize_contribution_for_export(contribution),
+                        export_contribution,
                         hf_token,
                         self.valves.dataset_repo,
                     )
@@ -1385,6 +1410,7 @@ class Action:
                             license_intent=contribution.get("license_intent", "unspecified"),
                             license_intent_note=contribution.get("license_intent_note", "—") or "—",
                             ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
+                            submit_via=("your Hugging Face account" if use_user_token else "app account"),
                             attribution=contribution.get("attribution", "anonymous"),
                         )
                     else:

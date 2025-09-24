@@ -156,9 +156,9 @@ class FlywheelHelperTests(unittest.TestCase):
         uv.attribution_mode = "pseudonym"
         name2, ver2 = self.action._resolve_attribution(uv, {"id": "u"})
         self.assertNotEqual(name2, "Anonymous")
-        uv.attribution_mode = "manual_hf"
+        uv.attribution_mode = "huggingface"
         name3, ver3 = self.action._resolve_attribution(uv, {"id": "u"})
-        self.assertIn("Manual HF", name3)
+        self.assertIn("Hugging Face", name3)
 
     def test_validate_contribution(self):
         base = {
@@ -266,8 +266,8 @@ class FlywheelActionFlowTests(unittest.TestCase):
         self.assertTrue(any("Too long" in (n.get("data") or {}).get("content", "") for n in notes2))
 
     def test_first_run_preview_and_confirm_test_mode(self):
-        # manual_hf forces test mode
-        self.action.user_valves.attribution_mode = "manual_hf"
+        # huggingface (without token) forces test mode
+        self.action.user_valves.attribution_mode = "huggingface"
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
         content = last_message_content(events)
@@ -298,7 +298,7 @@ class FlywheelActionFlowTests(unittest.TestCase):
 
     def test_feedback_association_filters_by_chat_id(self):
         # Build initial preview and capture counts
-        self.action.user_valves.attribution_mode = "manual_hf"
+        self.action.user_valves.attribution_mode = "huggingface"
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
         content1 = last_message_content(events)
@@ -333,7 +333,7 @@ class FlywheelActionFlowTests(unittest.TestCase):
         self.assertEqual(counts2.get("bad"), 0)
 
     def test_confirm_grabs_latest_on_tag_change(self):
-        self.action.user_valves.attribution_mode = "manual_hf"
+        self.action.user_valves.attribution_mode = "huggingface"
         # Build preview first
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
@@ -357,7 +357,7 @@ class FlywheelActionFlowTests(unittest.TestCase):
         self.assertIn("Test Mode: PR Preview", content2)
 
     def test_confirm_grabs_latest_on_feedback_change(self):
-        self.action.user_valves.attribution_mode = "manual_hf"
+        self.action.user_valves.attribution_mode = "huggingface"
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
 
