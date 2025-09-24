@@ -35,7 +35,7 @@ TRIM_MARKERS: Tuple[str, str] = (
 SETUP_TEMPLATE = """
 # Share Chat Publicly (Hugging Face)
 
-You can send specific chats to a public repository to share your good, bad, or interesting chats and help build better public AI. These chats can be used by anyone, subject to the "AI preference signals" and "licenses" you attach to the chats.
+You can send specific chats to a public repository to share your good, bad, or interesting chats and help build better public AI. These chats can be used by anyone, subject to the experimental "AI preference signals" and the formal "licenses" you attach to the chats.
 
 By default, your chats are not used directly for R&D. We may compute de‑identified aggregate stats (for example, total message volume) to operate the service.
 
@@ -45,8 +45,8 @@ How to setup public sharing:
 1) Controls (top right) → Valves → Functions → Sharing
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
-4) Choose a license.
-5) Optional: Choose AI Preference (CC Signals). Default: Ecosystem reciprocity (…;cc-cr-ec). See our FAQ ({faq_url}) for all options and details. Learn more: CC Signals (https://creativecommons.org/ai/cc-signals/) • RSL (https://rslstandard.org/). RSL integration is coming.
+4) Choose a Data Licensing Intent (declarative). Examples: "AI developers who open‑source only", "AI developers who contribute back to the ecosystem", "Public bodies only". We will translate these intents into enforceable options as the ecosystem stabilizes (see datalicenses.org and related efforts). For now, this captures your intent alongside the contribution.
+5) Optional: Choose AI Preference Signals (experimental). By default, we apply our current best-available signal for AI data use (today: Ecosystem reciprocity — …;cc-cr-ec). This may evolve as standards mature. See our FAQ ({faq_url}) for all options and details. Learn more: CC Signals (https://creativecommons.org/ai/cc-signals/) • IETF/IAB discussions • RSL (https://rslstandard.org/) — RSL integration is planned.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -60,8 +60,9 @@ PUBLIC_DATA_WARNING = (
 
 # Summarized header shown above details
 PREVIEW_HEADER = (
-    "**Assessment**: **{reason}** (`{sharing_tag}`); **Messages in your chat**: {num_messages}; "
-    "**AI Preference Selected**: {ai_preference};  **How you show up**: {attribution}"
+    "**Assessment**: **{reason}** (`{sharing_tag}`); **Messages**: {num_messages}; "
+    "**Licensing Intent**: {license_intent}; "
+    "**AI Preference Signals (experimental)**: {ai_preference}; **How you show up**: {attribution}"
 )
 
 # Everything else placed in details
@@ -123,6 +124,8 @@ Privacy: {privacy_status}{privacy_note}
 {preview_header}
 
 
+{license_intent_block}
+
 {privacy_block}
 
 {grabbed_section}
@@ -146,8 +149,10 @@ TEST_MODE_RESULT = """
 - ID: `{contrib_id}`
 - Assessment: {sharing_reason}
 - Messages: {num_messages}
-- License: {license}
-- AI Preference: {ai_preference}
+- License (fallback): {license}
+- Licensing Intent: {license_intent}
+- Licensing Note: {license_intent_note}
+- AI Preference Signals (experimental): {ai_preference}
 - Contributor Display: {attribution}
 """
 
@@ -161,8 +166,10 @@ PR_CREATED_RESULT = """
 - ID: `{contrib_id}`
 - Assessment: {sharing_reason}
 - Messages: {num_messages}
-- License: {license}
-- AI Preference: {ai_preference}
+- License (fallback): {license}
+- Licensing Intent: {license_intent}
+- Licensing Note: {license_intent_note}
+- AI Preference Signals (experimental): {ai_preference}
 - Contributor Display: {attribution}
 """
 
@@ -172,8 +179,10 @@ PR_DESCRIPTION_TEMPLATE = """## Contribution Details
 **Messages**: {num_messages}
 **Attribution (declared)**: {attribution}
 
-**License**: {license}
-**AI Preference**: {ai_preference}
+**License (fallback)**: {license}
+**Licensing Intent (declarative)**: {license_intent}
+**Licensing Note**: {license_intent_note}
+**AI Preference Signals (experimental)**: {ai_preference}
 **Content Hash**: `{content_hash}`
 **Submitted**: {submitted_at}
 
@@ -271,7 +280,7 @@ PRIVACY_PATTERNS = {
 }
 
 
-# CC Preference Signal definitions used for human‑readable preview
+# Experimental: CC Preference Signal definitions used for human‑readable preview
 AI_PREFERENCE_DEFS: Dict[str, str] = {
     "train-genai=n": "Deny training.",
     "train-genai=n;exceptions=cc-cr": "Allow training with Credit (attribution).",
@@ -411,6 +420,8 @@ class Action:
             ),
         )
 
+        # Legacy license (formal). Kept as a fallback for compatibility with current datasets;
+        # we additionally capture a declarative licensing intent below and will translate it later.
         license: Literal["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"] = Field(
             default="CC0-1.0",
             description=(
@@ -420,7 +431,32 @@ class Action:
                 "CC-BY-SA-4.0 = attribution + share-alike."
             ),
         )
-        # CC Preference Signals (dropdown). Integration with RSL is coming; see links below.
+
+        # New: Declarative licensing intent (menu) + optional note.
+        # These selections communicate the contributor's intent today; we'll translate
+        # them into concrete licenses/policies as the ecosystem settles (e.g., datalicenses.org).
+        license_intent: Literal[
+            "AI devs who open‑source only",
+            "AI devs who contribute back to the ecosystem",
+            "Public bodies only",
+            "Research and nonprofit only",
+            "Commercial use allowed with reciprocity",
+            "No AI training use",
+            "Ask first / case‑by‑case",
+        ] = Field(
+            default="AI devs who contribute back to the ecosystem",
+            description=(
+                "High‑level intent for data use. We will translate this into enforceable "
+                "terms as standards mature (see datalicenses.org)."
+            ),
+        )
+        license_intent_note: str = Field(
+            default="",
+            description=(
+                "Optional note to clarify your licensing intent (e.g., what counts as reciprocity, acceptable open‑source licenses, or public body scope)."
+            ),
+        )
+        # Experimental: AI Preference Signals (CC Signals); options and defaults may evolve. Integration with RSL is coming; see links below.
         # Training-focused options:
         # - "train-genai=n": Deny training.
         # - "train-genai=n;exceptions=cc-cr": Deny unless Credit (attribution) is provided.
@@ -445,9 +481,9 @@ class Action:
         ] = Field(
             default="train-genai=n;exceptions=cc-cr-ec",
             description=(
-                "AI Preference (CC Signals). Default: Ecosystem reciprocity (…;cc-cr-ec) — encourages attribution and community contributions. "
-                "Choose training‑focused (train-genai=…) or general AI‑use (ai-use=…). See FAQ for full details. "
-                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/."
+                "AI Preference Signals (experimental). Default: our current best‑available signal (today: Ecosystem reciprocity — …;cc-cr-ec). "
+                "This may change as standards mature. Choose training‑focused (train-genai=…) or general AI‑use (ai-use=…). "
+                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ (planned)."
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
@@ -843,6 +879,8 @@ class Action:
                 num_messages=len(contribution["clean_content"]),
                 attribution=contribution.get("attribution", "anonymous"),
                 license=contribution["license"],
+                license_intent=contribution.get("license_intent", "unspecified"),
+                license_intent_note=contribution.get("license_intent_note", "—") or "—",
                 ai_preference=contribution.get("ai_preference", "Credit"),
                 content_hash=contribution.get("content_hash", "N/A"),
                 submitted_at=contribution["contributed_at"],
@@ -1214,11 +1252,13 @@ class Action:
                         "sharing_tag": sharing_tag,
                         "all_tags": norm_tags,
                         "license": user_valves.license,
+                        "license_intent": user_valves.license_intent,
+                        "license_intent_note": user_valves.license_intent_note,
                         "ai_preference": user_valves.ai_preference,
                         "attribution": attribution,
                         "attribution_mode": user_valves.attribution_mode,
                         "verification": verification,
-                        "ai_preference_note": "Signal only; does not override explicit publication.",
+                        "ai_preference_note": "Experimental signal for AI data use; non-binding and may change as standards stabilize. Does not override explicit publication.",
                         "ai_preference_time": datetime.now(timezone.utc).isoformat(),
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                         "content_hash": messages_hash,
@@ -1277,6 +1317,7 @@ class Action:
                         reason=reason,
                         sharing_tag=sharing_tag,
                         num_messages=len(clean_messages),
+                        license_intent=(user_valves.license_intent or "unspecified"),
                         ai_preference=_pref_display,
                         attribution=attribution,
                     ),
@@ -1289,6 +1330,12 @@ class Action:
                     share_json_block=share_json_block,
                     privacy_block=privacy_block,
                     ner_block=ner_block,
+                    license_intent_block=(
+                        "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., datalicenses.org)._".format(
+                            user_valves.license_intent or "unspecified",
+                            (user_valves.license_intent_note or "—"),
+                        )
+                    ),
                     next_verb=next_verb,
                 )
 
@@ -1372,6 +1419,8 @@ class Action:
                         "attribution": attribution,
                         "verification": verification,
                         "license": user_valves.license,
+                        "license_intent": user_valves.license_intent,
+                        "license_intent_note": user_valves.license_intent_note,
                         "ai_preference": user_valves.ai_preference,
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                     }
@@ -1453,6 +1502,8 @@ class Action:
                         sharing_reason=contribution["sharing_reason"],
                         num_messages=len(contribution["clean_content"]),
                         license=contribution["license"],
+                        license_intent=contribution.get("license_intent", "unspecified"),
+                        license_intent_note=contribution.get("license_intent_note", "—") or "—",
                         ai_preference=contribution.get("ai_preference", "Credit"),
                         attribution=contribution.get("attribution", "anonymous"),
                     )
@@ -1488,6 +1539,8 @@ class Action:
                             sharing_reason=contribution["sharing_reason"],
                             num_messages=len(contribution["clean_content"]),
                             license=contribution["license"],
+                            license_intent=contribution.get("license_intent", "unspecified"),
+                            license_intent_note=contribution.get("license_intent_note", "—") or "—",
                             ai_preference=contribution.get("ai_preference", "Credit"),
                             attribution=contribution.get("attribution", "anonymous"),
                         )
