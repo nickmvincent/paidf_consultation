@@ -28,6 +28,8 @@ HUGGINGFACE_DATASET_DISCUSSION_URL = (
     "https://huggingface.co/datasets/{repo}/discussions/{num}"
 )
 DATALICENSES_URL = "https://datalicenses.org"
+DEFAULT_FAQ_URL = "https://example.com/flywheel-faq"
+DEFAULT_PRIVACY_POLICY_URL = "https://example.com/privacy"
 
 
 # ======================================================================
@@ -164,10 +166,8 @@ PR_CREATED_RESULT = """
 # Contribution sent! Thank you!
 
 **Contribution #{pr_number}**: [View on HuggingFace]({pr_url})
-**Status**: Awaiting review
 
 **Contribution Summary**
-- ID: `{contrib_id}`
 - Assessment: {sharing_reason}
 - Messages: {num_messages}
 - Licensing Intent: {license_intent}
@@ -254,11 +254,6 @@ PRIVACY_PATTERNS = {
     "ethereum_address": r"\b0x[a-fA-F0-9]{40}\b",
 }
 
-
-# (Intentionally left without AI-use preference settings; we'll translate
-# licensing intents into enforceable options as standards mature.)
-
-
 # ======================================================================
 # Types
 # ======================================================================
@@ -270,7 +265,6 @@ class Contribution(TypedDict, total=True):
     sharing_reason: Literal["good", "bad", "mixed"]
     sharing_tag: Literal["dataset-good", "dataset-bad", "dataset-mixed"]
     all_tags: List[str]
-    # Declarative licensing intent (replaces legacy license)
     license_intent: str
     license_intent_note: str
     ai_thoughts: str
@@ -282,6 +276,7 @@ class Contribution(TypedDict, total=True):
     version: str
     feedback_counts: Dict[str, int]
     # Map of clean_content message index (stringified) -> "good" | "bad"
+    # note: this could be explained better / possibly refactored
     response_labels: Dict[str, Literal["good", "bad"]]
 
 
@@ -331,11 +326,9 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         raise ValueError("response_labels must be a dict mapping indexes to labels")
     return c  # type: ignore[return-value]
 
-
 # ======================================================================
 # Config
 # ======================================================================
-
 
 class Action:
     class Valves(BaseModel):
@@ -349,10 +342,10 @@ class Action:
             default=True, description="Preflight: verify repo exists and token perms"
         )
         faq_url: str = Field(
-            default="https://example.com/flywheel-faq", description="Data FAQ"
+            default=DEFAULT_FAQ_URL, description="Data FAQ"
         )
         privacy_policy_url: str = Field(
-            default="https://example.com/privacy", description="Privacy Policy"
+            default=DEFAULT_PRIVACY_POLICY_URL, description="Privacy Policy"
         )
         min_messages: int = Field(
             default=2, description="Minimum messages required to share"
@@ -367,7 +360,6 @@ class Action:
             default=False, description="Enable public sharing workflow"
         )
 
-        # Attribution: simplified
         attribution_mode: Literal["anonymous", "pseudonym", "huggingface"] = Field(
             default="anonymous",
             description=(
@@ -378,9 +370,6 @@ class Action:
             ),
         )
 
-        # New: Declarative licensing intent (menu) + optional note.
-        # These selections communicate the contributor's intent today; we'll translate
-        # them into concrete licenses/policies as the ecosystem settles (e.g., datalicenses.org).
         license_intent: Literal[
             "AI devs who open‑source only",
             "AI devs who contribute back to the ecosystem",
@@ -402,7 +391,6 @@ class Action:
                 "Optional note to clarify your licensing intent (e.g., what counts as reciprocity, acceptable open‑source licenses, or public body scope)."
             ),
         )
-        # New: open-ended contributor thoughts about AI, stored alongside contribution
         ai_thoughts: str = Field(
             default="",
             description=(
@@ -417,7 +405,6 @@ class Action:
                 f"Create/manage at {HUGGINGFACE_TOKENS_DOC_URL}"
             ),
         )
-        # Note: Private researcher access is not available in the initial launch.
 
     def __init__(self):
         self.valves = self.Valves()
