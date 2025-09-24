@@ -45,7 +45,7 @@ How to setup public sharing:
 2) Toggle "Public Sharing Available" ON (Green)
 3) Choose an Attribution Mode (anonymous, an automatically generated pseudonym like "publicai-fan-123", or, for power users, manually submit via your own Hugging Face account)
 4) Choose a Data Licensing Intent (declarative). Examples: "AI developers who open‑source only", "AI developers who contribute back to the ecosystem", "Public bodies only". We will translate these intents into enforceable options as the ecosystem stabilizes (see datalicenses.org and related efforts). For now, this captures your intent alongside the contribution.
-5) Optional: Choose AI Preference Signals (experimental). By default, we apply our current best-available signal for AI data use (today: Ecosystem reciprocity — …;cc-cr-ec). This may evolve as standards mature. See our FAQ ({faq_url}) for all options and details. Learn more: CC Signals (https://creativecommons.org/ai/cc-signals/) • IETF/IAB discussions • RSL (https://rslstandard.org/) — RSL integration is planned.
+5) No extra settings needed: we will translate your declarative licensing intent into enforceable options (e.g., emerging AI-use signals like CC Signals, or policies at datalicenses.org) as standards mature.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -60,8 +60,7 @@ PUBLIC_DATA_WARNING = (
 # Summarized header shown above details
 PREVIEW_HEADER = (
     "**Assessment**: **{reason}** (`{sharing_tag}`); **Messages**: {num_messages}; "
-    "**Licensing Intent**: {license_intent}; "
-    "**AI Preference Signals (experimental)**: {ai_preference}; **How you show up**: {attribution}"
+    "**Licensing Intent**: {license_intent}; **How you show up**: {attribution}"
 )
 
 # Everything else placed in details
@@ -145,7 +144,6 @@ TEST_MODE_RESULT = """
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
 - Contributor Thoughts (AI): {ai_thoughts}
- - AI Preference Signals (experimental): {ai_preference}
  - Contributor Display: {attribution}
 """
 
@@ -162,8 +160,7 @@ PR_CREATED_RESULT = """
 - Licensing Intent: {license_intent}
 - Licensing Note: {license_intent_note}
 - Contributor Thoughts (AI): {ai_thoughts}
- - AI Preference Signals (experimental): {ai_preference}
- - Contributor Display: {attribution}
+  - Contributor Display: {attribution}
 """
 
 PR_DESCRIPTION_TEMPLATE = """## Contribution Details
@@ -176,7 +173,6 @@ PR_DESCRIPTION_TEMPLATE = """## Contribution Details
 **Licensing Note**: {license_intent_note}
 **Contributor Thoughts (AI)**:
 {ai_thoughts}
-**AI Preference Signals (experimental)**: {ai_preference}
 **Content Hash**: `{content_hash}`
 **Submitted**: {submitted_at}
 
@@ -244,19 +240,8 @@ PRIVACY_PATTERNS = {
 }
 
 
-# Experimental: CC Preference Signal definitions used for human‑readable preview
-AI_PREFERENCE_DEFS: Dict[str, str] = {
-    "train-genai=n": "Deny training.",
-    "train-genai=n;exceptions=cc-cr": "Allow training with Credit (attribution).",
-    "train-genai=n;exceptions=cc-cr-dc": "Allow with Credit + Direct Contribution reciprocity.",
-    "train-genai=n;exceptions=cc-cr-ec": "Allow with Credit + Ecosystem reciprocity.",
-    "train-genai=n;exceptions=cc-cr-op": "Allow with Credit + Open reciprocity.",
-    "ai-use=n": "Deny AI use.",
-    "ai-use=n;exceptions=cc-cr": "Allow AI use with Credit (attribution).",
-    "ai-use=n;exceptions=cc-cr-dc": "Allow with Credit + Direct Contribution reciprocity.",
-    "ai-use=n;exceptions=cc-cr-ec": "Allow with Credit + Ecosystem reciprocity.",
-    "ai-use=n;exceptions=cc-cr-op": "Allow with Credit + Open reciprocity.",
-}
+# (Intentionally left without AI-use preference settings; we'll translate
+# licensing intents into enforceable options as standards mature.)
 
 
 # ======================================================================
@@ -274,14 +259,9 @@ class Contribution(TypedDict, total=True):
     license_intent: str
     license_intent_note: str
     ai_thoughts: str
-    # IETF Content-Usage expression (preset), e.g.,
-    # "train-genai=n" or "train-genai=n;exceptions=cc-cr"
-    ai_preference: str
     attribution: str
     attribution_mode: Literal["anonymous", "pseudonym", "manual_hf"]
     verification: Dict[str, Any]
-    ai_preference_note: str
-    ai_preference_time: str
     contributed_at: str
     content_hash: str
     version: str
@@ -301,12 +281,9 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         "license_intent",
         "license_intent_note",
         "ai_thoughts",
-        "ai_preference",
         "attribution",
         "attribution_mode",
         "verification",
-        "ai_preference_note",
-        "ai_preference_time",
         "contributed_at",
         "content_hash",
         "version",
@@ -331,8 +308,6 @@ def validate_contribution(c: Dict[str, Any]) -> Contribution:
         raise ValueError("license_intent_note must be a string")
     if not isinstance(c.get("ai_thoughts"), str):
         raise ValueError("ai_thoughts must be a string")
-    if not isinstance(c["ai_preference"], str) or not c["ai_preference"].strip():
-        raise ValueError("ai_preference must be a non-empty string (Content-Usage expression)")
     if not isinstance(c["clean_content"], list) or not c["clean_content"]:
         raise ValueError("clean_content must be a non-empty list")
     if not isinstance(c["feedback_counts"], dict):
@@ -417,26 +392,6 @@ class Action:
             default="",
             description=(
                 "Optional: Your open‑ended thoughts about AI to include with the contribution."
-            ),
-        )
-        # Experimental: AI Preference Signals (CC Signals). Options may evolve.
-        ai_preference: Literal[
-            "train-genai=n",
-            "train-genai=n;exceptions=cc-cr",
-            "train-genai=n;exceptions=cc-cr-dc",
-            "train-genai=n;exceptions=cc-cr-ec",
-            "train-genai=n;exceptions=cc-cr-op",
-            "ai-use=n",
-            "ai-use=n;exceptions=cc-cr",
-            "ai-use=n;exceptions=cc-cr-dc",
-            "ai-use=n;exceptions=cc-cr-ec",
-            "ai-use=n;exceptions=cc-cr-op",
-        ] = Field(
-            default="train-genai=n;exceptions=cc-cr-ec",
-            description=(
-                "AI Preference Signals (experimental). Default: our current best‑available signal (today: Ecosystem reciprocity — …;cc-cr-ec). "
-                "This may change as standards mature. Choose training‑focused (train-genai=…) or general AI‑use (ai-use=…). "
-                "Learn more: CC Signals https://creativecommons.org/ai/cc-signals/ • RSL https://rslstandard.org/ (planned)."
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
@@ -603,11 +558,7 @@ class Action:
         }
 
 
-    def _ai_pref_definition(self, pref: str) -> str:
-        try:
-            return AI_PREFERENCE_DEFS.get(pref, "")
-        except Exception:
-            return ""
+    
 
     # DB helpers
     def _get_full_chat_data(self, chat_id: str) -> Dict[str, Any]:
@@ -817,7 +768,6 @@ class Action:
                 license_intent=contribution.get("license_intent", "unspecified"),
                 license_intent_note=contribution.get("license_intent_note", "—") or "—",
                 ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
-                ai_preference=contribution.get("ai_preference", "Credit"),
                 content_hash=contribution.get("content_hash", "N/A"),
                 submitted_at=contribution["contributed_at"],
                 attribution_mode=contribution.get("attribution_mode", "anonymous"),
@@ -1162,12 +1112,9 @@ class Action:
                         "license_intent": user_valves.license_intent,
                         "license_intent_note": user_valves.license_intent_note,
                         "ai_thoughts": user_valves.ai_thoughts,
-                        "ai_preference": user_valves.ai_preference,
                         "attribution": attribution,
                         "attribution_mode": user_valves.attribution_mode,
                         "verification": verification,
-                        "ai_preference_note": "Experimental signal for AI data use; non-binding and may change as standards stabilize. Does not override explicit publication.",
-                        "ai_preference_time": datetime.now(timezone.utc).isoformat(),
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                         "content_hash": messages_hash,
                         "version": "1.0.0",
@@ -1208,11 +1155,6 @@ class Action:
                 )
 
                 # Human-readable definition appended to selected preference
-                _pref_def = self._ai_pref_definition(user_valves.ai_preference)
-                _pref_display = (
-                    f"{user_valves.ai_preference} — {_pref_def}" if _pref_def else user_valves.ai_preference
-                )
-
                 preview_md = PREVIEW_TEMPLATE.format(
                     title=chat["title"],
                     public_data_warning=self._public_data_warning(user_valves),
@@ -1221,7 +1163,6 @@ class Action:
                         sharing_tag=sharing_tag,
                         num_messages=len(clean_messages),
                         license_intent=(user_valves.license_intent or "unspecified"),
-                        ai_preference=_pref_display,
                         attribution=attribution,
                     ),
                     privacy_status=privacy_status,
@@ -1326,7 +1267,6 @@ class Action:
                         "license_intent": user_valves.license_intent,
                         "license_intent_note": user_valves.license_intent_note,
                         "ai_thoughts": user_valves.ai_thoughts,
-                        "ai_preference": user_valves.ai_preference,
                         "contributed_at": datetime.now(timezone.utc).isoformat(),
                     }
                 )
@@ -1409,7 +1349,6 @@ class Action:
                         license_intent=contribution.get("license_intent", "unspecified"),
                         license_intent_note=contribution.get("license_intent_note", "—") or "—",
                         ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
-                        ai_preference=contribution.get("ai_preference", "Credit"),
                         attribution=contribution.get("attribution", "anonymous"),
                     )
                 else:
@@ -1446,7 +1385,6 @@ class Action:
                             license_intent=contribution.get("license_intent", "unspecified"),
                             license_intent_note=contribution.get("license_intent_note", "—") or "—",
                             ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
-                            ai_preference=contribution.get("ai_preference", "Credit"),
                             attribution=contribution.get("attribution", "anonymous"),
                         )
                     else:
