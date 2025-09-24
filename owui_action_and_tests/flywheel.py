@@ -20,6 +20,17 @@ from pydantic import BaseModel, Field
 
 
 # ======================================================================
+# URL Constants (edit here)
+# ======================================================================
+HUGGINGFACE_TOKENS_DOC_URL = "https://huggingface.co/docs/hub/en/security-tokens"
+HUGGINGFACE_TOKENS_SETTINGS_URL = "https://huggingface.co/settings/tokens"
+HUGGINGFACE_DATASET_DISCUSSION_URL = (
+    "https://huggingface.co/datasets/{repo}/discussions/{num}"
+)
+DATALICENSES_URL = "https://datalicenses.org"
+
+
+# ======================================================================
 # TEMPLATES (edit here)
 # ======================================================================
 
@@ -43,9 +54,9 @@ You can always delete chats at any time or use temporary mode to ensure chats ar
 How to setup public sharing:
 1) Controls (top right) → Valves → Functions → Sharing
 2) Toggle "Public Sharing Available" ON (Green)
-3) Choose how you show up: Anonymous, Deterministic Pseudonym, or your Hugging Face account (requires a write token; learn more: https://huggingface.co/docs/hub/en/security-tokens)
-4) Choose a Data Licensing Intent (declarative). Examples: "AI developers who open‑source only", "AI developers who contribute back to the ecosystem", "Public bodies only". We will translate these intents into enforceable options as the ecosystem stabilizes (see datalicenses.org and related efforts). For now, this captures your intent alongside the contribution.
-5) Optional: Link your Hugging Face account to author PRs as you. Create a short‑lived write token at https://huggingface.co/settings/tokens, paste it, and we will verify it locally. Tokens are stored per‑user and never published.
+3) Choose how you show up: Anonymous, Deterministic Pseudonym, or your Hugging Face account (requires a write token; learn more: {hf_tokens_doc_url})
+4) Choose a Data Licensing Intent (declarative). Examples: "AI developers who open‑source only", "AI developers who contribute back to the ecosystem", "Public bodies only". We will translate these intents into enforceable options as the ecosystem stabilizes (see {datalicenses_url} and related efforts). For now, this captures your intent alongside the contribution.
+5) Optional: Link your Hugging Face account to author PRs as you. Create a short‑lived write token at {hf_tokens_settings_url}, paste it, and we will verify it locally. Tokens are stored per‑user and never published.
 6) Close Chat Controls once you're done, and then click the "Sharing" button under your chat again!
 
 Data FAQ: {faq_url} • Privacy Policy: {privacy_policy_url}
@@ -402,8 +413,8 @@ class Action:
         hf_user_token: str = Field(
             default="",
             description=(
-                "Your Hugging Face write token; (Never published; this action is open source so you can see exactly what we're doing with the token!). "
-                "Create/manage at https://huggingface.co/docs/hub/en/security-tokens"
+                f"Your Hugging Face write token; (Never published; this action is open source so you can see exactly what we're doing with the token!). "
+                f"Create/manage at {HUGGINGFACE_TOKENS_DOC_URL}"
             ),
         )
         # Note: Private researcher access is not available in the initial launch.
@@ -431,7 +442,9 @@ class Action:
             time_diff = datetime.now(timezone.utc) - last_submit_time
             if time_diff < timedelta(minutes=self.DUP_WINDOW_MINUTES):
                 seconds_ago = int(time_diff.total_seconds())
-                pr_url = f"https://huggingface.co/datasets/{self.valves.dataset_repo}/discussions/{pr_number}"
+                pr_url = HUGGINGFACE_DATASET_DISCUSSION_URL.format(
+                    repo=self.valves.dataset_repo, num=pr_number
+                )
                 return (
                     True,
                     f"This chat was shared {seconds_ago} seconds ago. [View PR #{pr_number}]({pr_url})",
@@ -805,9 +818,7 @@ class Action:
             )
             pr_num = getattr(commit_info, "pr_num", None)
             pr_url = (
-                "https://huggingface.co/datasets/{}/discussions/{}".format(
-                    dataset_repo, pr_num
-                )
+                HUGGINGFACE_DATASET_DISCUSSION_URL.format(repo=dataset_repo, num=pr_num)
                 if pr_num
                 else getattr(commit_info, "pr_url", "Check repository")
             )
@@ -982,6 +993,9 @@ class Action:
                         "content": SETUP_TEMPLATE.format(
                             faq_url=self.valves.faq_url,
                             privacy_policy_url=self.valves.privacy_policy_url,
+                            hf_tokens_doc_url=HUGGINGFACE_TOKENS_DOC_URL,
+                            hf_tokens_settings_url=HUGGINGFACE_TOKENS_SETTINGS_URL,
+                            datalicenses_url=DATALICENSES_URL,
                         )
                     },
                 }
@@ -1188,9 +1202,10 @@ class Action:
                     share_json_block=share_json_block,
                     privacy_block=privacy_block,
                     license_intent_block=(
-                        "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., datalicenses.org)._".format(
+                    "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., {})._.".format(
                             user_valves.license_intent or "unspecified",
                             (user_valves.license_intent_note or "—"),
+                            DATALICENSES_URL,
                         )
                     ),
                     ai_thoughts_block=(
@@ -1353,10 +1368,8 @@ class Action:
 
                 if (not have_hf_creds) or manual_mode:
                     mock_pr_number = "MOCK-123"
-                    mock_pr_url = (
-                        "https://huggingface.co/datasets/{}/discussions/{}".format(
-                            self.valves.dataset_repo, mock_pr_number
-                        )
+                    mock_pr_url = HUGGINGFACE_DATASET_DISCUSSION_URL.format(
+                        repo=self.valves.dataset_repo, num=mock_pr_number
                     )
                     result = TEST_MODE_RESULT.format(
                         mock_pr_number=mock_pr_number,
