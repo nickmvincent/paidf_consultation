@@ -1,0 +1,68 @@
+# Failure Modes of Public AI Data Flywheels {sec-failure}
+
+> Short first draft. Goal: name concrete ways a public data flywheel can stall or backfire, plus early signals and pragmatic mitigations to bake into v1.
+
+## Why this matters
+
+Public flywheels promise compounding improvements: usage creates data; shared data improves models; better models attract usage. But feedback loops amplify downsides, too. If we ignore failure modes early, the same compounding dynamics entrench defects, erode trust, and are hard to unwind once incentives set.
+
+## Two primary failure modes
+
+### 1) No good data (trivial examples, low usage)
+
+- What happens: Contributions are sparse, short, and low‑signal; usage stalls so the flywheel never spins. Edge cases and hard tasks are underrepresented, making improvements shallow.
+- Why it happens: Weak product pull, unclear contribution asks, friction in the flow, or incentives that reward volume over quality. Cold‑start dynamics and “empty room” effect deter early users.
+- Early signals: High bounce rates; many single‑turn chats; few multi‑step corrections; long tail of near‑duplicates; contributor churn after 1–2 tries.
+- Mitigations: Ship strong, narrow utility first; template “valuable” examples; seed with curated gold sets; guided tasks over free‑form when early; highlight impact/attribution so contributors see outcomes; reduce cognitive/UX friction for non‑trivial submissions.
+
+### 2) Good data, but private actors benefit most
+
+- What happens: The public corpus is high‑quality, but closed providers can ingest it at scale, converting shared effort into private advantage with little reciprocity. The public project bears governance and moderation costs; value accrues elsewhere.
+- Why it happens: Permissive licensing without reciprocity; no access lag or rate asymmetry; weak brand/attribution; limited downstream public models using the data.
+- Early signals: Prominent closed models improve on tasks overrepresented in the corpus; citations/attribution are missing; partners delay or avoid open releases while extracting data; contributor questions about “who benefits?” rise.
+- Mitigations: Calibrate licenses (e.g., share‑alike terms where feasible, tiered licenses for high‑value subsets); create reciprocity agreements and data‑use covenants; introduce access symmetry (mirrors, rate limits, attribution requirements); build visible public baselines that convert data into open improvements.
+
+## Cross‑cutting failure: Loss of trust
+
+- What happens: Even with usage and data quality, perceived misalignment (opaque data flows, surprise uses, slow removals) erodes legitimacy. Contributors pause sharing; partners hesitate; moderation gets adversarial.
+- Why it happens: Consent scope creep, unclear retention, slow or manual deletion flows, security/privacy incidents, or governance capture.
+- Early signals: Rising deletion/retention requests; social media complaints about “bait‑and‑switch”; maintainers field policy questions instead of contributions; partner deals stall.
+- Mitigations: Plain‑language, versioned scopes; one‑click revocation with downstream propagation commitments; published data lineage and change logs; incident response SLOs; contributor representation in governance; regular external audits.
+
+## Other failure modes (brief)
+
+- Governance capture: Small groups tilt curation and priorities toward incumbents.
+- Data poisoning and gaming: Coordinated or subtle adversarial inputs skew training/evals.
+- Privacy and security incidents: Reidentification or leaks harm users and program viability.
+- Legal and policy shocks: Regulatory or IP events force takedowns and reprocessing.
+- Cold start and contributor fatigue: Repeated asks without visible impact reduce motivation.
+- Metric tunnel vision: Optimizing counts over signal quality and representativeness.
+- Fragmentation and forking: Incompatible schemas/licenses prevent compounding benefits.
+
+## Early warning signs
+
+- Skewed distributions: Heavy‑tailed usage (few users, few tasks) dominate the corpus; edge domains stall.
+- Rising moderation/curation backlog: Lead time grows; volunteer reviewers churn.
+- Consent tickets: Support requests about deletion/retention increase; contributors ask “where did my data go?”
+- Downstream mismatch: Benchmark gains do not translate to real‑world tasks contributors care about.
+- Quiet forks: External mirrors appear with different licenses/policies; partners hesitate to integrate.
+- Incident near‑misses: Post‑hoc redactions or takedowns become routine, not exceptional.
+
+## Mitigations (sketch)
+
+- Shape supply, don’t only count it: Target valuable gaps; templates for non‑trivial cases; curated seeds.
+- Make consent legible and revocable: Versioned scopes; one‑click deletion; downstream propagation.
+- Put guardrails in the loop: Client checks, staged publication, canaries to detect drift/poisoning.
+- Align incentives: Attribution, recognition, and shared benefits for contributors and curators.
+- Modular licensing and reciprocity: Calibrate terms; require attribution and contribution back where feasible.
+- Operational discipline: SLOs, incident playbooks, data lineage; reproducible processing.
+- Evaluate what matters: Task‑relevant evals; periodic re‑weighting to counter metric tunnel vision.
+
+## Open questions
+
+- How to structure reciprocity so open data still compounds publicly without being fully privatized downstream?
+- What minimum viable governance keeps velocity high while giving contributors credible voice and recourse?
+- Which redaction/anonymization pipelines meaningfully reduce reidentification risk for multi‑modal data?
+- What is the smallest set of metrics that predicts long‑run health (quality, diversity, trust) rather than just growth?
+
+This chapter sketches the “failure surface” to design against. Later sections describe ethics/compliance considerations, contribution flows, and governance patterns that operationalize these mitigations in practice.

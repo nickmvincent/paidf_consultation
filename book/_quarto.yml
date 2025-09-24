@@ -17,6 +17,7 @@ book:
       - 01e_options_for_flywheel.qmd
       - 01f_ethics_compliance.qmd
       - 01g_upstream.qmd
+      - 01h_failure_modes.qmd
     - part: "Case Study: Low friction peer production"
       chapters:
       - 2a_mvp.qmd
@@ -48,5 +49,4 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
-
 
