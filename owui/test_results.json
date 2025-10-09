@@ -1,0 +1,86 @@
+{
+  "phone_intl": {
+    "pattern": "phone_intl",
+    "passed": 8,
+    "failed": 0,
+    "failures": []
+  },
+  "phone_us": {
+    "pattern": "phone_us",
+    "passed": 6,
+    "failed": 0,
+    "failures": []
+  },
+  "phone_us_no_sep": {
+    "pattern": "phone_us_no_sep",
+    "passed": 5,
+    "failed": 0,
+    "failures": []
+  },
+  "email": {
+    "pattern": "email",
+    "passed": 12,
+    "failed": 0,
+    "failures": []
+  },
+  "ssn": {
+    "pattern": "ssn",
+    "passed": 8,
+    "failed": 0,
+    "failures": []
+  },
+  "ip_address": {
+    "pattern": "ip_address",
+    "passed": 7,
+    "failed": 0,
+    "failures": []
+  },
+  "ipv6_address": {
+    "pattern": "ipv6_address",
+    "passed": 6,
+    "failed": 0,
+    "failures": []
+  },
+  "aws_access_key": {
+    "pattern": "aws_access_key",
+    "passed": 4,
+    "failed": 0,
+    "failures": []
+  },
+  "api_key_stripe": {
+    "pattern": "api_key_stripe",
+    "passed": 4,
+    "failed": 0,
+    "failures": []
+  },
+  "street_address": {
+    "pattern": "street_address",
+    "passed": 7,
+    "failed": 0,
+    "failures": []
+  },
+  "credit_card": {
+    "pattern": "credit_card",
+    "passed": 7,
+    "failed": 0,
+    "failures": []
+  },
+  "iban": {
+    "pattern": "iban",
+    "passed": 6,
+    "failed": 0,
+    "failures": []
+  },
+  "bitcoin_address": {
+    "pattern": "bitcoin_address",
+    "passed": 5,
+    "failed": 0,
+    "failures": []
+  },
+  "ethereum_address": {
+    "pattern": "ethereum_address",
+    "passed": 4,
+    "failed": 0,
+    "failures": []
+  }
+}
