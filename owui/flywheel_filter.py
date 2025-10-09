@@ -107,6 +107,7 @@ class Filter:
         __user__: Optional[dict] = None,
         __chat_id__: Optional[str] = None,
         __messages__: Optional[List[Dict[str, Any]]] = None,
+        __request__: Optional[object] = None,
     ) -> dict:
         user_valves = (__user__ or {}).get("valves")
         if not user_valves or not user_valves.public_sharing_available:

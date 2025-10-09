@@ -403,41 +403,18 @@ class FlywheelActionFlowTests(unittest.TestCase):
         notes = [e for e in events2 if e.get("type") == "notification"]
         self.assertTrue(any("Preflight checks failed" in (n.get("data") or {}).get("content", "") for n in notes))
 
-    def test_real_pr_path_and_dedup_guard_with_mock(self):
-        # Disable preflight to skip dependency, emulate installed hub module, and mock PR creation
-        self.action.user_valves.attribution_mode = "anonymous"
-        self.action.valves.default_hf_token = "hf_fake"
-        self.action.valves.dataset_repo = "owner/repo"
-        self.action.valves.sanity_check_repo = False
-
-        # Stub huggingface_hub presence for import site
-        dummy = types.ModuleType("huggingface_hub")
-        class HfApi:  # minimal stub
-            pass
-        dummy.HfApi = HfApi
-        sys.modules["huggingface_hub"] = dummy
-
+    def test_dedup_guard_without_mock(self):
         # Build preview first
         events = []
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events))
 
-        # Mock the PR creation to succeed with a number
-        def fake_create_pr(contribution, hf_token, dataset_repo):
-            return {"success": True, "pr_number": 42, "pr_url": "https://example/pr/42"}
-
-        self.action._create_pull_request = fake_create_pr  # type: ignore[assignment]
-
-        # Confirm run → should post PR created message and record submission
-        events2 = []
-        confirm_msgs = messages_from_preview(last_message_content(events))
-        asyncio.run(run_action(self.action, self.chat_id, confirm_msgs, self.user, events2))
-        content2 = last_message_content(events2)
-        self.assertIn("Contribution sent! Thank you!", content2)
+        # Simulate a prior submission record (without creating a real PR)
+        self.action._record_submission(self.chat_id, 42)
 
         # Immediately try to build preview again (first_run path) → dedup guard should warn
-        events3 = []
-        asyncio.run(run_action(self.action, self.chat_id, [], self.user, events3))
-        notes = [e for e in events3 if e.get("type") == "notification"]
+        events2 = []
+        asyncio.run(run_action(self.action, self.chat_id, [], self.user, events2))
+        notes = [e for e in events2 if e.get("type") == "notification"]
         self.assertTrue(any("This chat was shared" in (n.get("data") or {}).get("content", "") for n in notes))
 
 

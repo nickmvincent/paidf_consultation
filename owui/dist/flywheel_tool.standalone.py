@@ -686,7 +686,106 @@ def get_db_path() -> str:
     return str(Path.home() / ".open-webui" / "webui.db")
 
 
-def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
+def _get_full_chat_data_via_models(chat_id: str, request=None, user: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    try:
+        from open_webui.models.chats import Chats
+        from open_webui.models.feedbacks import Feedbacks
+    except Exception:
+        return None
+
+    # Fetch chat
+    chat = Chats.get_chat_by_id(chat_id)
+    if not chat:
+        return None
+
+    # Messages + tags from payload and meta
+    try:
+        chat_json = chat.chat if isinstance(chat.chat, dict) else {}
+    except Exception:
+        chat_json = {}
+    messages = chat_json.get("messages", []) if isinstance(chat_json, dict) else []
+
+    meta_json = chat.meta if isinstance(chat.meta, dict) else {}
+
+    meta_tags = []
+    if isinstance(meta_json.get("tags"), list):
+        meta_tags = [t for t in meta_json.get("tags") if isinstance(t, str)]
+
+    chat_tags = []
+    if isinstance(chat_json.get("tags"), list):
+        chat_tags = [t for t in chat_json.get("tags") if isinstance(t, str)]
+
+    tags = [*meta_tags, *chat_tags]
+
+    # Gather feedbacks (all) then filter by chat_id from meta/data
+    try:
+        all_feedbacks = Feedbacks.get_all_feedbacks()
+    except Exception:
+        all_feedbacks = []
+
+    feedback_items: List[Dict[str, Any]] = []
+    for fb in all_feedbacks:
+        d = fb.model_dump() if hasattr(fb, "model_dump") else dict(fb)
+        data = d.get("data") or {}
+        meta = d.get("meta") or {}
+        # normalize types
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except Exception:
+                data = {}
+        if isinstance(meta, str):
+            try:
+                meta = json.loads(meta)
+            except Exception:
+                meta = {}
+        target = meta.get("chat_id") or data.get("chat_id") or meta.get("chatId") or data.get("chatId")
+        if target == chat_id:
+            d["data"] = data
+            d["meta"] = meta
+            feedback_items.append(d)
+
+    def is_good(it):
+        data = it.get("data") or {}
+        r = data.get("rating")
+        try:
+            return r is not None and int(r) > 0
+        except Exception:
+            return False
+
+    def is_bad(it):
+        data = it.get("data") or {}
+        r = data.get("rating")
+        try:
+            return r is not None and int(r) < 0
+        except Exception:
+            return False
+
+    good = sum(1 for it in feedback_items if is_good(it))
+    bad = sum(1 for it in feedback_items if is_bad(it))
+
+    return {
+        "chat_id": chat_id,
+        "title": chat.title or "Untitled Chat",
+        "created_at": chat.created_at,
+        "updated_at": chat.updated_at,
+        "messages": messages,
+        "tags": tags,
+        "meta": meta_json,
+        "feedback_items": feedback_items,
+        "feedback_counts": {"good": good, "bad": bad},
+    }
+
+
+def get_full_chat_data(db_path: Optional[str], chat_id: str, request=None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    # Prefer model-based access when available
+    via_models = _get_full_chat_data_via_models(chat_id=chat_id, request=request, user=user)
+    if via_models is not None:
+        return via_models
+
+    # Fallback: direct SQLite (used in tests/minimal env)
+    if not db_path:
+        raise ValueError("db_path required when request is not available")
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -698,9 +797,6 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
         raise ValueError("Chat not found")
     chat_row = dict(chat_row)
 
-    cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
-    tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
-
     try:
         raw_meta = chat_row.get("meta")
         meta_json = (
@@ -708,6 +804,7 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
         )
     except Exception:
         meta_json = {}
+
     meta_tags = []
     try:
         maybe_tags = (meta_json or {}).get("tags")
@@ -731,6 +828,16 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
             chat_tags = [t for t in maybe_ctags if isinstance(t, str)]
     except Exception:
         chat_tags = []
+
+    # Attempt to include tags from chatidtag table if present
+    tags_rows: List[str] = []
+    try:
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='chatidtag'")
+        if cur.fetchone():
+            cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
+            tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
+    except Exception:
+        pass
 
     tags = [*tags_rows, *meta_tags, *chat_tags]
 
@@ -756,13 +863,6 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
                     d[k] = json.loads(d[k])
                 except Exception:
                     pass
-
-        # Normalize: feedback types
-        ftype = (d.get("type") or "").lower()
-        if ftype not in ("rating", "reaction", "vote", "thumbs"):
-            # keep but do not interpret
-            pass
-
         feedback_items.append(d)
 
     def is_good(it):
@@ -826,8 +926,6 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-
-
 # ===== End injected flywheel_shared =====
 
 
@@ -837,40 +935,6 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-    DEFAULT_FAQ_URL,
-    DEFAULT_PRIVACY_POLICY_URL,
-    DATALICENSES_URL,
-    HUGGINGFACE_TOKENS_DOC_URL,
-    HUGGINGFACE_TOKENS_SETTINGS_URL,
-    HUGGINGFACE_DATASET_DISCUSSION_URL,
-    PUBLICAI_GITHUB_URL,
-    PUBLIC_DATA_WARNING,
-    TIP_LINE,
-    PREVIEW_HEADER,
-    PREVIEW_TEMPLATE,
-    TEST_MODE_RESULT,
-    PR_CREATED_RESULT,
-    SETUP_TEMPLATE,
-    build_grabbed_section,
-    build_privacy_block,
-    build_share_json_block,
-    validate_contribution,
-    Contribution,
-    compute_sharing_reason,
-    resolve_attribution,
-    hf_preflight,
-    create_pull_request,
-    clean_messages,
-    detect_workflow_stage,
-    extract_json_from_preview,
-    map_response_labels,
-    norm_tags,
-    hash_messages,
-    check_privacy,
-    get_db_path,
-    get_full_chat_data,
-    now_iso,
-)
 
 
 class Tools:
@@ -942,6 +1006,7 @@ class Tools:
         __messages__: Optional[List[Dict[str, Any]]] = None,
         __user__: Dict[str, Any] = {},
         __event_emitter__=None,
+        __request__=None,
     ) -> str:
         """
         Share current chat to Flywheel (Hugging Face dataset PR).
@@ -969,7 +1034,7 @@ class Tools:
 
         # FIRST RUN → Build preview
         if stage == "first_run":
-            chat = get_full_chat_data(self.db_path, __chat_id__)
+            chat = get_full_chat_data(self.db_path, __chat_id__, request=__request__, user=__user__)
             clean = clean_messages(chat["messages"])
 
             if len(clean) < self.valves.min_messages:
@@ -1118,7 +1183,7 @@ class Tools:
             except Exception as e:
                 return f"Preview invalid: {e}"
 
-            chat = get_full_chat_data(self.db_path, __chat_id__)
+            chat = get_full_chat_data(self.db_path, __chat_id__, request=__request__, user=__user__)
             fresh_messages = clean_messages(chat["messages"])
             fresh_hash = hash_messages(fresh_messages)
             new_sharing_tag, new_reason = compute_sharing_reason(chat["feedback_counts"])

@@ -36,12 +36,42 @@ def strip_future_imports(s: str) -> str:
 
 
 def remove_shared_imports(lines: list[str]) -> list[str]:
-    out = []
-    pattern = re.compile(r"\b(flywheel_shared)\b")
+    """Remove any import of flywheel_shared, including multiline blocks.
+
+    Handles patterns like:
+      from .flywheel_shared import (
+          A,
+          B,
+      )
+    And single-line:
+      from .flywheel_shared import A, B
+      import flywheel_shared
+    """
+    out: list[str] = []
+    pattern = re.compile(r"\bflywheel_shared\b")
+    in_block = False
+    depth = 0
     for ln in lines:
-        if "import" in ln and pattern.search(ln):
-            # drop this line
+        if in_block:
+            # Track parentheses depth and continue skipping until closed
+            depth += ln.count("(")
+            depth -= ln.count(")")
+            if depth <= 0:
+                in_block = False
             continue
+
+        if pattern.search(ln) and "import" in ln and ln.strip().startswith("from"):
+            # Start of multiline or single-line from-import
+            depth = ln.count("(") - ln.count(")")
+            if depth > 0:
+                in_block = True
+            # Skip this line (and subsequent lines if in_block)
+            continue
+
+        if pattern.search(ln) and ln.strip().startswith("import"):
+            # import flywheel_shared
+            continue
+
         out.append(ln)
     return out
 
@@ -107,4 +137,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

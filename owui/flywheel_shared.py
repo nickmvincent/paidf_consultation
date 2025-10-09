@@ -818,7 +818,17 @@ def get_full_chat_data(db_path: Optional[str], chat_id: str, request=None, user:
     except Exception:
         chat_tags = []
 
-    tags = [*meta_tags, *chat_tags]
+    # Attempt to include tags from chatidtag table if present
+    tags_rows: List[str] = []
+    try:
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='chatidtag'")
+        if cur.fetchone():
+            cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
+            tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
+    except Exception:
+        pass
+
+    tags = [*tags_rows, *meta_tags, *chat_tags]
 
     q = """
         SELECT id, type, data, meta, created_at
@@ -903,4 +913,3 @@ def build_share_json_block(export_contribution: Dict[str, Any]) -> str:
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
-

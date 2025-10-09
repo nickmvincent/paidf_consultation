@@ -20,23 +20,23 @@ from pydantic import BaseModel, Field
 
 # Flywheel shared helpers (templates, privacy, utils)
 from .flywheel_shared import (
-    PRIVACY_PATTERNS as SHARED_PRIVACY_PATTERNS,
-    norm_tags as _shared_norm_tags,
-    hash_messages as _shared_hash_messages,
-    sanitize_contribution_for_export as _shared_sanitize,
-    deterministic_pseudonym as _shared_pseudonym,
-    luhn_ok as _shared_luhn_ok,
-    check_privacy as _shared_check_privacy,
-    get_db_path as _shared_get_db_path,
-    get_full_chat_data as _shared_get_full_chat_data,
-    compute_sharing_reason as _shared_compute_reason,
-    resolve_attribution as _shared_resolve_attr,
-    hf_preflight as _shared_hf_preflight,
-    create_pull_request as _shared_create_pr,
-    clean_messages as _shared_clean_messages,
-    detect_workflow_stage as _shared_detect_stage,
-    extract_json_from_preview as _shared_extract_preview,
-    map_response_labels as _shared_map_response_labels,
+    PRIVACY_PATTERNS,
+    norm_tags,
+    hash_messages,
+    sanitize_contribution_for_export,
+    deterministic_pseudonym,
+    luhn_ok,
+    check_privacy,
+    get_db_path,
+    get_full_chat_data,
+    compute_sharing_reason,
+    resolve_attribution,
+    hf_preflight,
+    create_pull_request,
+    clean_messages,
+    detect_workflow_stage,
+    extract_json_from_preview,
+    map_response_labels,
 )
 
 
@@ -228,58 +228,6 @@ TIP_LINE = (
 )
 
 
-PRIVACY_PATTERNS = SHARED_PRIVACY_PATTERNS
-# Legacy (unused) left for reference below
-LEGACY_PRIVACY_PATTERNS = {
-    "phone_intl": (
-        r"(?<!\d)\+(?:"
-        r"(?:[1-9])(?:[-.\s]?\d){7,13}"
-        r"|(?:[1-9]\d)(?:[-.\s]?\d){6,12}"
-        r"|(?:[1-9]\d{2})(?:[-.\s]?\d){5,11}"
-        r")(?!\d)"
-    ),
-    "phone_us": r"(?<!\d)(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)",
-    "phone_us_no_sep": r"(?<!\d)(?:\+?1)?(?:[2-9]\d{2}\d{7})(?!\d)",
-    "email": (
-        r"(?<![A-Za-z0-9._%+-])"
-        r"[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?"
-        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?)*"
-        r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"
-        r"(?![A-Za-z0-9._%+-])"
-    ),
-    "ssn": r"(?<!\d)(?!000|666|9\d{2})\d{3}[-\s]?(?!00)\d{2}[-\s]?(?!0000)\d{4}(?!\d)",
-    "ip_address": r"(?<!\d)(?<!\.)(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?!\.\d)(?!\d)",
-    "ipv6_address": (
-        r"(?<![A-Za-z0-9:])(" 
-        r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,7}:"
-        r"|:(?::[A-Fa-f0-9]{1,4}){1,7}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}"
-        r"|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}"
-        r")(?!(?:[A-Za-z0-9:.]))"
-    ),
-    "aws_access_key": r"\b(?-i:(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16,17})\b",
-    "aws_secret_key": r"\b[A-Za-z0-9/+=]{40}\b",
-    "private_key": r"-----BEGIN\s+(?:RSA\s+)?(?:PRIVATE|ENCRYPTED)\s+KEY-----",
-    "api_key_stripe": r"\b(?:sk|pk)_(?:test_|live_)?[A-Za-z0-9]{24,}\b",
-    "api_key_generic": r"\b(?:api[-_]?key|apikey|access[-_]?token)[-_:\s]*[A-Za-z0-9+/]{32,}\b",
-    "street_address": r"\b\d{1,5}\s+(?:[NSEW]\.?\s+)?[A-Za-z0-9\s\-\.]{2,30}\s+(?:St(?:reet)?|Ave(?:nue)?|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr(?:ive)?|Ct|Court|Cir(?:cle)?|Pl(?:aza)?|Way|Pkwy|Parkway|Pike|Ter(?:race)?|Trail|Path|Loop|Run|Pass|Cross(?:ing)?|Sq(?:uare)?)\b",
-    "credit_card": r"\b(?:\d[-\s]?){13,19}\b",
-    "routing_number": r"\b(?:ABA|Routing)[-:\s]*\d{9}\b",
-    "iban": (
-        r"\b(?:AL|AD|AT|AZ|BH|BE|BA|BR|BG|CR|HR|CY|CZ|DK|DO|EE|FO|FI|FR|GE|DE|GI|GR|GL|GT|HU|IS|IE|IL|IT|JO|KZ|KW|LV|LB|LI|LT|LU|MT|MR|MU|MC|MD|ME|NL|NO|PK|PS|PL|PT|QA|RO|SM|SA|RS|SK|SI|ES|SE|CH|TN|TR|AE|GB|VG|XK)\d{2}[A-Z0-9]{4,30}\b"
-    ),
-    "us_passport": r"\b(?:[0-9]{9}|[A-Z][0-9]{8})\b",
-    "ein": r"\b\d{2}-\d{7}\b",
-    "medicare": r"\b[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{4}\b",
-    "bitcoin_address": r"\b(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b",
-    "ethereum_address": r"\b0x[a-fA-F0-9]{40}\b",
-}
-
 # ======================================================================
 # Types
 # ======================================================================
@@ -435,7 +383,7 @@ class Action:
     def __init__(self):
         self.valves = self.Valves()
         self.user_valves = self.UserValves()
-        self.db_path = _shared_get_db_path()
+        self.db_path = get_db_path()
         self.recent_submissions: Dict[str, Tuple[datetime, str]] = (
             {}
         )  # chat_id -> (timestamp, pr_number)
@@ -477,24 +425,24 @@ class Action:
     # Helpers
     # ------------------------------------------------------------------
     def _norm_tags(self, tags: List[str]) -> List[str]:
-        return _shared_norm_tags(tags)
+        return norm_tags(tags)
 
     def _hash_messages(self, messages: List[Dict[str, Any]]) -> str:
-        return _shared_hash_messages(messages)
+        return hash_messages(messages)
 
     def _sanitize_contribution_for_export(self, contribution: Dict[str, Any]) -> Dict[str, Any]:
-        return _shared_sanitize(contribution)
+        return sanitize_contribution_for_export(contribution)
 
     # Deterministic pseudonym from user id only
     def _deterministic_pseudonym(self, user_obj: Dict[str, Any]) -> str:
-        return _shared_pseudonym(user_obj)
+        return deterministic_pseudonym(user_obj)
 
     # Privacy scan (improved, counts only)
     def _luhn_ok(self, s: str) -> bool:
-        return _shared_luhn_ok(s)
+        return luhn_ok(s)
 
     def _check_privacy(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-        return _shared_check_privacy(messages)
+        return check_privacy(messages)
 
 
     
@@ -502,29 +450,29 @@ class Action:
     # DB helpers
     def _get_full_chat_data(self, chat_id: str, request=None, user_obj=None) -> Dict[str, Any]:
         # Delegate to shared implementation (prefers model-based, falls back to sqlite for tests)
-        return _shared_get_full_chat_data(chat_id=chat_id, db_path=self.db_path, request=request, user=user_obj)
+        return get_full_chat_data(chat_id=chat_id, db_path=self.db_path, request=request, user=user_obj)
 
     def _compute_sharing_reason(self, feedback_counts: Dict[str, int]) -> Tuple[str, str]:
-        return _shared_compute_reason(feedback_counts)
+        return compute_sharing_reason(feedback_counts)
 
     def _resolve_attribution(self, user_valves: "Action.UserValves", user_obj: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
-        return _shared_resolve_attr(user_valves.attribution_mode, user_obj)
+        return resolve_attribution(user_valves.attribution_mode, user_obj)
 
     # HF preflight & PR
     def _hf_preflight(self, hf_token: str) -> dict:
-        return _shared_hf_preflight(self.valves.dataset_repo, hf_token)
+        return hf_preflight(self.valves.dataset_repo, hf_token)
 
     def _create_pull_request(self, contribution: Contribution, hf_token: str, dataset_repo: str) -> Dict[str, Any]:
-        return _shared_create_pr(contribution, hf_token, dataset_repo)
+        return create_pull_request(contribution, hf_token, dataset_repo)
 
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return _shared_clean_messages(messages)
+        return clean_messages(messages)
 
     def _detect_workflow_stage(self, messages: List[Dict[str, Any]]) -> Tuple[str, Optional[str]]:
-        return _shared_detect_stage(messages)
+        return detect_workflow_stage(messages)
 
     def _extract_json_from_preview(self, content: str) -> Optional[Dict[str, Any]]:
-        return _shared_extract_preview(content)
+        return extract_json_from_preview(content)
 
     def _map_response_labels(
         self,
@@ -532,7 +480,7 @@ class Action:
         clean_messages: List[Dict[str, Any]],
         feedback_items: List[Dict[str, Any]],
     ) -> Dict[str, Literal["good", "bad"]]:
-        return _shared_map_response_labels(raw_messages, clean_messages, feedback_items)
+        return map_response_labels(raw_messages, clean_messages, feedback_items)
 
     # ------------------------------------------------------------------
     # Main

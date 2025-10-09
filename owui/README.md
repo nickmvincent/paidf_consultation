@@ -31,6 +31,7 @@ Tests
 Notes
 - The Tool/Filter/Pipe variants reuse logic via `flywheel_shared.py` to stay consistent with the Action behavior and templates.
 - If desired, `flywheel_action.py` can be refactored to import the shared helpers to fully deduplicate logic.
+- Data access: When running inside OpenWebUI, data (chat, tags, feedbacks) is read via the in-process models (`open_webui.models.chats/feedbacks`) and not by direct SQL queries. In standalone tests or environments without the OpenWebUI backend loaded, the code transparently falls back to reading the local SQLite file for test isolation.
 
 Build (standalone scripts)
 - Some OpenWebUI installs load single-file plugins via the admin panel and cannot resolve local imports.

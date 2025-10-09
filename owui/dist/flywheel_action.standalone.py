@@ -686,7 +686,106 @@ def get_db_path() -> str:
     return str(Path.home() / ".open-webui" / "webui.db")
 
 
-def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
+def _get_full_chat_data_via_models(chat_id: str, request=None, user: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    try:
+        from open_webui.models.chats import Chats
+        from open_webui.models.feedbacks import Feedbacks
+    except Exception:
+        return None
+
+    # Fetch chat
+    chat = Chats.get_chat_by_id(chat_id)
+    if not chat:
+        return None
+
+    # Messages + tags from payload and meta
+    try:
+        chat_json = chat.chat if isinstance(chat.chat, dict) else {}
+    except Exception:
+        chat_json = {}
+    messages = chat_json.get("messages", []) if isinstance(chat_json, dict) else []
+
+    meta_json = chat.meta if isinstance(chat.meta, dict) else {}
+
+    meta_tags = []
+    if isinstance(meta_json.get("tags"), list):
+        meta_tags = [t for t in meta_json.get("tags") if isinstance(t, str)]
+
+    chat_tags = []
+    if isinstance(chat_json.get("tags"), list):
+        chat_tags = [t for t in chat_json.get("tags") if isinstance(t, str)]
+
+    tags = [*meta_tags, *chat_tags]
+
+    # Gather feedbacks (all) then filter by chat_id from meta/data
+    try:
+        all_feedbacks = Feedbacks.get_all_feedbacks()
+    except Exception:
+        all_feedbacks = []
+
+    feedback_items: List[Dict[str, Any]] = []
+    for fb in all_feedbacks:
+        d = fb.model_dump() if hasattr(fb, "model_dump") else dict(fb)
+        data = d.get("data") or {}
+        meta = d.get("meta") or {}
+        # normalize types
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except Exception:
+                data = {}
+        if isinstance(meta, str):
+            try:
+                meta = json.loads(meta)
+            except Exception:
+                meta = {}
+        target = meta.get("chat_id") or data.get("chat_id") or meta.get("chatId") or data.get("chatId")
+        if target == chat_id:
+            d["data"] = data
+            d["meta"] = meta
+            feedback_items.append(d)
+
+    def is_good(it):
+        data = it.get("data") or {}
+        r = data.get("rating")
+        try:
+            return r is not None and int(r) > 0
+        except Exception:
+            return False
+
+    def is_bad(it):
+        data = it.get("data") or {}
+        r = data.get("rating")
+        try:
+            return r is not None and int(r) < 0
+        except Exception:
+            return False
+
+    good = sum(1 for it in feedback_items if is_good(it))
+    bad = sum(1 for it in feedback_items if is_bad(it))
+
+    return {
+        "chat_id": chat_id,
+        "title": chat.title or "Untitled Chat",
+        "created_at": chat.created_at,
+        "updated_at": chat.updated_at,
+        "messages": messages,
+        "tags": tags,
+        "meta": meta_json,
+        "feedback_items": feedback_items,
+        "feedback_counts": {"good": good, "bad": bad},
+    }
+
+
+def get_full_chat_data(db_path: Optional[str], chat_id: str, request=None, user: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    # Prefer model-based access when available
+    via_models = _get_full_chat_data_via_models(chat_id=chat_id, request=request, user=user)
+    if via_models is not None:
+        return via_models
+
+    # Fallback: direct SQLite (used in tests/minimal env)
+    if not db_path:
+        raise ValueError("db_path required when request is not available")
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -698,9 +797,6 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
         raise ValueError("Chat not found")
     chat_row = dict(chat_row)
 
-    cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
-    tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
-
     try:
         raw_meta = chat_row.get("meta")
         meta_json = (
@@ -708,6 +804,7 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
         )
     except Exception:
         meta_json = {}
+
     meta_tags = []
     try:
         maybe_tags = (meta_json or {}).get("tags")
@@ -731,6 +828,16 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
             chat_tags = [t for t in maybe_ctags if isinstance(t, str)]
     except Exception:
         chat_tags = []
+
+    # Attempt to include tags from chatidtag table if present
+    tags_rows: List[str] = []
+    try:
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='chatidtag'")
+        if cur.fetchone():
+            cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
+            tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
+    except Exception:
+        pass
 
     tags = [*tags_rows, *meta_tags, *chat_tags]
 
@@ -756,13 +863,6 @@ def get_full_chat_data(db_path: str, chat_id: str) -> Dict[str, Any]:
                     d[k] = json.loads(d[k])
                 except Exception:
                     pass
-
-        # Normalize: feedback types
-        ftype = (d.get("type") or "").lower()
-        if ftype not in ("rating", "reaction", "vote", "thumbs"):
-            # keep but do not interpret
-            pass
-
         feedback_items.append(d)
 
     def is_good(it):
@@ -826,8 +926,6 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-
-
 # ===== End injected flywheel_shared =====
 
 import json
@@ -842,24 +940,6 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
 from pydantic import BaseModel, Field
 
 # Flywheel shared helpers (templates, privacy, utils)
-    PRIVACY_PATTERNS as SHARED_PRIVACY_PATTERNS,
-    norm_tags as _shared_norm_tags,
-    hash_messages as _shared_hash_messages,
-    sanitize_contribution_for_export as _shared_sanitize,
-    deterministic_pseudonym as _shared_pseudonym,
-    luhn_ok as _shared_luhn_ok,
-    check_privacy as _shared_check_privacy,
-    get_db_path as _shared_get_db_path,
-    get_full_chat_data as _shared_get_full_chat_data,
-    compute_sharing_reason as _shared_compute_reason,
-    resolve_attribution as _shared_resolve_attr,
-    hf_preflight as _shared_hf_preflight,
-    create_pull_request as _shared_create_pr,
-    clean_messages as _shared_clean_messages,
-    detect_workflow_stage as _shared_detect_stage,
-    extract_json_from_preview as _shared_extract_preview,
-    map_response_labels as _shared_map_response_labels,
-)
 
 
 # ======================================================================
@@ -1050,58 +1130,6 @@ TIP_LINE = (
 )
 
 
-PRIVACY_PATTERNS = SHARED_PRIVACY_PATTERNS
-# Legacy (unused) left for reference below
-LEGACY_PRIVACY_PATTERNS = {
-    "phone_intl": (
-        r"(?<!\d)\+(?:"
-        r"(?:[1-9])(?:[-.\s]?\d){7,13}"
-        r"|(?:[1-9]\d)(?:[-.\s]?\d){6,12}"
-        r"|(?:[1-9]\d{2})(?:[-.\s]?\d){5,11}"
-        r")(?!\d)"
-    ),
-    "phone_us": r"(?<!\d)(?:\+?1[-.\s]?)?(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)",
-    "phone_us_no_sep": r"(?<!\d)(?:\+?1)?(?:[2-9]\d{2}\d{7})(?!\d)",
-    "email": (
-        r"(?<![A-Za-z0-9._%+-])"
-        r"[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?"
-        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9_%+\-]*[A-Za-z0-9])?)*"
-        r"@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"
-        r"(?![A-Za-z0-9._%+-])"
-    ),
-    "ssn": r"(?<!\d)(?!000|666|9\d{2})\d{3}[-\s]?(?!00)\d{2}[-\s]?(?!0000)\d{4}(?!\d)",
-    "ip_address": r"(?<!\d)(?<!\.)(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?!\.\d)(?!\d)",
-    "ipv6_address": (
-        r"(?<![A-Za-z0-9:])(" 
-        r"(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,7}:"
-        r"|:(?::[A-Fa-f0-9]{1,4}){1,7}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,6}:[A-Fa-f0-9]{1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,5}(?::[A-Fa-f0-9]{1,4}){1,2}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,4}(?::[A-Fa-f0-9]{1,4}){1,3}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,3}(?::[A-Fa-f0-9]{1,4}){1,4}"
-        r"|(?:[A-Fa-f0-9]{1,4}:){1,2}(?::[A-Fa-f0-9]{1,4}){1,5}"
-        r"|[A-Fa-f0-9]{1,4}:(?::[A-Fa-f0-9]{1,4}){1,6}"
-        r")(?!(?:[A-Za-z0-9:.]))"
-    ),
-    "aws_access_key": r"\b(?-i:(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16,17})\b",
-    "aws_secret_key": r"\b[A-Za-z0-9/+=]{40}\b",
-    "private_key": r"-----BEGIN\s+(?:RSA\s+)?(?:PRIVATE|ENCRYPTED)\s+KEY-----",
-    "api_key_stripe": r"\b(?:sk|pk)_(?:test_|live_)?[A-Za-z0-9]{24,}\b",
-    "api_key_generic": r"\b(?:api[-_]?key|apikey|access[-_]?token)[-_:\s]*[A-Za-z0-9+/]{32,}\b",
-    "street_address": r"\b\d{1,5}\s+(?:[NSEW]\.?\s+)?[A-Za-z0-9\s\-\.]{2,30}\s+(?:St(?:reet)?|Ave(?:nue)?|Rd|Road|Blvd|Boulevard|Ln|Lane|Dr(?:ive)?|Ct|Court|Cir(?:cle)?|Pl(?:aza)?|Way|Pkwy|Parkway|Pike|Ter(?:race)?|Trail|Path|Loop|Run|Pass|Cross(?:ing)?|Sq(?:uare)?)\b",
-    "credit_card": r"\b(?:\d[-\s]?){13,19}\b",
-    "routing_number": r"\b(?:ABA|Routing)[-:\s]*\d{9}\b",
-    "iban": (
-        r"\b(?:AL|AD|AT|AZ|BH|BE|BA|BR|BG|CR|HR|CY|CZ|DK|DO|EE|FO|FI|FR|GE|DE|GI|GR|GL|GT|HU|IS|IE|IL|IT|JO|KZ|KW|LV|LB|LI|LT|LU|MT|MR|MU|MC|MD|ME|NL|NO|PK|PS|PL|PT|QA|RO|SM|SA|RS|SK|SI|ES|SE|CH|TN|TR|AE|GB|VG|XK)\d{2}[A-Z0-9]{4,30}\b"
-    ),
-    "us_passport": r"\b(?:[0-9]{9}|[A-Z][0-9]{8})\b",
-    "ein": r"\b\d{2}-\d{7}\b",
-    "medicare": r"\b[A-Z0-9]{4}-[A-Z0-9]{3}-[A-Z0-9]{4}\b",
-    "bitcoin_address": r"\b(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34}|bc1[a-z0-9]{39,59})\b",
-    "ethereum_address": r"\b0x[a-fA-F0-9]{40}\b",
-}
-
 # ======================================================================
 # Types
 # ======================================================================
@@ -1257,7 +1285,7 @@ class Action:
     def __init__(self):
         self.valves = self.Valves()
         self.user_valves = self.UserValves()
-        self.db_path = _shared_get_db_path()
+        self.db_path = get_db_path()
         self.recent_submissions: Dict[str, Tuple[datetime, str]] = (
             {}
         )  # chat_id -> (timestamp, pr_number)
@@ -1299,54 +1327,54 @@ class Action:
     # Helpers
     # ------------------------------------------------------------------
     def _norm_tags(self, tags: List[str]) -> List[str]:
-        return _shared_norm_tags(tags)
+        return norm_tags(tags)
 
     def _hash_messages(self, messages: List[Dict[str, Any]]) -> str:
-        return _shared_hash_messages(messages)
+        return hash_messages(messages)
 
     def _sanitize_contribution_for_export(self, contribution: Dict[str, Any]) -> Dict[str, Any]:
-        return _shared_sanitize(contribution)
+        return sanitize_contribution_for_export(contribution)
 
     # Deterministic pseudonym from user id only
     def _deterministic_pseudonym(self, user_obj: Dict[str, Any]) -> str:
-        return _shared_pseudonym(user_obj)
+        return deterministic_pseudonym(user_obj)
 
     # Privacy scan (improved, counts only)
     def _luhn_ok(self, s: str) -> bool:
-        return _shared_luhn_ok(s)
+        return luhn_ok(s)
 
     def _check_privacy(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-        return _shared_check_privacy(messages)
+        return check_privacy(messages)
 
 
     
 
     # DB helpers
-    def _get_full_chat_data(self, chat_id: str) -> Dict[str, Any]:
-        # Delegate to shared implementation
-        return _shared_get_full_chat_data(chat_id=chat_id, db_path=self.db_path)
+    def _get_full_chat_data(self, chat_id: str, request=None, user_obj=None) -> Dict[str, Any]:
+        # Delegate to shared implementation (prefers model-based, falls back to sqlite for tests)
+        return get_full_chat_data(chat_id=chat_id, db_path=self.db_path, request=request, user=user_obj)
 
     def _compute_sharing_reason(self, feedback_counts: Dict[str, int]) -> Tuple[str, str]:
-        return _shared_compute_reason(feedback_counts)
+        return compute_sharing_reason(feedback_counts)
 
     def _resolve_attribution(self, user_valves: "Action.UserValves", user_obj: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
-        return _shared_resolve_attr(user_valves.attribution_mode, user_obj)
+        return resolve_attribution(user_valves.attribution_mode, user_obj)
 
     # HF preflight & PR
     def _hf_preflight(self, hf_token: str) -> dict:
-        return _shared_hf_preflight(self.valves.dataset_repo, hf_token)
+        return hf_preflight(self.valves.dataset_repo, hf_token)
 
     def _create_pull_request(self, contribution: Contribution, hf_token: str, dataset_repo: str) -> Dict[str, Any]:
-        return _shared_create_pr(contribution, hf_token, dataset_repo)
+        return create_pull_request(contribution, hf_token, dataset_repo)
 
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return _shared_clean_messages(messages)
+        return clean_messages(messages)
 
     def _detect_workflow_stage(self, messages: List[Dict[str, Any]]) -> Tuple[str, Optional[str]]:
-        return _shared_detect_stage(messages)
+        return detect_workflow_stage(messages)
 
     def _extract_json_from_preview(self, content: str) -> Optional[Dict[str, Any]]:
-        return _shared_extract_preview(content)
+        return extract_json_from_preview(content)
 
     def _map_response_labels(
         self,
@@ -1354,13 +1382,13 @@ class Action:
         clean_messages: List[Dict[str, Any]],
         feedback_items: List[Dict[str, Any]],
     ) -> Dict[str, Literal["good", "bad"]]:
-        return _shared_map_response_labels(raw_messages, clean_messages, feedback_items)
+        return map_response_labels(raw_messages, clean_messages, feedback_items)
 
     # ------------------------------------------------------------------
     # Main
     # ------------------------------------------------------------------
     async def action(
-        self, body: dict, __user__=None, __event_emitter__=None, __event_call__=None
+        self, body: dict, __user__=None, __event_emitter__=None, __event_call__=None, __request__=None
     ):
         user_valves = (__user__ or {}).get("valves")
         chat_id = (body or {}).get("chat_id")
@@ -1408,7 +1436,7 @@ class Action:
                     }
                 )
 
-                chat = self._get_full_chat_data(chat_id)
+                chat = self._get_full_chat_data(chat_id, request=__request__, user_obj=__user__)
                 clean_messages = self._clean_messages(chat["messages"])
 
                 # length checks
@@ -1653,7 +1681,7 @@ class Action:
                     return
 
                 # fresh state
-                chat = self._get_full_chat_data((body or {}).get("chat_id"))
+                chat = self._get_full_chat_data((body or {}).get("chat_id"), request=__request__, user_obj=__user__)
                 fresh_messages = self._clean_messages(
                     chat["messages"]
                 )  # kept for PR payload and hash record
