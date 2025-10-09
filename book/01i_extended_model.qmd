@@ -1,0 +1,915 @@
+# Extended Record-Generation Model
+
+This section extends the base record-generation model with 12 enhancement layers that capture temporal dynamics, social effects, economic incentives, governance, and compliance constraints. Each extension can be selectively enabled or treated as constant (disabled) for analysis.
+
+## Base Model Recap
+
+The base model (see Chapter 01i) defines a staged pipeline:
+
+```
+Interaction i → E_i → C_i → S_i → A_i → T_i → P_i^k
+```
+
+With factored publication probability:
+
+```
+Pr[P_i^k=1] = 1[E_i] · p_c(i) · p_a(i) · p_t(i) · p_k(i)
+```
+
+Metadata `ψ(x_i)` includes `L_i, U_i, name_i, uid_i`, and policy parameters `θ` control stage rates.
+
+## Extension Framework
+
+Each extension adds:
+1. **New state variables** (per-user, per-interaction, or system-level)
+2. **Modified rate functions** that depend on new state
+3. **Update equations** that evolve state over time
+4. **Control parameters** in `θ` with enable/disable flags
+
+Extensions can be composed: enabling Extension #1 (learning) and #3 (network effects) yields `p_a(i,t)` that depends on both user history and peer influence.
+
+---
+
+## Mechanics in Plain Language
+
+This section explains, in natural language, how the extended model actually “runs” as a simulation. It is meant for readers who prefer a narrative description over formulas. You can read it end‑to‑end to build an intuition for the objects, the sequence of events, and how the extensions interact, then refer back to the formal definitions above when you want precision.
+
+### What is being simulated?
+
+We simulate people using an AI application and deciding whether to contribute their interactions to a public dataset. Each person is represented as a “user agent” with preferences (for example, what license they like, how comfortable they are with contributing data) and behavioral tendencies (how active they are, how high‑quality their contributions tend to be). The simulation moves forward in discrete steps (think “days” or “ticks”). At each step, some users interact with the system, creating candidate records that can flow through a pipeline of checks before possibly being published to one or more public channels (like a Git repository, a model hub, or social media).
+
+### The pipeline, in words
+
+Every interaction goes through the same stages:
+
+1) Eligibility (E): Is this interaction even allowed to be considered? This can fail early for simple reasons (e.g., the user is under the minimum age, or their jurisdiction forbids certain data flows), or it can pass and move on.
+
+2) Capture (C): Did the system successfully capture the interaction so it can be reviewed? This reflects engineering realities like logging, storage, and routing; sometimes capture fails and the opportunity is lost.
+
+3) Shown Prompt (S): Did the user actually see a consent prompt or setting at this time? We distinguish between “natural” usage (the user just used the product) and “prompted” usage (the system proactively surfaces a contribution prompt). Policies decide how often prompts are shown in each case.
+
+4) Authorization/Consent (A): Given the situation, does the user consent to contribute this interaction under a chosen license and attribution style? Their decision depends on their personal propensity and whether they were actually prompted. Extensions can make this also depend on past satisfaction and what their peers have been doing.
+
+5) Transform/Validation (T): Before anything is published, the system checks whether the content meets basic quality and safety standards. Did automated checks pass (for example, were PII risks within acceptable limits)? If not, it stops here. If yes, it becomes eligible for publication.
+
+6) Publication (P): The item may be published to one or more channels (e.g., a Git repo via a PR merge, a model hub, or a social feed). Each channel can have its own gatekeeping logic (review queues, voting, priorities). Some channels can boost others (e.g., once merged in Git, it’s easier to post a short announcement on social media).
+
+If an interaction fails at any stage, it simply drops out. If it passes through, we record metadata such as the chosen license, how the user wants to be attributed, whether a consent prompt was shown, and so on. Already‑published items can later be “tombstoned” (retracted) due to policy or user requests (e.g., erasure rights), so the system also evolves after publication.
+
+### Who are the “users” in the model?
+
+Each user has a few key traits:
+- Consent propensity: how inclined they are to say “yes” when asked.
+- Quality level: how likely their contributions are to pass automated checks (e.g., avoiding PII) and be useful.
+- Activity rate: how often they create interactions.
+- License and attribution preferences: what terms they prefer, and whether they want to use a username, pseudonym, or be anonymous.
+
+Extensions add more: reputation (how trusted they have become over time), a position in a social network (neighbors, coalitions), an agent type (most are honest; some could be spammers or adversaries), a jurisdiction and age for compliance, and, when experiments are enabled, an assignment to an A/B test group.
+
+### What happens in a single simulation step?
+
+1) Generate interactions: Each user “rolls the dice” according to their activity rate. Some create zero interactions this step, others create one or more. Each new interaction is labeled as natural or prompted, and it is given a type (e.g., chat, feedback, label, summary).
+
+2) Run the pipeline: For each new interaction, the system tries to move it through E → C → S → A → T → P in that order. Along the way, we attach metadata once consent is granted (license choice, attribution style, etc.).
+
+3) Apply extensions:
+   - Learning and adaptation: Users update how willing they are to contribute based on recent outcomes (for example, a successful publication may make them a bit more likely next time). The system can also adapt its own prompting policy over time if it notices low consent or quality.
+   - Social effects: People can be influenced by peers. Seeing others contribute can increase the chance of being shown a prompt, or it can directly nudge willingness to say yes. Coalitions can be modeled as groups acting together or sharing norms.
+   - Adversarial behavior: Some users may behave differently (spamming, low‑effort, or trying to game the system). The transform step becomes stricter for them; repeated low‑quality behavior can trigger flags that effectively block publication.
+   - Economics: Users can receive rewards when their contributions are published. Review and moderation can consume a budget, which in turn throttles how much gets merged in a step.
+   - Privacy and compliance: Publication consumes from a privacy budget (if enabled). Risk scores can block items. Age or jurisdiction rules can pre‑empt eligibility. Erasure requests can retroactively remove items.
+   - Governance: In some configurations, the community can vote on whether an item should be published; authors of closed items might appeal; more advanced variants can experiment with quadratic voting or proposals to change policy.
+   - Channels: Publishing to one channel can unlock or boost others. The system can respect a priority order (e.g., Git first, then announcements). The same record can be disclosed differently per channel (full content vs. a short summary).
+   - Experimentation: You can split users into groups with different policies (A/B test), or use a multi‑armed bandit to try different prompting rates and learn which ones work best.
+
+4) Track outcomes: The simulation logs how many interactions reached each stage and how many were published, broken down over time. With extensions enabled, it can also track quality‑adjusted throughput, privacy risk, diversity, and combined objective scores.
+
+5) Process retractions: Items that were previously published can be tombstoned later. This models both policy changes and user‑initiated deletion requests.
+
+### How do the extensions change behavior?
+
+- Temporal dynamics and learning: Users remember whether things went well for them (e.g., “my contribution got published”), and this slightly shifts their future choices. The system itself can tune how often it prompts based on observed consent and quality.
+
+- Quality and value metrics: Not all contributions are equal. The model can assign a value score to each published item and then talk about throughput in value terms (how much valuable content is getting through, not just how many items). It can also aim for a particular mix (e.g., a target license distribution) and gently steer toward it.
+
+- Social and network effects: People influence each other. If your neighbors tend to consent, you may become more likely to consent too. Recent contributions by peers can make prompts more likely to appear for you (a “viral” effect), which then increases the chance of collecting consent.
+
+- Economic layer: Publication can grant small rewards to contributors. Moderation and review take effort and can be budget‑limited; if review resources are tight, fewer items get merged even if they passed automated checks.
+
+- Adversarial behavior: Some agents submit lots of low‑quality content. The model detects this pattern and becomes stricter with them, which lowers their eventual publication rate.
+
+- Multi‑objective optimization: Instead of only maximizing count, the model can keep an eye on several things at once: volume, quality, diversity, and privacy risk. This makes tradeoffs explicit, and you can visualize different policy settings along a Pareto frontier.
+
+- Privacy and PII modeling: Each item can have a risk score. Publishing consumes from a privacy budget. If the budget is low or the risk is high, an item stops at the transform stage. A stricter configuration yields safer data but also fewer publications.
+
+- Governance mechanisms: Gatekeeping doesn’t have to be automatic or staff‑only. The simulation can include community voting before merge, appeals for rejected items, and (in advanced variants) quadratic voting or user proposals that drive policy changes.
+
+- Cross‑channel dynamics: Success in one place can help elsewhere. For example, once a contribution is merged in Git, it might be easier to automatically announce a summary on social media. This creates gentle positive feedback loops.
+
+- Heterogeneous contribution types: Beyond raw chats, you can have labels, summaries, and even composite datasets composed of multiple smaller interactions. The model can periodically create derived datasets (e.g., evaluation sets) from recent contributions.
+
+- Uncertainty and experimentation: You can deliberately explore different policies and keep track of uncertainty in the measured rates. Bandits add an “explore vs. exploit” layer to find better prompting levels over time.
+
+- Legal and compliance: The model can enforce age limits, jurisdiction‑specific eligibility, license compatibility rules, and right‑to‑erasure. These constraints operate primarily at eligibility and transform stages, and they can trigger tombstoning later on.
+
+### What can you learn by running it?
+
+- Where the bottlenecks are: You can see whether most drop‑off occurs at consent, transform, or publication, and whether that changes when you adjust prompting, validation strictness, or review capacity.
+
+- How prompting interacts with consent and quality: You can find the point where more prompts no longer pay off, or where quality declines because people say “yes” in contexts that produce riskier content.
+
+- Which incentives matter: You can check whether small rewards shift consent rates for high‑quality contributors, and how review budgets cap throughput.
+
+- How social structure shapes outcomes: You can simulate settings where clusters of enthusiastic contributors seed a viral effect, versus settings where social influence is weak and growth is slower.
+
+- Tradeoffs you must make explicit: When you optimize for value, safety, and diversity together, you can see how one policy setting yields safer but slower growth, while another yields faster growth at higher risk.
+
+### Interpreting results safely
+
+This is a stylized model. It abstracts away many product and legal details, and it uses simple distributions for human behavior. Use it to compare policies directionally, not to predict exact numbers. Good practice is to:
+- Report both cumulative and per‑step metrics.
+- Segment results (by origin, user type, license, channel) to avoid Simpson’s paradox.
+- Show confidence bands when comparing policies.
+- Keep track of why items failed at each stage; qualitative reason codes make dashboards much more useful.
+
+### How to tune and iterate
+
+Start with a baseline run (all extensions off), then enable one or two extensions that match your questions. For example, if you’re asking “Do prompts help?”, enable learning and bandits for prompting. If you’re asking “Can we keep data safe while scaling?”, enable privacy budgets and quality tracking. Iterate by:
+1) Tuning a small number of parameters at a time.
+2) Running for enough steps to reach stable patterns (or proving that you need adaptation).
+3) Comparing scenarios with the same random seed for fair comparisons.
+4) Logging segment breakdowns and failure reasons to see why curves move.
+
+This narrative section should give you a mental model for how the simulation behaves. The formal sections above define the exact variables and equations, and the ABM in the repository provides an executable counterpart you can inspect, modify, and run.
+
+
+## Extension #1: Temporal Dynamics & Learning
+
+**Motivation**: Users and the system adapt based on experience.
+
+### New State Variables
+
+**Per-user**:
+- `R_{user}(t) ∈ ℝ_+`: reputation at time `t`
+- `H_{user}^{consent}`: history of consent decisions `{A_i}_{i ∈ user}`
+- `H_{user}^{satisf}`: satisfaction outcomes `{s_i}_{i ∈ user}`, where `s_i ∈ [0,1]`
+
+**System**:
+- `θ(t)`: time-varying policy parameters
+
+### Modified Rate Functions
+
+**Consent with learning**:
+```
+p_a(i,t) = p_a^{base}(i) · β_{user}(t)
+
+where β_{user}(t) is user's consent propensity at time t, updated as:
+
+β_{user}(t) = β_{user}(t-1) + α_{learn} · (s̄_{recent} - 0.5)
+
+s̄_{recent} = mean({s_j : j ∈ last K interactions by user})
+```
+
+**Reputation dynamics**:
+```
+R_{user}(t) = R_{user}(t-1) · (1 - δ_{decay}) + γ_{pub} · |{i : A_i=1, P_i^k=1, timestep=t}|
+```
+
+**Reputation-based auto-merge**:
+```
+p_k(i) = 1  if R_{user} ≥ τ_{auto}
+       = p_k^{base}(i)  otherwise
+```
+
+**System adaptation**:
+```
+θ(t) adapts based on recent performance:
+
+If mean(p_a | window W) < τ_{low}:
+    q_i(t+1) ← q_i(t) · (1 + ε_{adapt})
+
+If mean(p_t | window W) < τ_{quality}:
+    q_i(t+1) ← q_i(t) · (1 - ε_{adapt})
+```
+
+### Parameters in θ
+
+- `enable_learning ∈ {0,1}`
+- `enable_reputation ∈ {0,1}`
+- `α_{learn} ∈ [0,1]`: learning rate
+- `δ_{decay} ∈ [0,1]`: reputation decay
+- `γ_{pub} > 0`: reputation boost per publication
+- `τ_{auto} > 0`: auto-merge threshold
+- `ε_{adapt} ∈ [0,1]`: system adaptation rate
+
+**To disable**: Set `enable_learning=0`, `enable_reputation=0`.
+
+---
+
+## Extension #2: Quality & Value Metrics
+
+**Motivation**: Not all contributions are equal; track value `V_i` and optimize composition.
+
+### New State Variables
+
+**Per-interaction**:
+- `V_i ∈ ℝ_+`: value/quality score
+- `d_i ∈ [0,1]`: diversity score
+- `ℓ_i ∈ ℝ_+`: content length (normalized)
+
+**System**:
+- `Dist_{actual}(L)`: observed license distribution
+- `Dist_{target}(L)`: target distribution (composition objective)
+
+### Value Function
+
+```
+V_i = w_{div} · d_i + w_{len} · ℓ_i + w_{rep} · (R_{user} / R_{max})
+
+where:
+  d_i = diversity metric (e.g., embedding distance, topic novelty)
+  ℓ_i = length(content_i) / length_{norm}
+  w_{div}, w_{len}, w_{rep} ∈ [0,1], ∑w = 1
+```
+
+### Quality-Adjusted Throughput
+
+```
+Λ_k^{Q} = E[∑_{i∈W} V_i · P_i^k]
+```
+
+### Composition Objectives
+
+```
+Objective: minimize KL(Dist_{actual} || Dist_{target})
+
+Can adjust p_a(i) or p_k(i) based on L_i to steer toward target distribution.
+```
+
+### Parameters in θ
+
+- `enable_quality ∈ {0,1}`
+- `w_{div}, w_{len}, w_{rep}`: weights
+- `Dist_{target}`: target distribution (e.g., `{CC0: 0.2, CC-BY: 0.6, CC-BY-SA: 0.2}`)
+
+**To disable**: Set `enable_quality=0`.
+
+---
+
+## Extension #3: Social & Network Effects
+
+**Motivation**: Users influence each other; peer contributions affect behavior.
+
+### New State Variables
+
+**Per-user**:
+- `N_{user}`: set of network neighbors
+- `coalition_{user} ∈ ℤ_+`: coalition ID (if applicable)
+- `v_{user}(t) ∈ ℝ_+`: viral boost at time `t`
+
+**System**:
+- `G = (V,E)`: social network graph
+- `C_1, C_2, ..., C_m`: coalitions (subsets of users)
+
+### Modified Rate Functions
+
+**Network influence on consent**:
+```
+p_a(i,t) = p_a^{base}(i) · β̃_{user}(t)
+
+where β̃_{user}(t) = (1-γ) · β_{user}(t) + γ · mean({β_j(t) : j ∈ N_{user}})
+
+γ ∈ [0,1] is network influence strength.
+```
+
+**Viral prompting**:
+```
+q_i(t) = q^{base}_i + v_{user}(t)
+
+v_{user}(t) = v_{user}(t-1) · λ_{decay} + η · count({j : j ∈ N_{user}, A_j=1, timestep ∈ [t-K, t]})
+
+where:
+  λ_{decay} ∈ [0,1]: decay rate
+  η > 0: boost per peer contribution
+```
+
+**Coalition bargaining** (placeholder):
+```
+If coalition C requests collective action, can gate p_k(i) on |{j ∈ C : A_j=1}| ≥ K_{min}
+```
+
+### Network Construction
+
+Typical: Watts-Strogatz small-world or preferential attachment.
+
+### Parameters in θ
+
+- `enable_network ∈ {0,1}`
+- `enable_coalitions ∈ {0,1}`
+- `enable_viral ∈ {0,1}`
+- `γ ∈ [0,1]`: network influence strength
+- `η > 0`: viral boost coefficient
+- `λ_{decay} ∈ [0,1]`: viral decay
+- Network params: degree distribution, rewiring probability
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Extension #4: Economic Layer
+
+**Motivation**: Model incentives (rewards) and costs (review budget).
+
+### New State Variables
+
+**Per-user**:
+- `W_{user}(t) ∈ ℝ_+`: total rewards accumulated
+- `balance_{user}(t) ∈ ℝ`: wallet balance
+
+**System**:
+- `Budget_{review}(t) ∈ ℝ_+`: review budget per timestep
+- `Budget_{used}(t)`: budget consumed
+
+**Per-interaction**:
+- `reward_i ∈ ℝ_+`: reward for publication
+- `cost_{review}(i) ∈ ℝ_+`: cost to review
+
+### Reward Mechanism
+
+```
+If P_i^k = 1:
+    W_{user}(t) ← W_{user}(t-1) + reward_{per_pub}
+```
+
+### Review Budget Constraint
+
+```
+Budget_{used}(t) = ∑_{i : timestep=t, T_i=1} cost_{review}(i)
+
+If Budget_{used}(t) + cost_{review}(i) > Budget_{review}(t):
+    p_k(i) ← p_k(i) · ρ_{penalty}  (reduce merge rate)
+```
+
+### Market Pricing (advanced)
+
+```
+Price(data_type, t) = Price_{base} · (Demand(t) / Supply(t))^{elasticity}
+```
+
+Users can trade data; coalitions can negotiate bulk pricing.
+
+### Parameters in θ
+
+- `enable_rewards ∈ {0,1}`
+- `enable_review_costs ∈ {0,1}`
+- `enable_markets ∈ {0,1}`
+- `reward_{per_pub} > 0`
+- `cost_{review}(i)` function
+- `Budget_{review}(t)` schedule
+- `elasticity ∈ ℝ`
+
+**To disable**: Set enable flags to 0.
+
+---
+
+## Extension #5: Adversarial Behavior
+
+**Motivation**: Model spammers, low-quality actors, gaming detection.
+
+### New State Variables
+
+**Per-user**:
+- `τ_{user} ∈ \{honest, spammer, adversarial, low\_effort\}`: agent type
+- `spam_{score}(t) ∈ ℝ_+`: cumulative spam score
+- `flagged_{user} ∈ \{0,1\}`: flagged as adversarial
+
+### Modified Rate Functions
+
+**Activity multiplier**:
+```
+activity_{user} = activity^{base} · μ_{spam}  if τ = spammer
+                = activity^{base}             otherwise
+
+where μ_{spam} > 1 (spammers contribute more frequently)
+```
+
+**Quality penalty**:
+```
+p_t(i) = p_t^{base}(i) · (1 - κ_{penalty})  if τ ∈ {adversarial, spammer}
+       = p_t^{base}(i)                     if τ = honest
+
+where κ_{penalty} ∈ [0,1]
+```
+
+**Gaming detection**:
+```
+Define: bad_recent(user, K) = |{i : author=user, i ∈ last K, T_i=0}|
+
+If bad_recent(user, K) > threshold:
+    flagged_{user} ← 1
+    p_t(i) ← 0  for all future i from user (block)
+```
+
+### Parameters in θ
+
+- `enable_adversarial ∈ {0,1}`
+- `fraction_{adversarial} ∈ [0,1]`: % adversarial agents
+- `μ_{spam} > 1`: activity multiplier
+- `κ_{penalty} ∈ [0,1]`: quality penalty
+- `detection_{rate} ∈ [0,1]`: probability of detecting gaming
+- `threshold_{spam}`: spam score threshold
+
+**To disable**: Set `enable_adversarial=0`.
+
+---
+
+## Extension #6: Multi-Objective Optimization
+
+**Motivation**: Explicitly model throughput-quality-diversity-privacy tradeoffs.
+
+### Objective Function
+
+```
+Objective(θ, t) = α · Throughput(t) + β · Quality(t) + γ · Diversity(t) + δ · Privacy_Risk(t)
+
+where:
+  Throughput(t) = |{i : P_i^k=1, timestep ≤ t}| / t
+  Quality(t) = mean({V_i : P_i^k=1, timestep ≤ t})
+  Diversity(t) = |unique licenses| + |unique attributions| + topic_diversity
+  Privacy_Risk(t) = mean({risk_{PII}(i) : P_i^k=1})
+
+Weights: α, β, γ, δ ∈ ℝ (δ typically negative)
+```
+
+### Pareto Frontier
+
+Track `(Throughput, Quality, Diversity, Privacy_Risk)` over different θ settings to chart Pareto frontier.
+
+### Parameters in θ
+
+- `enable_multi_objective ∈ {0,1}`
+- `α, β, γ, δ`: objective weights
+
+**To disable**: Set `enable_multi_objective=0`.
+
+---
+
+## Extension #7: Privacy & PII Modeling
+
+**Motivation**: Model privacy budgets, risk scores, k-anonymity.
+
+### New State Variables
+
+**System**:
+- `ε_{used}(t) ∈ ℝ_+`: privacy budget consumed (differential privacy)
+- `ε_{total}`: total budget
+
+**Per-interaction**:
+- `risk_{PII}(i) ∈ [0,1]`: continuous PII risk score
+- `ε_i > 0`: privacy cost of publishing `i`
+
+### Modified Transform Function
+
+**Privacy budget constraint**:
+```
+T_i = 0  if ε_{used}(t) + ε_i > ε_{total}
+
+Otherwise:
+T_i ~ Bernoulli(p_t^{base} · 1[risk_{PII}(i) < τ_{risk}])
+
+If T_i = 1 and published:
+    ε_{used}(t+1) ← ε_{used}(t) + ε_i
+```
+
+**PII risk score**:
+```
+risk_{PII}(i) ~ N(μ_{honest}, σ)        if τ_{user} = honest
+              ~ Uniform(0.3, 0.8)       if τ_{user} ∈ {spammer, adversarial}
+```
+
+**k-anonymity**:
+```
+Only release batch B if |{users contributing to B}| ≥ k_{min}
+```
+
+### Parameters in θ
+
+- `enable_privacy_budget ∈ {0,1}`
+- `enable_pii_risk ∈ {0,1}`
+- `enable_k_anon ∈ {0,1}`
+- `ε_{total} > 0`: total privacy budget
+- `ε_i` function
+- `τ_{risk} ∈ [0,1]`: PII risk threshold
+- `k_{min} ∈ ℤ_+`: k-anonymity parameter
+- `μ_{honest}, σ`: PII risk distribution params
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Extension #8: Governance Mechanisms
+
+**Motivation**: Community voting, appeals, policy proposals.
+
+### New State Variables
+
+**Per-interaction**:
+- `votes_{for}(i), votes_{against}(i) ∈ ℤ_+`
+- `appealed_i ∈ {0,1}`
+- `appeal_{granted}_i ∈ {0,1}`
+
+**Per-user**:
+- `voting\_power_{user} ∈ ℝ_+`
+- `proposals_{made}, votes_{cast}`
+
+### Modified Publication Function
+
+**Community voting**:
+```
+p_k(i) determined by vote:
+
+Sample n voters from eligible users.
+Each voter j votes yes with probability f(quality_i, β_j)
+
+vote_i = (∑_j voting_power_j · vote_j) / (∑_j voting_power_j)
+
+P_i^k = 1  if vote_i ≥ τ_{vote}
+```
+
+**Appeal process**:
+```
+If M_i = closed and user appeals:
+    appealed_i ← 1
+    appeal_granted_i ~ Bernoulli(p_{appeal})
+
+    If appeal_granted_i = 1:
+        M_i ← merged, P_i^k ← 1
+```
+
+**Quadratic voting** (optional):
+```
+cost(n_votes) = k · n^2
+
+Users spend voting credits quadratically.
+```
+
+### Parameters in θ
+
+- `enable_voting ∈ {0,1}`
+- `enable_appeals ∈ {0,1}`
+- `enable_quadratic ∈ {0,1}`
+- `τ_{vote} ∈ [0,1]`: approval threshold
+- `p_{appeal} ∈ [0,1]`: appeal success rate
+- `k_{quadratic} > 0`: quadratic cost coefficient
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Extension #9: Cross-Channel Dynamics
+
+**Motivation**: Publishing to one channel can boost (or gate) others.
+
+### Channel Dependency Graph
+
+Define `G_{channels} = (K, E)` where edge `(k_1, k_2)` means `P_i^{k_1}=1` affects `p_{k_2}(i)`.
+
+### Modified Channel Rates
+
+**Dependency example** (Git → Bluesky):
+```
+p_{bluesky}(i) = p_{bluesky}^{base}  if P_i^{git} = 0
+               = p_{bluesky}^{base} + β_{boost}  if P_i^{git} = 1
+
+where β_{boost} > 0
+```
+
+**Priority ordering**:
+Process channels in order `[git, huggingface, bluesky]`. Success in earlier channel can unlock later ones.
+
+**Selective disclosure**:
+Different `ψ(x_i)` per channel:
+- Git: full conversation
+- Bluesky: summary + link
+
+### Parameters in θ
+
+- `enable_channel_deps ∈ {0,1}`
+- `enable_priorities ∈ {0,1}`
+- `enable_selective ∈ {0,1}`
+- `G_{channels}`: dependency graph
+- `β_{boost}(k_1 → k_2)`: boost coefficients
+
+**To disable**: Set enable flags to 0.
+
+---
+
+## Extension #10: Heterogeneous Contribution Types
+
+**Motivation**: Model composite bundles, meta-contributions, derived datasets.
+
+### New Contribution Types
+
+Expand `r_i`:
+- `r_i ∈ {chat, feedback, label, summary, composite, meta, derived}`
+
+**Composite**:
+```
+r_i = composite: bundle of {i_1, i_2, ..., i_n}
+Publish only if all sub-interactions pass pipeline.
+```
+
+**Meta-contribution**:
+```
+r_i = meta: label/vote on existing interaction j
+references_i = {j}
+```
+
+**Derived dataset**:
+```
+Created periodically from {i : P_i^k=1, i ∈ window W}
+Examples: benchmark, evaluation set, aggregated stats
+```
+
+### Types and Mechanics (Natural Language)
+
+We distinguish between three common contribution patterns beyond a single chat:
+
+- Chat-only (seed): A normal in-app interaction that can be published as-is.
+- Chat + Feedback (pair): A chat immediately accompanied by structured feedback (e.g., “thumbs up/down” with rationale, tags). The pair can be treated as a small composite bundle referencing the same context.
+- Rich Document (delayed): The user leaves the app to create a richer artifact (e.g., a wiki article, code snippet, notebook). This “project” is seeded by a chat and materializes after a few steps (a production delay) as a new contribution that references the earlier chat.
+
+Operationally, the simulation does the following each step:
+1) Generate new chats per user as usual.
+2) With some probability, immediately attach a feedback record to a chat (pair). This feedback inherits the author and references the chat ID.
+3) With some probability, start an off-platform project that completes after a stochastic delay; when due, a new “rich document” contribution is created referencing the source chat(s).
+
+Type-specific effects:
+- Validation (T): Feedback may be easier to validate (short, structured); rich docs often pass validation when created by high-quality users (higher effective p_t).
+- Publication (P): Rich docs may have a slightly higher chance of being merged (e.g., they include code/tests, clearer value), modeled as a modest boost to p_k for Git. (Exact boosts are parameters.)
+- Value (V): If quality tracking is on, rich docs typically get higher value scores due to length, novelty, or downstream utility.
+
+These additions preserve the original pipeline: chats, feedback, and rich docs all flow through E → C → S → A → T → P. The only differences are type-specific probabilities and the fact that rich docs arrive later than their source chats.
+
+### Parameters in θ
+
+- `enable_composite ∈ {0,1}`
+- `enable_meta ∈ {0,1}`
+- `enable_derived ∈ {0,1}`
+- `bundle_{size}`: distribution over bundle sizes
+- `meta_{rate} ∈ [0,1]`: fraction of interactions that are meta
+- `window_{derived}`: window for derived dataset creation
+- `pair_{rate} ∈ [0,1]`: probability a chat yields an immediate feedback pair
+- `project_{rate} ∈ [0,1]`: probability a chat seeds an off-platform rich doc project
+- `project_{time_mean} > 0`: average delay (steps) to complete rich docs
+- `p_t_multipliers[type]`: optional multipliers for transform success by contribution type
+- `p_k_boosts[type, channel]`: optional merge boosts by type and channel
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Extension #11: Uncertainty & Experimentation
+
+**Motivation**: A/B testing, multi-armed bandits, confidence intervals.
+
+### A/B Testing
+
+Split users into `G$ groups with different `θ_1, θ_2, ..., θ_G`.
+
+```
+user assigned to group g ∈ {1, ..., G}
+Policy for user: θ_g
+```
+
+Compare outcomes across groups to identify best policy.
+
+### Multi-Armed Bandit
+
+Treat prompt rate `q_i` as action. Arms: `{q_1, q_2, ..., q_m}`.
+
+```
+ε-greedy:
+  With prob ε: explore (sample random arm)
+  With prob 1-ε: exploit (choose arm with highest observed reward)
+
+Reward: r_i = 1[P_i^k=1] (or quality-adjusted: r_i = V_i · 1[P_i^k=1])
+
+Update estimates:
+  Q̂(q_j) ← mean({r_i : q_i = q_j})
+```
+
+### Confidence Intervals
+
+Track uncertainty in `p_c, p_a, p_t, p_k`:
+
+```
+p̂_a ~ Beta(α, β) updated with observed (A_i=1) and (A_i=0) counts
+
+Report: p̂_a ± 1.96 · SE  (95% CI)
+```
+
+### Parameters in θ
+
+- `enable_ab ∈ {0,1}`
+- `enable_bandits ∈ {0,1}`
+- `enable_ci ∈ {0,1}`
+- `G`: number of A/B groups
+- `ε_{explore} ∈ [0,1]`: exploration rate
+- `arms`: set of actions to try
+- `α_{CI}`: confidence level
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Extension #12: Legal & Compliance
+
+**Motivation**: Jurisdiction rules, age verification, GDPR, license compatibility.
+
+### New State Variables
+
+**Per-user**:
+- `jurisdiction_{user} ∈ \{US, EU, UK, OTHER\}$
+- `age_{user} ∈ ℤ_+`
+- `erasure_{requests}`: list of GDPR erasure request timesteps
+
+**System**:
+- `Compatible_{licenses}`: set of (upstream, downstream) license pairs
+
+### Modified Eligibility
+
+**Age verification**:
+```
+E_i = 0  if age_{user} < age_{min}
+```
+
+**Jurisdiction rules**:
+```
+E_i ~ Bernoulli(eligibility_{base} · multiplier_{jurisdiction})
+
+where multiplier_{jurisdiction}(j) ∈ [0,1] per jurisdiction j
+```
+
+**License compatibility**:
+```
+T_i = 0  if (L_{upstream}, L_i) ∉ Compatible_{licenses}
+```
+
+**GDPR erasure**:
+```
+If user requests erasure at time t_req:
+    Mark all {i : author=user} for deletion
+    Remove within window Δ_{erasure}
+    M_i ← tombstoned for published items
+```
+
+### Parameters in θ
+
+- `enable_jurisdiction ∈ {0,1}`
+- `enable_age ∈ {0,1}`
+- `enable_gdpr ∈ {0,1}`
+- `enable_license_compat ∈ {0,1}`
+- `age_{min} ∈ ℤ_+`: minimum age
+- `multiplier_{jurisdiction}`: dictionary
+- `Δ_{erasure}`: erasure processing window (days)
+- `Compatible_{licenses}`: set of compatible pairs
+
+**To disable**: Set all enable flags to 0.
+
+---
+
+## Composed Model
+
+When multiple extensions are enabled, effects compose:
+
+**Example**: Learning + Network + Reputation
+```
+p_a(i,t) = p_a^{base}(i) · β̃_{user}(t)
+
+where:
+  β̃_{user}(t) = (1-γ) · β_{user}(t) + γ · mean({β_j(t) : j ∈ N_{user}})
+  β_{user}(t) updated via learning rule
+
+p_k(i) = 1  if R_{user}(t) ≥ τ_{auto}
+       = voting result  if enable_voting=1
+       = p_k^{base}     otherwise
+```
+
+**Full factorization with extensions**:
+```
+Pr[P_i^k=1 | history, network, θ(t)] =
+    1[E_i(age, jurisdiction, ...)]
+    · p_c(i)
+    · p_a(i, β_{user}(t), N_{user}, v_{user}(t), ...)
+    · p_t(i, risk_{PII}(i), ε_{used}, τ_{user}, ...)
+    · p_k(i, R_{user}, votes, Budget_{review}, ...)
+```
+
+---
+
+## Summary: Baseline vs. Extended
+
+| Feature | Baseline Model | Extended Model |
+|---------|----------------|----------------|
+| Time dependence | None (memoryless) | Learning, reputation, adaptation |
+| Quality | Binary T_i | Value scores V_i, composition objectives |
+| Social | Independent users | Network influence, coalitions, viral effects |
+| Economics | No incentives | Rewards, costs, markets |
+| Adversaries | Assumed honest | Agent types, gaming detection |
+| Objectives | Throughput only | Multi-objective (quality, diversity, privacy) |
+| Privacy | Binary PII check | ε-DP budgets, risk scores, k-anonymity |
+| Governance | Policy-set | Community voting, appeals, proposals |
+| Channels | Independent | Dependencies, priorities, selective disclosure |
+| Contribution types | Single-type | Composite, meta, derived datasets |
+| Experimentation | Fixed policy | A/B tests, bandits, confidence intervals |
+| Compliance | Minimal | Jurisdiction, age, GDPR, license compat |
+
+---
+
+## Parameters Summary
+
+**Enable/Disable Flags** (all default to 0 for baseline):
+
+```python
+θ_extended = {
+    # Extension #1
+    'enable_learning': 0,
+    'enable_reputation': 0,
+    'enable_adaptation': 0,
+
+    # Extension #2
+    'enable_quality': 0,
+    'enable_composition': 0,
+
+    # Extension #3
+    'enable_network': 0,
+    'enable_coalitions': 0,
+    'enable_viral': 0,
+
+    # Extension #4
+    'enable_rewards': 0,
+    'enable_costs': 0,
+    'enable_markets': 0,
+
+    # Extension #5
+    'enable_adversarial': 0,
+
+    # Extension #6
+    'enable_multi_objective': 0,
+
+    # Extension #7
+    'enable_privacy_budget': 0,
+    'enable_pii_risk': 0,
+    'enable_k_anon': 0,
+
+    # Extension #8
+    'enable_voting': 0,
+    'enable_appeals': 0,
+    'enable_quadratic': 0,
+
+    # Extension #9
+    'enable_channel_deps': 0,
+    'enable_priorities': 0,
+    'enable_selective': 0,
+
+    # Extension #10
+    'enable_composite': 0,
+    'enable_meta': 0,
+    'enable_derived': 0,
+
+    # Extension #11
+    'enable_ab': 0,
+    'enable_bandits': 0,
+    'enable_ci': 0,
+
+    # Extension #12
+    'enable_jurisdiction': 0,
+    'enable_age': 0,
+    'enable_gdpr': 0,
+    'enable_license_compat': 0,
+
+    # ... + all continuous parameters
+}
+```
+
+Setting all enable flags to 0 recovers the baseline model.
+
+---
+
+## Implementation
+
+The agent-based model in `abms/flywheel_abm.py` implements this extended formal model (base and extensions unified in a single file). See `abms/EXTENSIONS.md` for usage examples and parameter tuning guidance.
+
+---
+
+## Future Directions
+
+- **Mechanism design**: Optimize `θ(t)` to maximize objectives subject to constraints
+- **Equilibrium analysis**: Nash equilibria in multi-agent settings with coalitions
+- **Causal inference**: Estimate treatment effects of policy changes via A/B tests
+- **Fairness**: Add constraints ensuring contributions from diverse demographic groups
+- **Robustness**: Adversarial stress-testing of governance mechanisms
+- **Real-time adaptation**: Online learning for `θ(t)` based on streaming data
+
+The extended model provides a formal foundation for reasoning about these directions while maintaining the ability to collapse back to the simple baseline by disabling all extensions.

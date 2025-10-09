@@ -5,7 +5,7 @@ This document describes all 12 enhancement layers added to the base Public AI Da
 ## Quick Start
 
 ```python
-from flywheel_abm_extended import ExtendedFlywheelABM, ExtendedPolicyParams
+from flywheel_abm import ExtendedFlywheelABM, ExtendedPolicyParams
 
 # Use base model (all extensions OFF)
 policy = ExtendedPolicyParams()
