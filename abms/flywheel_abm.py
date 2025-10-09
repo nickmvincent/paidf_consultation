@@ -15,10 +15,11 @@ Key components:
 
 import numpy as np
 from dataclasses import dataclass, field
-from typing import Literal, Dict, List, Optional, Set
+from typing import Literal, Dict, List, Optional, Set, Tuple, Callable
 from enum import Enum
 import json
 from collections import defaultdict
+import warnings
 
 
 # Enums for model states
@@ -26,19 +27,16 @@ class Origin(Enum):
     NATURAL = "natural"
     PROMPTED = "prompted"
 
-
 class RecordType(Enum):
     CHAT = "chat"
     FEEDBACK = "feedback"
     LABEL = "label"
     SUMMARY = "summary"
 
-
 class License(Enum):
     CC0 = "CC0-1.0"
     CC_BY = "CC-BY-4.0"
     CC_BY_SA = "CC-BY-SA-4.0"
-
 
 class WorkflowState(Enum):
     OPEN = "open"
@@ -51,6 +49,22 @@ class Attribution(Enum):
     USERNAME = "username"
     PSEUDONYM = "pseudonym"
     ANONYMOUS = "anonymous"
+
+
+class AgentType(Enum):
+    """Agent behavioral type for adversarial modeling (Extension #5)"""
+    HONEST = "honest"
+    SPAMMER = "spammer"
+    ADVERSARIAL = "adversarial"
+    LOW_EFFORT = "low_effort"
+
+
+class JurisdictionType(Enum):
+    """Geographic jurisdiction for compliance (Extension #12)"""
+    US = "us"
+    EU = "eu"
+    UK = "uk"
+    OTHER = "other"
 
 
 @dataclass
