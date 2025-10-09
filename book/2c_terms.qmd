@@ -2,6 +2,10 @@
 
 For reference, this chapter include the full text of the the Terms and Privacy document for publicai.co (Sep 12, 2025.)
 
+::: {.callout-note collapse=true title="Model Reference (01i): Licensing and Signals"}
+Terms map to the model as follows: `L_i` is the license you select for a contribution; `U_i` is your AI‑use preference signal (e.g., `train-genai=n;exceptions=cc-cr`); `name_i` is the public attribution string (username, pseudonym, anonymous). Consent to publish corresponds to `A_i=1`; publication to a channel (e.g., Git) is `P_i^k=1` on acceptance/merge; workflow state is `M_i∈{open,merged,closed,tombstoned}`.
+:::
+
 ---
 
 ## 1. Terms of Service

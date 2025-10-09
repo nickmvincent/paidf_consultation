@@ -1,4 +1,7 @@
 # Code
 
+::: {.callout-note collapse=true title="Model Reference (01i): Schema and Workflow"}
+`ψ(x_i)` is the schema mapping from an interaction to a structured payload (messages/content, metadata, `L_i`, `U_i`, `name_i`, `uid`). The PR workflow state is `M_i∈{open,merged,closed}`; publish to Git occurs on merge (`P_i^git=1`).
+:::
 
 For reference, this chapter contains key snippets of code from the Flywheel Action. (The full code is tracked in the `src` directory, but is duplicated here in case readers are curious.)
