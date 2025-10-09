@@ -18,6 +18,7 @@ book:
       - 01f_ethics_compliance.qmd
       - 01g_upstream.qmd
       - 01h_failure_modes.qmd
+      - 01i_record_generation_model.qmd
     - part: "Case Study: Low friction peer production"
       chapters:
       - 2a_mvp.qmd
@@ -49,4 +50,3 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
-

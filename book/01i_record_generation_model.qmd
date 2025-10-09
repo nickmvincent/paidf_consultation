@@ -1,0 +1,76 @@
+# A Record-Generation Model
+
+This section defines a compact model for how interactions become public records. It is meant to support concrete design and metrics without overfitting to any one implementation.
+
+## Objects and States
+
+- System: a deployment `X` where interactions happen; time is discrete by event.
+- Interaction `i`: occurs with context `x_i` (agent, UI, model, route, timestamp).
+- Origin `o_i ∈ {natural, prompted}`: normal use vs. a surfaced request to share.
+- Record type `r_i ∈ R`: e.g., `chat`, `feedback`, `label`, `summary`.
+- Channels `K`: destinations like `git`, `huggingface`, `bluesky`, `site`.
+
+Per interaction `i`, define stage variables (0/1 unless noted):
+
+- `E_i`: eligible under current policy (type, scope, age).
+- `C_i`: captured locally (structured log or draft record exists).
+- `S_i`: user was shown a share prompt (only if product prompts).
+- `A_i`: authorization/consent to publish (may encode license + name).
+- `T_i`: transform/sanitize succeeded (PII checks, schema, hashing).
+- `P_i^k`: published to channel `k ∈ K` (accepted/merged state).
+- `M_i ∈ {open, merged, closed, tombstoned}`: workflow state (for `git`/PR‑style channels).
+
+Metadata bound to a publishable record:
+
+- `ψ(x_i)`: schema mapping from interaction to structured payload.
+- `L_i`: license (e.g., CC0, CC‑BY, CC‑BY‑SA).
+- `U_i`: AI‑use preference signal (e.g., `train-genai=n;exceptions=cc-cr`).
+- `name_i`: attribution string (username, pseudonym, anonymous).
+- `uid_i`: stable contribution id.
+
+## Instrumentation and Policy
+
+Let `θ` collect product and policy knobs (logging mode, prompt rules, defaults). Key rates:
+
+- `q_i = Pr[S_i=1 | x_i, θ]`: prompt rate given context.
+- `p_c(i) = Pr[C_i=1 | x_i, θ]`: capture rate (automatic or draft creation).
+- `p_a(i) = Pr[A_i=1 | x_i, S_i, θ]`: consent rate (affected by prompts and UX).
+- `p_t(i) = Pr[T_i=1 | x_i, θ]`: transform/validation success.
+- `p_k(i) = Pr[P_i^k=1 | x_i, θ]`: channel‑specific acceptance/merge.
+
+For a single channel `k`, the per‑interaction publish probability factors as:
+
+`Pr[P_i^k=1] = 1[E_i] · p_c(i) · p_a(i) · p_t(i) · p_k(i)`
+
+Vector form for multiple channels: `P_i = (P_i^k)_{k∈K}` with per‑channel `p_k(i)`.
+
+Retraction is modeled with `D_i^k(t) ∈ {0,1}` and hazard `h_d(i,k)`: a published item can later be closed or tombstoned; `M_i` tracks state over time.
+
+## Prompted vs. Natural
+
+Origin influences consent: `o_i=prompted` increases `q_i`, which shifts `p_a(i)` by surfacing consent at the right time. Natural interactions can still be captured (`C_i=1`) without publishing (`A_i=0`).
+
+## Minimal Schema
+
+`ψ(x_i)` produces a payload with:
+
+- `uid`, `type`, `created_at`, `route`, `model`.
+- `content` (e.g., chat messages or summary), optional `feedback`.
+- `license=L_i`, `ai_use=U_i`, `attribution=name_i`.
+- provenance: `source=o_i`, `prompt_shown=S_i`, `checks` (PII flags), `hashes`.
+
+## Metrics and Levers
+
+- Throughput (per window `W`): `Λ_k = E[∑_{i∈W} P_i^k]`.
+- Yield by stage: estimate `p_c, p_a, p_t, p_k` from logs to find bottlenecks.
+- Quality gates: raise or lower `p_t` via validators; adjust `p_k` via review policy.
+- UX levers: adjust `q_i` (when to prompt) to change `p_a(i)` without spamming.
+
+## Practical Mapping
+
+- OpenWebUI action: sets `S_i=1`, collects `A_i`, builds `ψ(x_i)` with `L_i, U_i, name_i`.
+- Git PR: `P_i^git=1` iff merged; otherwise `M_i∈{open,closed}`.
+- Bluesky/microblog: optional `P_i^bsky` with a short preview and `uid` link.
+
+This model is intentionally small: a staged Bernoulli chain with explicit metadata. It is sufficient to reason about product changes, consent flows, and publishing policies, and it is easy to compute stage‑level rates from operational logs.
+

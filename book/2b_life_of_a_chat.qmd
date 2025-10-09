@@ -2,6 +2,10 @@
 
 The goal of this Section is to provide a worked example of what exactly happens to one of your chats in a system like the public ai utility interface.
 
+::: {.callout-note collapse=true title="Model Reference (01i)"}
+Stages: capture `C_i`, prompt `S_i`, consent `A_i`, transform `T_i`, publish `P_i^k`, with PR workflow state `M_i`.
+:::
+
 First, what happens when you visit the site?
 
 - You visit publicai.co
@@ -38,6 +42,10 @@ Now you start a new chat!
   - By default, nobody outside of the Utility Interface can see your chats. We only access them internally as needed to operate the service and investigate security or legal issues.
   - We may compute high‑level, aggregate statistics about usage (for example, total volume or broad topic distributions) without exposing individual chat content.
   - You can opt in to the public Data Flywheel: choose specific chats to contribute to a public Hugging Face dataset under a license you select. This is a per‑chat, public opt‑in. Private research access is not part of the initial launch.
+
+::: {.callout-note collapse=true title="Model Mapping for Opt‑In"}
+UI may show a prompt (`S_i=1`), you grant consent (`A_i=1`), checks run (`T_i=1`), and a PR is opened; publication occurs on merge (`P_i^git=1`).
+:::
 
 - You can delete Chats at any time
 

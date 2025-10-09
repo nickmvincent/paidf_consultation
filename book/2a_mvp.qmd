@@ -20,6 +20,10 @@ With preferences set, contributing looks like any other chat until the moment of
 
 The pull request is the central coordination object. Reviewers can comment, merge, or request changes; automated checks can validate format and run policy scanners; and anyone can see the history that led to the decision. If the contribution is accepted, the data lands in the public dataset with the same license and preference signals the user selected. The PR thread itself preserves the reasoning and any follow-up, which becomes part of the public provenance trail.
 
+::: {.callout-note collapse=true title="Model Reference (01i)"}
+The action follows the record-generation model. It shows a prompt (`S_i=1`), obtains consent (`A_i=1` on confirm), builds a payload `ψ(x_i)` with `L_i, U_i, name_i`, and opens a PR. Publication to Git corresponds to `P_i^git=1` when the PR is merged; otherwise `M_i∈{open,closed}`. Stage rates—`p_c, p_a, p_t, p_k`—map to capture, consent, checks, and merge policy.
+:::
+
 ## Privacy, Attribution, and Preference Signals
 
 We want people to get credit when they want it, and privacy when they do not. Each contribution carries an attribution string drawn from the user’s chosen setting. Public releases display this attribution string but not the underlying OpenWebUI account id. Today, if you select “pseudonym,” that pseudonym is a deterministic function of your OpenWebUI account id (unsalted), which means contributions under a pseudonym can be linked to each other over time. We chose determinism to make it easy to accrue credit, support light‑weight moderation, and keep analytics simple without exposing account identifiers. If you want the least linkability, choose “anonymous.”
