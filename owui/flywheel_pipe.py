@@ -73,6 +73,9 @@ class Pipe:
         max_messages: int = Field(
             default=100, description="Maximum messages allowed per share (lowered)"
         )
+        share_every_n_messages: int = Field(
+            default=5, description="Auto-share when total cleaned messages is a multiple of N"
+        )
 
     class UserValves(BaseModel):
         public_sharing_available: bool = Field(
@@ -112,187 +115,43 @@ class Pipe:
         if not __chat_id__:
             return "Error: No chat selected."
 
-        stage, preview_content = detect_workflow_stage(__messages__ or [])
-
-        if stage == "first_run":
-            chat = get_full_chat_data(self.db_path, __chat_id__, request=__request__, user=__user__)
-            clean = clean_messages(chat["messages"])
-
-            if len(clean) < self.valves.min_messages:
-                return f"Too short. Minimum {self.valves.min_messages} messages required."
-            if len(clean) > self.valves.max_messages:
-                return f"Too long. Maximum {self.valves.max_messages}. Consider splitting."
-
-            privacy = check_privacy(clean)
-            privacy_status = (
-                "✅ No obvious personal data detected"
-                if not privacy.get("has_issues")
-                else "⚠️ Possible personal data present"
-            )
-            privacy_note = (
-                " — please review the content carefully before sharing."
-                if privacy.get("has_issues")
-                else ""
-            )
-
-            norm = norm_tags(chat["tags"])
-            sharing_tag, reason = compute_sharing_reason(chat["feedback_counts"])
-            attribution, verification = resolve_attribution(
-                user_valves.attribution_mode, __user__ or {}
-            )
-
-            sample_feedback = []
-            for it in chat["feedback_items"][:5]:
-                data = it.get("data") or {}
-                meta = it.get("meta") or {}
-                sample_feedback.append(
-                    {
-                        "id": it.get("id"),
-                        "type": it.get("type"),
-                        "rating": data.get("rating"),
-                        "model_id": data.get("model_id") or meta.get("model_id"),
-                        "chat_id": meta.get("chat_id"),
-                        "created_at": it.get("created_at"),
-                        "tags": (data.get("tags") if isinstance(data.get("tags"), list) else None),
-                    }
-                )
-            sample_feedback_json = json.dumps(sample_feedback, indent=2, ensure_ascii=False)
-
-            contrib_id = f"contrib_{secrets.token_urlsafe(8)}"
-            messages_hash = hash_messages(clean)
-            response_labels = map_response_labels(chat["messages"], clean, chat["feedback_items"])
-
-            contribution: Contribution = validate_contribution(
-                {
-                    "id": contrib_id,
-                    "title": chat["title"],
-                    "clean_content": clean,
-                    "sharing_reason": reason,
-                    "sharing_tag": sharing_tag,
-                    "all_tags": norm,
-                    "license_intent": user_valves.license_intent,
-                    "license_intent_note": user_valves.license_intent_note,
-                    "ai_thoughts": user_valves.ai_thoughts,
-                    "attribution": attribution,
-                    "attribution_mode": user_valves.attribution_mode,
-                    "verification": verification,
-                    "contributed_at": now_iso(),
-                    "content_hash": messages_hash,
-                    "version": "1.0.0",
-                    "feedback_counts": chat["feedback_counts"],
-                    "response_labels": response_labels,
-                }
-            )
-
-            export_contribution = contribution.copy()
-            share_json_block = build_share_json_block(export_contribution)
-            privacy_block = build_privacy_block(privacy)
-            grabbed_section = build_grabbed_section(
-                norm, chat["feedback_counts"], sample_feedback_json, reason
-            )
-
-            use_user_token = (
-                user_valves.attribution_mode == "huggingface"
-                and (user_valves.hf_user_token or "").strip()
-            )
-            have_app_token = bool(self.valves.default_hf_token and self.valves.dataset_repo)
-            submit_via = (
-                "your Hugging Face account" if use_user_token else (
-                    "app account" if have_app_token else "simulation"
-                )
-            )
-            next_verb = ("create" if (use_user_token or have_app_token) else "simulate")
-
-            preview_md = PREVIEW_TEMPLATE.format(
-                title=chat["title"],
-                public_data_warning=PUBLIC_DATA_WARNING,
-                preview_header=PREVIEW_HEADER.format(
-                    reason=reason,
-                    sharing_tag=sharing_tag,
-                    num_messages=len(clean),
-                    license_intent=(user_valves.license_intent or "unspecified"),
-                    attribution=attribution,
-                    submit_via=submit_via,
-                ),
-                privacy_status=privacy_status,
-                privacy_note=privacy_note,
-                grabbed_section=grabbed_section,
-                tip_line=TIP_LINE,
-                faq_url=self.valves.faq_url,
-                privacy_policy_url=self.valves.privacy_policy_url,
-                share_json_block=share_json_block,
-                privacy_block=privacy_block,
-                license_intent_block=(
-                    "- Data Licensing Intent: {}\n- Note: {}\n\n_We will translate these intents into concrete licensing actions as standards mature (e.g., {})._.".format(
-                        user_valves.license_intent or "unspecified",
-                        (user_valves.license_intent_note or "—"),
-                        DATALICENSES_URL,
-                    )
-                ),
-                ai_thoughts_block=(
-                    "- Contributor Thoughts (AI): {}\n".format(user_valves.ai_thoughts.strip())
-                    if (user_valves.ai_thoughts or "").strip() else ""
-                ),
-                intent_note_block=(
-                    (
-                        "Note on Licensing Intents and AI Thoughts\n\n"
-                        "We capture your natural‑language licensing intent and any optional thoughts on AI. As standards mature, we will translate these into concrete licenses and/or AI‑use preference signals. For now, there is no firm legal contract: submissions are published publicly on Hugging Face with a lightweight contributor agreement and may be mirrored later on a static site with anti‑scraping. As the Public AI movement grows, we’ll formalize this. Iterating on licenses and signals is a great way to contribute — join us on GitHub: {}"
-                    ).format(PUBLICAI_GITHUB_URL)
-                ),
-                next_verb=next_verb,
-            )
-
-            return preview_md
-
-        # CONFIRM RUN → re-compare and (mock|real) PR
-        contribution = extract_json_from_preview(preview_content or "") or {}
-        try:
-            contribution = validate_contribution(contribution)  # type: ignore
-        except Exception as e:
-            return f"Preview invalid: {e}"
-
+        # Auto-share every N messages; silent otherwise
         chat = get_full_chat_data(self.db_path, __chat_id__, request=__request__, user=__user__)
         fresh_messages = clean_messages(chat["messages"])
+        total = len(fresh_messages)
+        if total < self.valves.min_messages or total > self.valves.max_messages:
+            return ""
+        if total % max(1, int(self.valves.share_every_n_messages)) != 0:
+            return ""
+
+        privacy = check_privacy(fresh_messages)
+        if privacy.get("has_issues"):
+            return "Auto-share skipped due to potential personal data."
+
         fresh_hash = hash_messages(fresh_messages)
         new_sharing_tag, new_reason = compute_sharing_reason(chat["feedback_counts"])
-
-        preview_tags = norm_tags(contribution.get("all_tags", []))
-        fresh_tags = norm_tags(chat["tags"])
-        preview_feedback = {
-            "good": int(contribution.get("feedback_counts", {}).get("good", 0)),
-            "bad": int(contribution.get("feedback_counts", {}).get("bad", 0)),
-        }
-        fresh_feedback = {
-            "good": int(chat["feedback_counts"].get("good", 0)),
-            "bad": int(chat["feedback_counts"].get("bad", 0)),
-        }
-
-        attribution, verification = resolve_attribution(
-            user_valves.attribution_mode, __user__ or {}
-        )
-        contribution.update(
+        attribution, verification = resolve_attribution(user_valves.attribution_mode, __user__ or {})
+        contribution: Contribution = validate_contribution(
             {
+                "id": f"contrib_{secrets.token_urlsafe(8)}",
+                "title": chat["title"],
                 "clean_content": fresh_messages,
-                "content_hash": fresh_hash,
-                "all_tags": fresh_tags,
-                "feedback_counts": fresh_feedback,
-                "response_labels": map_response_labels(
-                    chat["messages"], fresh_messages, chat["feedback_items"]
-                ),
-                "sharing_tag": new_sharing_tag,
                 "sharing_reason": new_reason,
-                "attribution": attribution,
-                "verification": verification,
+                "sharing_tag": new_sharing_tag,
+                "all_tags": norm_tags(chat["tags"]),
                 "license_intent": user_valves.license_intent,
                 "license_intent_note": user_valves.license_intent_note,
                 "ai_thoughts": user_valves.ai_thoughts,
+                "attribution": attribution,
+                "attribution_mode": user_valves.attribution_mode,
+                "verification": verification,
                 "contributed_at": now_iso(),
+                "content_hash": fresh_hash,
+                "version": "1.0.0",
+                "feedback_counts": chat["feedback_counts"],
+                "response_labels": map_response_labels(chat["messages"], fresh_messages, chat["feedback_items"]),
             }
         )
-        try:
-            contribution = validate_contribution(contribution)  # type: ignore
-        except Exception as e:
-            return f"Updated data invalid: {e}"
 
         use_user_token = (
             user_valves.attribution_mode == "huggingface"

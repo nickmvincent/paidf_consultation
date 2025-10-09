@@ -5,13 +5,14 @@ This folder contains the Flywheel conversation sharing feature and tests. It let
 Implementations
 - `flywheel_action.py`: Original Action-based flow used from Chat Controls → Functions → Sharing.
 - `flywheel_tool.py`: Tool-based variant exposing `Tools.share_to_flywheel(...)` for tool calling flows.
-- `flywheel_filter.py`: Filter-based variant that renders the same preview/result as assistant messages from the outlet hook.
-- `flywheel_pipe.py`: Pipe-based variant that returns the preview/result directly from `Pipe.pipe(...)`.
+- `flywheel_filter.py`: Filter-based variant that automatically shares high/low quality chats without a preview (privacy-gated).
+- `flywheel_pipe.py`: Pipe-based variant that auto-shares every N messages (privacy-gated).
 - `flywheel_shared.py`: Shared templates, types, and helpers used by all variants to keep behavior identical.
 
 Behavior summary
-- First run: produces a markdown preview with a JSON payload fenced between sentinels `<<<SHARE_PREVIEW_START>>>` … `<<<SHARE_PREVIEW_END>>>` and a clear “Next Step” instruction.
-- Confirm run: refreshes tags/feedback just-in-time, computes attribution and privacy, then either creates a PR (when credentials are configured) or shows a Test Mode preview.
+- Tool: preview → confirm; creates a PR when credentials are configured, or Test Mode preview without creds.
+- Filter: no preview; if conversation is clearly high or low quality (based on feedback), and no obvious personal data is detected, submits automatically.
+- Pipe: no preview; submits automatically whenever total cleaned messages is a multiple of `share_every_n_messages` (default 5), gated by privacy.
 - Attribution modes: `anonymous`, `pseudonym` (deterministic), and `huggingface` (user token). App-level token is supported for submissions via the app account.
 
 Valves
@@ -21,8 +22,8 @@ Valves
 Using each variant
 - Action: Trigger via Chat Controls → Functions → Sharing. Follow the on-screen preview/confirm flow.
 - Tool: Call `Tools.share_to_flywheel(confirm=False, __chat_id__, __messages__, __user__)` to preview. Call again with `confirm=True` to submit.
-- Filter: Enable the filter and press the Sharing function; the outlet injects the same preview/result as assistant messages. Confirm by pressing again.
-- Pipe: Create a pipeline using `Pipe.pipe(body, __user__, __chat_id__, __messages__)`; first call previews, second call (after preview is present) submits.
+- Filter: Enable the filter. When a chat is clearly high/low quality and privacy-safe, a PR is created automatically.
+- Pipe: Build a pipeline and call `Pipe.pipe(body, __user__, __chat_id__, __messages__)`. A PR is created automatically every `share_every_n_messages` messages if privacy-safe.
 
 Tests
 - `tests.py`: Unit tests covering helper behavior and full flows for Action, Tool, Filter, and Pipe variants using a temporary SQLite DB.
