@@ -9,6 +9,9 @@ import unittest
 from datetime import datetime
 
 from owui.flywheel_action import Action, validate_contribution
+from owui.flywheel_tool import Tools as FlywheelTools
+from owui.flywheel_filter import Filter as FlywheelFilter
+from owui.flywheel_pipe import Pipe as FlywheelPipe
 
 
 # ------------------------------
@@ -436,6 +439,213 @@ class FlywheelActionFlowTests(unittest.TestCase):
         asyncio.run(run_action(self.action, self.chat_id, [], self.user, events3))
         notes = [e for e in events3 if e.get("type") == "notification"]
         self.assertTrue(any("This chat was shared" in (n.get("data") or {}).get("content", "") for n in notes))
+
+
+class FlywheelToolFlowTests(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.db_path = os.path.join(self.tmpdir.name, "webui.db")
+        conn = make_db(self.db_path)
+
+        self.chat_id = "c1"
+        self.chat_payload = {
+            "messages": [
+                {"role": "user", "content": "hello"},
+                {"role": "assistant", "content": "hi there"},
+            ]
+        }
+        conn.execute(
+            "INSERT INTO chat (id, title, meta, chat, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                self.chat_id,
+                "Sample Chat",
+                json.dumps({}),
+                json.dumps(self.chat_payload),
+                datetime.utcnow().isoformat(),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.execute(
+            "INSERT INTO chatidtag (chat_id, tag_name) VALUES (?, ?)",
+            (self.chat_id, "demo"),
+        )
+        conn.execute(
+            "INSERT INTO feedback (type, data, meta, created_at) VALUES (?, ?, ?, ?)",
+            (
+                "good",
+                json.dumps({"rating": "+1"}),
+                json.dumps({"chat_id": self.chat_id}),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.commit(); conn.close()
+
+        self.tool = FlywheelTools()
+        # override DB path used by shared helper
+        self.tool.db_path = self.db_path  # type: ignore[attr-defined]
+        # Enable public sharing for tests
+        uv = self.tool.UserValves(public_sharing_available=True)
+        self.user = {"valves": uv, "id": "user-123"}
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+
+    def test_tool_preview_and_confirm_test_mode(self):
+        # Preview
+        res1 = self.tool.share_to_flywheel(
+            confirm=False,
+            __chat_id__=self.chat_id,
+            __messages__=[],
+            __user__=self.user,
+        )
+        self.assertIn("<<<SHARE_PREVIEW_START>>>", res1)
+
+        # Confirm (no creds) -> Test Mode
+        res2 = self.tool.share_to_flywheel(
+            confirm=True,
+            __chat_id__=self.chat_id,
+            __messages__=messages_from_preview(res1),
+            __user__=self.user,
+        )
+        self.assertIn("Test Mode: PR Preview", res2)
+
+
+class FlywheelFilterFlowTests(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.db_path = os.path.join(self.tmpdir.name, "webui.db")
+        conn = make_db(self.db_path)
+
+        self.chat_id = "c1"
+        self.chat_payload = {
+            "messages": [
+                {"role": "user", "content": "hello"},
+                {"role": "assistant", "content": "hi there"},
+            ]
+        }
+        conn.execute(
+            "INSERT INTO chat (id, title, meta, chat, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                self.chat_id,
+                "Sample Chat",
+                json.dumps({}),
+                json.dumps(self.chat_payload),
+                datetime.utcnow().isoformat(),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.execute(
+            "INSERT INTO chatidtag (chat_id, tag_name) VALUES (?, ?)",
+            (self.chat_id, "demo"),
+        )
+        conn.execute(
+            "INSERT INTO feedback (type, data, meta, created_at) VALUES (?, ?, ?, ?)",
+            (
+                "good",
+                json.dumps({"rating": "+1"}),
+                json.dumps({"chat_id": self.chat_id}),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.commit(); conn.close()
+
+        self.filter = FlywheelFilter()
+        self.filter.db_path = self.db_path  # type: ignore[attr-defined]
+        uv = self.filter.UserValves(public_sharing_available=True)
+        self.user = {"valves": uv, "id": "user-123"}
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+
+    def test_filter_outlet_preview_and_confirm(self):
+        # First call → preview injected
+        out1 = self.filter.outlet(
+            body={"messages": []},
+            __user__=self.user,
+            __chat_id__=self.chat_id,
+            __messages__=[],
+        )
+        self.assertIn("messages", out1)
+        preview = out1["messages"][0]["content"]
+        self.assertIn("<<<SHARE_PREVIEW_START>>>", preview)
+
+        # Confirm → simulated PR
+        out2 = self.filter.outlet(
+            body={"messages": []},
+            __user__=self.user,
+            __chat_id__=self.chat_id,
+            __messages__=messages_from_preview(preview),
+        )
+        result = out2["messages"][0]["content"]
+        self.assertIn("Test Mode: PR Preview", result)
+
+
+class FlywheelPipeFlowTests(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.db_path = os.path.join(self.tmpdir.name, "webui.db")
+        conn = make_db(self.db_path)
+
+        self.chat_id = "c1"
+        self.chat_payload = {
+            "messages": [
+                {"role": "user", "content": "hello"},
+                {"role": "assistant", "content": "hi there"},
+            ]
+        }
+        conn.execute(
+            "INSERT INTO chat (id, title, meta, chat, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (
+                self.chat_id,
+                "Sample Chat",
+                json.dumps({}),
+                json.dumps(self.chat_payload),
+                datetime.utcnow().isoformat(),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.execute(
+            "INSERT INTO chatidtag (chat_id, tag_name) VALUES (?, ?)",
+            (self.chat_id, "demo"),
+        )
+        conn.execute(
+            "INSERT INTO feedback (type, data, meta, created_at) VALUES (?, ?, ?, ?)",
+            (
+                "good",
+                json.dumps({"rating": "+1"}),
+                json.dumps({"chat_id": self.chat_id}),
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.commit(); conn.close()
+
+        self.pipe = FlywheelPipe()
+        self.pipe.db_path = self.db_path  # type: ignore[attr-defined]
+        uv = self.pipe.UserValves(public_sharing_available=True)
+        self.user = {"valves": uv, "id": "user-123"}
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+
+    def test_pipe_preview_and_confirm(self):
+        # First run → preview string
+        res1 = self.pipe.pipe(
+            body={},
+            __user__=self.user,
+            __chat_id__=self.chat_id,
+            __messages__=[],
+        )
+        self.assertIsInstance(res1, str)
+        self.assertIn("<<<SHARE_PREVIEW_START>>>", res1)
+
+        # Confirm → simulated PR
+        res2 = self.pipe.pipe(
+            body={},
+            __user__=self.user,
+            __chat_id__=self.chat_id,
+            __messages__=messages_from_preview(res1),
+        )
+        self.assertIn("Test Mode: PR Preview", res2)
 
 
 if __name__ == "__main__":

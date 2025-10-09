@@ -18,6 +18,27 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, TypedDict
 
 from pydantic import BaseModel, Field
 
+# Flywheel shared helpers (templates, privacy, utils)
+from .flywheel_shared import (
+    PRIVACY_PATTERNS as SHARED_PRIVACY_PATTERNS,
+    norm_tags as _shared_norm_tags,
+    hash_messages as _shared_hash_messages,
+    sanitize_contribution_for_export as _shared_sanitize,
+    deterministic_pseudonym as _shared_pseudonym,
+    luhn_ok as _shared_luhn_ok,
+    check_privacy as _shared_check_privacy,
+    get_db_path as _shared_get_db_path,
+    get_full_chat_data as _shared_get_full_chat_data,
+    compute_sharing_reason as _shared_compute_reason,
+    resolve_attribution as _shared_resolve_attr,
+    hf_preflight as _shared_hf_preflight,
+    create_pull_request as _shared_create_pr,
+    clean_messages as _shared_clean_messages,
+    detect_workflow_stage as _shared_detect_stage,
+    extract_json_from_preview as _shared_extract_preview,
+    map_response_labels as _shared_map_response_labels,
+)
+
 
 # ======================================================================
 # URL Constants (edit here)
@@ -207,7 +228,9 @@ TIP_LINE = (
 )
 
 
-PRIVACY_PATTERNS = {
+PRIVACY_PATTERNS = SHARED_PRIVACY_PATTERNS
+# Legacy (unused) left for reference below
+LEGACY_PRIVACY_PATTERNS = {
     "phone_intl": (
         r"(?<!\d)\+(?:"
         r"(?:[1-9])(?:[-.\s]?\d){7,13}"
@@ -412,7 +435,7 @@ class Action:
     def __init__(self):
         self.valves = self.Valves()
         self.user_valves = self.UserValves()
-        self.db_path = str(Path.home() / ".open-webui" / "webui.db")
+        self.db_path = _shared_get_db_path()
         self.recent_submissions: Dict[str, Tuple[datetime, str]] = (
             {}
         )  # chat_id -> (timestamp, pr_number)
@@ -454,437 +477,54 @@ class Action:
     # Helpers
     # ------------------------------------------------------------------
     def _norm_tags(self, tags: List[str]) -> List[str]:
-        return sorted(
-            {
-                (t or "").strip().lower()
-                for t in tags
-                if isinstance(t, str) and t.strip()
-            }
-        )
+        return _shared_norm_tags(tags)
 
     def _hash_messages(self, messages: List[Dict[str, Any]]) -> str:
-        # include model and tool_calls for better reproducibility
-        digest_basis = []
-        for m in messages:
-            digest_basis.append(
-                {
-                    "role": m.get("role"),
-                    "content": m.get("content"),
-                    "model": m.get("model"),
-                    "tool_calls": m.get("tool_calls"),
-                }
-            )
-        content = json.dumps(digest_basis, sort_keys=True, ensure_ascii=False)
-        return hashlib.sha256(content.encode()).hexdigest()[:16]
+        return _shared_hash_messages(messages)
 
-    def _sanitize_contribution_for_export(
-        self, contribution: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Return a copy safe for sharing externally.
-        - Remove internal/sensitive fields
-        - Add a brief note about content_hash purpose
-        """
-        out = dict(contribution)
-        # Remove fields we do not want to publish
-        out.pop("source_chat_id", None)
-        # Add note about content_hash for transparency
-        if out.get("content_hash") and not out.get("content_hash_note"):
-            out["content_hash_note"] = (
-                "Shared to help detect duplicates and verify integrity without exposing raw text."
-            )
-        return out
+    def _sanitize_contribution_for_export(self, contribution: Dict[str, Any]) -> Dict[str, Any]:
+        return _shared_sanitize(contribution)
 
     # Deterministic pseudonym from user id only
     def _deterministic_pseudonym(self, user_obj: Dict[str, Any]) -> str:
-        uid = (
-            (user_obj or {}).get("id")
-            or (user_obj or {}).get("username")
-            or (user_obj or {}).get("profile", {}).get("username")
-            or "anon"
-        )
-        h = hashlib.sha256(str(uid).encode()).hexdigest()
-        adjectives = [
-            "swift",
-            "calm",
-            "bright",
-            "clever",
-            "brave",
-            "curious",
-            "quiet",
-            "lucky",
-            "merry",
-            "stellar",
-        ]
-        nouns = [
-            "otter",
-            "lynx",
-            "falcon",
-            "willow",
-            "ember",
-            "quartz",
-            "spruce",
-            "aurora",
-            "delta",
-            "river",
-        ]
-        a = adjectives[int(h[:2], 16) % len(adjectives)]
-        n = nouns[int(h[2:4], 16) % len(nouns)]
-        num = int(h[4:8], 16) % 1000
-        return f"{a}-{n}-{num:03d}"
+        return _shared_pseudonym(user_obj)
 
     # Privacy scan (improved, counts only)
     def _luhn_ok(self, s: str) -> bool:
-        digits = [int(c) for c in re.sub(r"\D", "", s)]
-        if not (13 <= len(digits) <= 19):
-            return False
-        total = 0
-        parity = len(digits) % 2
-        for i, d in enumerate(digits):
-            if i % 2 == parity:
-                d *= 2
-                if d > 9:
-                    d -= 9
-            total += d
-        return total % 10 == 0
+        return _shared_luhn_ok(s)
 
     def _check_privacy(self, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
-    
-        counts: Dict[str, int] = {}
-        for msg in messages:
-            text = msg.get("content") or ""
-            if not text:
-                continue
-            for name, pat in PRIVACY_PATTERNS.items():
-                matches = re.findall(pat, text, flags=re.IGNORECASE)
-                if not matches:
-                    continue
-                if name == "credit_card":
-                    good = [m for m in matches if self._luhn_ok(m)]
-                    if not good:
-                        continue
-                    counts[name] = counts.get(name, 0) + len(good)
-                else:
-                    counts[name] = counts.get(name, 0) + len(matches)
-        return {
-            "has_issues": bool(counts),
-            "types_found": sorted([k for k, v in counts.items() if v > 0]),
-            "counts": counts,
-            "note": "Heuristic only; review before sharing.",
-        }
+        return _shared_check_privacy(messages)
 
 
     
 
     # DB helpers
-    def _get_full_chat_data(self, chat_id: str) -> Dict[str, Any]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
+    def _get_full_chat_data(self, chat_id: str, request=None, user_obj=None) -> Dict[str, Any]:
+        # Delegate to shared implementation (prefers model-based, falls back to sqlite for tests)
+        return _shared_get_full_chat_data(chat_id=chat_id, db_path=self.db_path, request=request, user=user_obj)
 
-        cur.execute("SELECT * FROM chat WHERE id = ?", (chat_id,))
-        chat_row = cur.fetchone()
-        if not chat_row:
-            conn.close()
-            raise ValueError("Chat not found")
-        chat_row = dict(chat_row)
+    def _compute_sharing_reason(self, feedback_counts: Dict[str, int]) -> Tuple[str, str]:
+        return _shared_compute_reason(feedback_counts)
 
-        # tags from chatidtag table + any tags in chat.meta/chat payload
-        cur.execute("SELECT tag_name FROM chatidtag WHERE chat_id = ?", (chat_id,))
-        tags_rows = [r["tag_name"] for r in cur.fetchall() if r and r["tag_name"]]
-
-        # meta (unused for tags, but kept)
-        try:
-            raw_meta = chat_row.get("meta")
-            meta_json = (
-                json.loads(raw_meta) if isinstance(raw_meta, str) else (raw_meta or {})
-            )
-        except Exception:
-            meta_json = {}
-        # Merge-in tags if present in meta
-        meta_tags = []
-        try:
-            maybe_tags = (meta_json or {}).get("tags")
-            if isinstance(maybe_tags, list):
-                meta_tags = [t for t in maybe_tags if isinstance(t, str)]
-        except Exception:
-            meta_tags = []
-
-        # messages
-        try:
-            raw_chat = chat_row.get("chat")
-            chat_json = (
-                json.loads(raw_chat) if isinstance(raw_chat, str) else (raw_chat or {})
-            )
-        except Exception:
-            chat_json = {}
-        messages = chat_json.get("messages", []) if isinstance(chat_json, dict) else []
-        # Merge-in tags if present in chat payload
-        chat_tags = []
-        try:
-            maybe_ctags = (chat_json or {}).get("tags") if isinstance(chat_json, dict) else []
-            if isinstance(maybe_ctags, list):
-                chat_tags = [t for t in maybe_ctags if isinstance(t, str)]
-        except Exception:
-            chat_tags = []
-
-        # Combine tag sources
-        tags = [*tags_rows, *meta_tags, *chat_tags]
-
-        # feedback (support multiple locations/keys for chat id)
-        q = """
-            SELECT id, type, data, meta, created_at
-            FROM feedback
-            WHERE COALESCE(
-                json_extract(meta, '$.chat_id'),
-                json_extract(data, '$.chat_id'),
-                json_extract(meta, '$.chatId'),
-                json_extract(data, '$.chatId')
-            ) = ?
-            ORDER BY created_at DESC
-        """
-        cur.execute(q, (chat_id,))
-        rows = cur.fetchall()
-        feedback_items: List[Dict[str, Any]] = []
-        for r in rows:
-            d = dict(r)
-            for k in ("data", "meta"):
-                if isinstance(d.get(k), str):
-                    try:
-                        d[k] = json.loads(d[k])
-                    except Exception:
-                        pass
-            feedback_items.append(d)
-
-        def _num_or_none(x):
-            try:
-                return int(x)
-            except Exception:
-                try:
-                    return float(x)
-                except Exception:
-                    return None
-
-        def is_good(item):
-            t = (item.get("type") or "").lower()
-            if t in ("good", "good_response", "thumbs_up"):
-                return True
-            data = item.get("data") or {}
-            rnum = _num_or_none(data.get("rating"))
-            if rnum is not None:
-                return rnum > 0
-            r = str(data.get("rating", "")).lower()
-            return r in ("good", "thumbs_up", "up", "1", "+1", "positive")
-
-        def is_bad(item):
-            t = (item.get("type") or "").lower()
-            if t in ("bad", "bad_response", "thumbs_down"):
-                return True
-            data = item.get("data") or {}
-            rnum = _num_or_none(data.get("rating"))
-            if rnum is not None:
-                return rnum < 0
-            r = str(data.get("rating", "")).lower()
-            return r in ("bad", "thumbs_down", "down", "-1", "negative")
-
-        good = sum(1 for it in feedback_items if is_good(it))
-        bad = sum(1 for it in feedback_items if is_bad(it))
-
-        conn.close()
-        return {
-            "chat_id": chat_id,
-            "title": chat_row.get("title", "Untitled Chat"),
-            "created_at": chat_row.get("created_at"),
-            "updated_at": chat_row.get("updated_at"),
-            "messages": messages,
-            "tags": tags,
-            "meta": meta_json,
-            "feedback_items": feedback_items,
-            "feedback_counts": {"good": good, "bad": bad},
-        }
-
-    def _compute_sharing_reason(
-        self, feedback_counts: Dict[str, int]
-    ) -> Tuple[str, str]:
-        good, bad = feedback_counts.get("good", 0), feedback_counts.get("bad", 0)
-        if good > bad:
-            return "dataset-good", "good"
-        if bad > good:
-            return "dataset-bad", "bad"
-        return "dataset-mixed", "mixed"
-
-    def _resolve_attribution(
-        self, user_valves: "Action.UserValves", user_obj: Dict[str, Any]
-    ) -> Tuple[str, Dict[str, Any]]:
-        mode = user_valves.attribution_mode
-        if mode == "anonymous":
-            return "Anonymous", {"type": "none", "status": "unverified"}
-        if mode == "pseudonym":
-            name = self._deterministic_pseudonym(user_obj)
-            return name, {"type": "pseudonym", "status": "deterministic"}
-        if mode == "huggingface":
-            return "Hugging Face account", {"type": "hf", "status": "token_required"}
-        return "Anonymous", {"type": "none", "status": "unverified"}
+    def _resolve_attribution(self, user_valves: "Action.UserValves", user_obj: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+        return _shared_resolve_attr(user_valves.attribution_mode, user_obj)
 
     # HF preflight & PR
     def _hf_preflight(self, hf_token: str) -> dict:
-        out = {"ok": True, "errors": [], "who": None, "repo": None}
-        try:
-            from huggingface_hub import HfApi  # type: ignore
+        return _shared_hf_preflight(self.valves.dataset_repo, hf_token)
 
-            api = HfApi()
-            try:
-                out["who"] = api.whoami(token=hf_token)
-            except Exception as e:
-                out["ok"] = False
-                out["errors"].append(f"whoami failed: {e}")
-            try:
-                repo = api.repo_info(
-                    repo_id=self.valves.dataset_repo,
-                    repo_type="dataset",
-                    token=hf_token,
-                )
-                out["repo"] = {
-                    "name": getattr(repo, "name", None),
-                    "owner": getattr(repo, "owner", None),
-                    "private": getattr(repo, "private", None),
-                }
-            except Exception as e:
-                out["ok"] = False
-                out["errors"].append(f"repo_info failed: {e}")
-        except Exception as e:
-            out["ok"] = False
-            out["errors"].append(f"preflight critical: {e}")
-        return out
-
-    def _create_pull_request(
-        self, contribution: Contribution, hf_token: str, dataset_repo: str
-    ) -> Dict[str, Any]:
-        try:
-            from huggingface_hub import HfApi, CommitOperationAdd  # type: ignore
-            import io
-
-            api = HfApi()
-            file_path = f"contributions/{contribution['id']}.json"
-            safe_contribution = self._sanitize_contribution_for_export(contribution)
-            json_content = json.dumps(safe_contribution, indent=2, ensure_ascii=False)
-
-            pr_title = "[{sharing_reason}] Contribution ({attribution})".format(
-                sharing_reason=contribution["sharing_reason"],
-                attribution=contribution.get("attribution", "anonymous"),
-            )
-            pr_description = PR_DESCRIPTION_TEMPLATE.format(
-                sharing_reason=contribution["sharing_reason"],
-                sharing_tag=contribution["sharing_tag"],
-                num_messages=len(contribution["clean_content"]),
-                attribution=contribution.get("attribution", "anonymous"),
-                license_intent=contribution.get("license_intent", "unspecified"),
-                license_intent_note=contribution.get("license_intent_note", "—") or "—",
-                ai_thoughts=contribution.get("ai_thoughts", "—") or "—",
-                content_hash=contribution.get("content_hash", "N/A"),
-                submitted_at=contribution["contributed_at"],
-                attribution_mode=contribution.get("attribution_mode", "anonymous"),
-                submit_via=contribution.get("submit_via", "app account"),
-                verification_json=json.dumps(
-                    contribution.get("verification", {}), ensure_ascii=False
-                ),
-                tags_preview=", ".join(
-                    "`{}`".format(t) for t in contribution["all_tags"][:10]
-                ),
-            )
-
-            commit_info = api.create_commit(
-                repo_id=dataset_repo,
-                operations=[
-                    CommitOperationAdd(
-                        path_in_repo=file_path,
-                        path_or_fileobj=io.BytesIO(json_content.encode()),
-                    )
-                ],
-                commit_message=pr_title,
-                commit_description=pr_description,
-                token=hf_token,
-                create_pr=True,
-                repo_type="dataset",
-            )
-            pr_num = getattr(commit_info, "pr_num", None)
-            pr_url = (
-                HUGGINGFACE_DATASET_DISCUSSION_URL.format(repo=dataset_repo, num=pr_num)
-                if pr_num
-                else getattr(commit_info, "pr_url", "Check repository")
-            )
-            return {"success": True, "pr_number": pr_num, "pr_url": pr_url}
-        except Exception as e:
-            return {"success": False, "error": "{}: {}".format(type(e).__name__, e)}
+    def _create_pull_request(self, contribution: Contribution, hf_token: str, dataset_repo: str) -> Dict[str, Any]:
+        return _shared_create_pr(contribution, hf_token, dataset_repo)
 
     def _clean_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Simplify messages; trim preview markers from the last message.
-        Preserves `id`, `model`, and `tool_calls` if present.
-        """
-        clean: List[Dict[str, Any]] = []
+        return _shared_clean_messages(messages)
 
-        def _trim_last_message_content(content: str) -> str:
-            if not isinstance(content, str):
-                return content
-            cut = None
-            for m in TRIM_MARKERS:
-                idx = content.find(m)
-                if idx != -1:
-                    cut = idx if cut is None else min(cut, idx)
-            if cut is not None:
-                return content[:cut].rstrip()
-            return content
-
-        last_idx = len(messages) - 1
-        for i, msg in enumerate(messages):
-            if not (isinstance(msg, dict) and "role" in msg and "content" in msg):
-                continue
-            content = msg.get("content")
-            if i == last_idx and isinstance(content, str):
-                content = _trim_last_message_content(content)
-                if not content:
-                    continue
-            cm = {"role": msg["role"], "content": content}
-            if "id" in msg:
-                cm["id"] = msg["id"]
-            if "model" in msg:
-                cm["model"] = msg["model"]
-            if "tool_calls" in msg:
-                cm["tool_calls"] = msg["tool_calls"]
-            clean.append(cm)
-        return clean
-
-    def _detect_workflow_stage(
-        self, messages: List[Dict[str, Any]]
-    ) -> Tuple[str, Optional[str]]:
-        """Detect first_run vs confirm_run by scanning for preview sentinels."""
-        WORKFLOW_SCAN_DEPTH = 25
-        if not messages:
-            return "first_run", None
-        for msg in reversed(messages[-WORKFLOW_SCAN_DEPTH:]):
-            content = msg.get("content", "") or ""
-            if (
-                "<<<SHARE_PREVIEW_START>>>" in content
-                and "<<<SHARE_PREVIEW_END>>>" in content
-            ):
-                if "**Next Step**: Click the Share button again" in content:
-                    return "confirm_run", content
-                else:
-                    return "first_run", None
-        return "first_run", None
+    def _detect_workflow_stage(self, messages: List[Dict[str, Any]]) -> Tuple[str, Optional[str]]:
+        return _shared_detect_stage(messages)
 
     def _extract_json_from_preview(self, content: str) -> Optional[Dict[str, Any]]:
-        """Extract JSON payload between preview sentinels (or None)."""
-        m = re.search(
-            r"<<<SHARE_PREVIEW_START>>>\s*(.*?)\s*<<<SHARE_PREVIEW_END>>>",
-            content,
-            re.DOTALL,
-        )
-        if m:
-            try:
-                return json.loads(m.group(1).strip())
-            except json.JSONDecodeError:
-                return None
-        return None
+        return _shared_extract_preview(content)
 
     def _map_response_labels(
         self,
@@ -892,74 +532,13 @@ class Action:
         clean_messages: List[Dict[str, Any]],
         feedback_items: List[Dict[str, Any]],
     ) -> Dict[str, Literal["good", "bad"]]:
-        """Simplified mapping for OpenWebUI shapes:
-        - Feedback type is usually "rating" with numeric data.rating 1/-1
-        - meta.message_id refers to the target message id
-        - meta.message_index is a raw message index fallback
-        """
-        # Build raw->clean index map and id->clean
-        raw_to_clean: Dict[int, int] = {}
-        ci = 0
-        for ri, msg in enumerate(raw_messages):
-            if isinstance(msg, dict) and "role" in msg and "content" in msg:
-                raw_to_clean[ri] = ci
-                ci += 1
-
-        id_to_clean: Dict[str, int] = {}
-        for idx, msg in enumerate(clean_messages):
-            mid = msg.get("id")
-            if isinstance(mid, str):
-                id_to_clean[mid] = idx
-
-        def label_from_rating(val) -> Optional[Literal["good", "bad"]]:
-            try:
-                if val is None:
-                    return None
-                n = int(val)
-                if n > 0:
-                    return "good"
-                if n < 0:
-                    return "bad"
-                return None
-            except Exception:
-                return None
-
-        labels: Dict[str, Literal["good", "bad"]] = {}
-        for it in feedback_items:
-            data = it.get("data") or {}
-            meta = it.get("meta") or {}
-            label = label_from_rating((data or {}).get("rating"))
-            if not label:
-                continue
-
-            # Prefer message_id match
-            mid = meta.get("message_id") or data.get("message_id")
-            if isinstance(mid, str) and mid in id_to_clean:
-                key = str(id_to_clean[mid])
-                if key not in labels:
-                    labels[key] = label
-                continue
-
-            # Fallback: raw message index
-            idx_raw = meta.get("message_index")
-            try:
-                if idx_raw is not None:
-                    idx_raw_int = int(idx_raw)
-                    if idx_raw_int in raw_to_clean:
-                        key = str(raw_to_clean[idx_raw_int])
-                        if key not in labels:
-                            labels[key] = label
-                        continue
-            except Exception:
-                pass
-
-        return labels
+        return _shared_map_response_labels(raw_messages, clean_messages, feedback_items)
 
     # ------------------------------------------------------------------
     # Main
     # ------------------------------------------------------------------
     async def action(
-        self, body: dict, __user__=None, __event_emitter__=None, __event_call__=None
+        self, body: dict, __user__=None, __event_emitter__=None, __event_call__=None, __request__=None
     ):
         user_valves = (__user__ or {}).get("valves")
         chat_id = (body or {}).get("chat_id")
@@ -1007,7 +586,7 @@ class Action:
                     }
                 )
 
-                chat = self._get_full_chat_data(chat_id)
+                chat = self._get_full_chat_data(chat_id, request=__request__, user_obj=__user__)
                 clean_messages = self._clean_messages(chat["messages"])
 
                 # length checks
@@ -1252,7 +831,7 @@ class Action:
                     return
 
                 # fresh state
-                chat = self._get_full_chat_data((body or {}).get("chat_id"))
+                chat = self._get_full_chat_data((body or {}).get("chat_id"), request=__request__, user_obj=__user__)
                 fresh_messages = self._clean_messages(
                     chat["messages"]
                 )  # kept for PR payload and hash record
