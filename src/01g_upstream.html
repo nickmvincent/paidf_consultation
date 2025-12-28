@@ -326,9 +326,19 @@ div.csl-indent {
   <ul>
   <li><a href="#upstream-data-and-data-contribution" id="toc-upstream-data-and-data-contribution" class="nav-link active" data-scroll-target="#upstream-data-and-data-contribution"><span class="header-section-number">9</span> Upstream data and data contribution</a>
   <ul class="collapse">
-  <li><a href="#ai-builder-attribution" id="toc-ai-builder-attribution" class="nav-link" data-scroll-target="#ai-builder-attribution"><span class="header-section-number">9.0.1</span> AI builder attribution</a></li>
-  <li><a href="#data-attribution" id="toc-data-attribution" class="nav-link" data-scroll-target="#data-attribution"><span class="header-section-number">9.0.2</span> Data attribution</a></li>
-  <li><a href="#why-does-upstream-matter" id="toc-why-does-upstream-matter" class="nav-link" data-scroll-target="#why-does-upstream-matter"><span class="header-section-number">9.1</span> Why does upstream matter?</a></li>
+  <li><a href="#what-is-upstream-in-this-context" id="toc-what-is-upstream-in-this-context" class="nav-link" data-scroll-target="#what-is-upstream-in-this-context"><span class="header-section-number">9.1</span> What is “upstream” in this context?</a></li>
+  <li><a href="#ai-builder-attribution" id="toc-ai-builder-attribution" class="nav-link" data-scroll-target="#ai-builder-attribution"><span class="header-section-number">9.2</span> AI builder attribution</a></li>
+  <li><a href="#data-attribution" id="toc-data-attribution" class="nav-link" data-scroll-target="#data-attribution"><span class="header-section-number">9.3</span> Data attribution</a>
+  <ul class="collapse">
+  <li><a href="#challenges-in-data-attribution" id="toc-challenges-in-data-attribution" class="nav-link" data-scroll-target="#challenges-in-data-attribution"><span class="header-section-number">9.3.1</span> Challenges in data attribution</a></li>
+  </ul></li>
+  <li><a href="#why-does-upstream-transparency-matter" id="toc-why-does-upstream-transparency-matter" class="nav-link" data-scroll-target="#why-does-upstream-transparency-matter"><span class="header-section-number">9.4</span> Why does upstream transparency matter?</a>
+  <ul class="collapse">
+  <li><a href="#building-trust-and-incentivizing-contribution" id="toc-building-trust-and-incentivizing-contribution" class="nav-link" data-scroll-target="#building-trust-and-incentivizing-contribution"><span class="header-section-number">9.4.1</span> Building trust and incentivizing contribution</a></li>
+  <li><a href="#enabling-informed-choices" id="toc-enabling-informed-choices" class="nav-link" data-scroll-target="#enabling-informed-choices"><span class="header-section-number">9.4.2</span> Enabling informed choices</a></li>
+  <li><a href="#supporting-research-and-accountability" id="toc-supporting-research-and-accountability" class="nav-link" data-scroll-target="#supporting-research-and-accountability"><span class="header-section-number">9.4.3</span> Supporting research and accountability</a></li>
+  </ul></li>
+  <li><a href="#connections-to-data-valuation-and-collective-action" id="toc-connections-to-data-valuation-and-collective-action" class="nav-link" data-scroll-target="#connections-to-data-valuation-and-collective-action"><span class="header-section-number">9.5</span> Connections to data valuation and collective action</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -357,26 +367,104 @@ div.csl-indent {
 
 <section id="upstream-data-and-data-contribution" class="level1" data-number="9">
 <h1 data-number="9"><span class="header-section-number">9</span> Upstream data and data contribution</h1>
-<p>Data flywheels / contribution pathways are one part of the broader “data strategy” for an AI product or organization. Another key factor is making the full public AI pipeline is transparent is telling users about upstream data. Typically, the terms of service for an application or flywheel try to tell users where the data will go; but it can also be useful to tell users about where the data/AI come from.</p>
-<section id="ai-builder-attribution" class="level3" data-number="9.0.1">
-<h3 data-number="9.0.1" class="anchored" data-anchor-id="ai-builder-attribution"><span class="header-section-number">9.0.1</span> AI builder attribution</h3>
-<p>At a high-level: in each interaction between users and a public AI system, we want to attribute the organization who did the hard work of prepping a model. Ideally, we also want to attribute the original data creators, though in some cases practical constraints make this hard.</p>
+<p>Data flywheels and contribution pathways are one part of the broader “data strategy” for an AI product or organization. Another key factor in making the full public AI pipeline transparent is telling users about <strong>upstream data</strong>—where the AI models and their training data come from in the first place.</p>
+<p>Typically, Terms of Service for an application or flywheel tell users where their data <em>will go</em>; but it can also be valuable to tell users where the data and AI <em>came from</em>. This bidirectional transparency is a distinguishing feature of public AI systems.</p>
+<section id="what-is-upstream-in-this-context" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="what-is-upstream-in-this-context"><span class="header-section-number">9.1</span> What is “upstream” in this context?</h2>
+<p>When we talk about upstream data, we mean:</p>
+<ol type="1">
+<li><strong>Pre-training data</strong>: The massive datasets (web crawls, books, code repositories, etc.) used to train foundation models</li>
+<li><strong>Fine-tuning data</strong>: Curated datasets used to specialize or align models for specific tasks</li>
+<li><strong>Model provenance</strong>: Which organizations trained the models, under what conditions, and with what objectives</li>
+<li><strong>Data supply chains</strong>: The often-complex path from original data creation to model training</li>
+</ol>
+<p>For public AI systems, transparency about upstream sources serves multiple goals: it helps users make informed choices, supports accountability, enables research into model behavior, and can build trust in the overall system.</p>
+</section>
+<section id="ai-builder-attribution" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="ai-builder-attribution"><span class="header-section-number">9.2</span> AI builder attribution</h2>
+<p>In each interaction between users and a public AI system, we want to attribute the organization who did the hard work of building and training the model. Ideally, we also want to attribute the original data creators, though practical constraints often make this challenging.</p>
+<p>Key considerations for AI builder attribution:</p>
 <ul>
-<li>The custom text, branding, etc. within an AI interface can provide organization- specific, with the goal of making sure all model builders are happy. Can even highlight other interfaces/endpoints, something private AI systems are less likely to do.</li>
-<li>Important to get this right so that model developers don’t “back out” of the inference MVP and just switch to their own sovereign interfaces</li>
+<li><strong>Interface-level branding</strong>: Custom text, logos, and model cards within the AI interface can provide organization-specific attribution, ensuring all model builders receive appropriate credit</li>
+<li><strong>Cross-promotion potential</strong>: Public AI systems can highlight other interfaces and endpoints—something private AI systems are typically less willing to do</li>
+<li><strong>Maintaining partnerships</strong>: Getting attribution right is important so that model developers remain engaged with the public ecosystem rather than retreating to their own proprietary interfaces</li>
+<li><strong>Version tracking</strong>: As models are updated, attribution should reflect which version is being used and any significant changes</li>
 </ul>
 </section>
-<section id="data-attribution" class="level3" data-number="9.0.2">
-<h3 data-number="9.0.2" class="anchored" data-anchor-id="data-attribution"><span class="header-section-number">9.0.2</span> Data attribution</h3>
-<p>Another way that public AI platforms can differentiate themselves from private AI is by heavily emphasizing data attribution. This might involve showing users data cards, incorporating features like OlmoTrace <span class="citation" data-cites="liu2025olmotrace">(<a href="references.html#ref-liu2025olmotrace" role="doc-biblioref">Liu et al. 2025</a>)</span>, etc.</p>
+<section id="data-attribution" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="data-attribution"><span class="header-section-number">9.3</span> Data attribution</h2>
+<p>Another way that public AI platforms can differentiate themselves from private AI is by heavily emphasizing data attribution. This might involve:</p>
+<ul>
+<li><strong>Data cards and documentation</strong>: Showing users standardized documentation about training datasets, including their sources, curation methods, and known limitations <span class="citation" data-cites="gebru_datasheets_2018">(<a href="references.html#ref-gebru_datasheets_2018" role="doc-biblioref">Gebru et al. 2018</a>)</span></li>
+<li><strong>Trace-back features</strong>: Incorporating tools like OlmoTrace <span class="citation" data-cites="liu2025olmotrace">(<a href="references.html#ref-liu2025olmotrace" role="doc-biblioref">Liu et al. 2025</a>)</span> that allow users to see which training examples influenced a particular model response</li>
+<li><strong>Dataset lineage</strong>: Providing clear documentation of how datasets were assembled, filtered, and processed</li>
+<li><strong>Creator acknowledgment</strong>: Where possible, attributing specific contributions to individuals or communities who created training data</li>
+</ul>
+<section id="challenges-in-data-attribution" class="level3" data-number="9.3.1">
+<h3 data-number="9.3.1" class="anchored" data-anchor-id="challenges-in-data-attribution"><span class="header-section-number">9.3.1</span> Challenges in data attribution</h3>
+<p>Full data attribution faces significant practical challenges:</p>
+<ul>
+<li><strong>Scale</strong>: Modern foundation models train on billions of data points, making individual attribution infeasible</li>
+<li><strong>Derived works</strong>: Much training data is itself derived from other sources, creating complex attribution chains</li>
+<li><strong>Privacy tensions</strong>: Detailed attribution could conflict with contributor privacy preferences</li>
+<li><strong>Aggregation effects</strong>: Model capabilities emerge from the aggregate of training data, not individual examples</li>
+</ul>
+<p>Despite these challenges, even partial or aggregate attribution can provide value—acknowledging major data sources, highlighting community contributions, and being transparent about what is and isn’t known about training data provenance.</p>
 </section>
-<section id="why-does-upstream-matter" class="level2" data-number="9.1">
-<h2 data-number="9.1" class="anchored" data-anchor-id="why-does-upstream-matter"><span class="header-section-number">9.1</span> Why does upstream matter?</h2>
-<p>Telling users about upstream data is a key part of system-wide transparency. Transparency on both fronts (model builders, data) has the potential to provide further incentive to users to provide data in the first place (because, e.g., they specifically want to support one of the organizations providing models or data).</p>
-<p>There are a number of other exciting conncetions between data valuation/attribution, collective action in data (algorithmic collective action, data leverage), and flywheels.</p>
+</section>
+<section id="why-does-upstream-transparency-matter" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="why-does-upstream-transparency-matter"><span class="header-section-number">9.4</span> Why does upstream transparency matter?</h2>
+<p>Telling users about upstream data is a key part of system-wide transparency. This matters for several reasons:</p>
+<section id="building-trust-and-incentivizing-contribution" class="level3" data-number="9.4.1">
+<h3 data-number="9.4.1" class="anchored" data-anchor-id="building-trust-and-incentivizing-contribution"><span class="header-section-number">9.4.1</span> Building trust and incentivizing contribution</h3>
+<p>Transparency on both fronts (model builders and data sources) can provide further incentive to users to contribute data themselves. Users may be more willing to contribute if they:</p>
+<ul>
+<li>See that their contributions will join a corpus with clear provenance</li>
+<li>Specifically want to support certain organizations providing models or data</li>
+<li>Understand how their contributions relate to the broader ecosystem</li>
+</ul>
+</section>
+<section id="enabling-informed-choices" class="level3" data-number="9.4.2">
+<h3 data-number="9.4.2" class="anchored" data-anchor-id="enabling-informed-choices"><span class="header-section-number">9.4.2</span> Enabling informed choices</h3>
+<p>Users can make better decisions about which AI systems to use when they understand:</p>
+<ul>
+<li>What data the models were trained on (and potential biases this introduces)</li>
+<li>Which organizations are involved in the supply chain</li>
+<li>What values and objectives guided model development</li>
+</ul>
+</section>
+<section id="supporting-research-and-accountability" class="level3" data-number="9.4.3">
+<h3 data-number="9.4.3" class="anchored" data-anchor-id="supporting-research-and-accountability"><span class="header-section-number">9.4.3</span> Supporting research and accountability</h3>
+<p>Upstream transparency enables:</p>
+<ul>
+<li>Academic research into model behavior and failure modes</li>
+<li>Third-party audits and evaluations</li>
+<li>Regulatory compliance and accountability mechanisms</li>
+<li>Community oversight and governance</li>
+</ul>
+</section>
+</section>
+<section id="connections-to-data-valuation-and-collective-action" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="connections-to-data-valuation-and-collective-action"><span class="header-section-number">9.5</span> Connections to data valuation and collective action</h2>
+<p>There are a number of exciting connections between upstream transparency and other areas of research:</p>
+<ul>
+<li><strong>Data valuation</strong>: Methods for quantifying the contribution of individual data points or subsets to model performance <span class="citation" data-cites="ghorbani2019datashapley koh2017understanding">(<a href="references.html#ref-ghorbani2019datashapley" role="doc-biblioref">Ghorbani and Zou 2019</a>; <a href="references.html#ref-koh2017understanding" role="doc-biblioref">Koh and Liang 2017</a>)</span> could eventually inform attribution and compensation schemes</li>
+<li><strong>Collective action</strong>: Understanding upstream data flows helps communities organize around their collective data contributions and exercise data leverage <span class="citation" data-cites="vincent2021datalev">(<a href="references.html#ref-vincent2021datalev" role="doc-biblioref"><strong>vincent2021datalev?</strong></a>)</span></li>
+<li><strong>Data intermediaries</strong>: Organizations that help individuals understand and manage their data contributions benefit from clear upstream documentation</li>
+</ul>
+<p>These connections suggest that investing in upstream transparency today can enable more sophisticated governance and participation mechanisms in the future.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-gebru_datasheets_2018" class="csl-entry" role="listitem">
+Gebru, Timnit, Jamie Morgenstern, Briana Vecchione, Jennifer Wortman Vaughan, Hanna Wallach, Hal Daumé III, and Kate Crawford. 2018. <span>“Datasheets for Datasets.”</span> In <em>arXiv:1803.09010</em>. <a href="https://arxiv.org/abs/1803.09010">https://arxiv.org/abs/1803.09010</a>.
+</div>
+<div id="ref-ghorbani2019datashapley" class="csl-entry" role="listitem">
+Ghorbani, Amirata, and James Zou. 2019. <span>“Data Shapley: Equitable Valuation of Data for Machine Learning.”</span> In <em>International Conference on Machine Learning</em>, 2242–51. PMLR. <a href="https://proceedings.mlr.press/v97/ghorbani19c.html">https://proceedings.mlr.press/v97/ghorbani19c.html</a>.
+</div>
+<div id="ref-koh2017understanding" class="csl-entry" role="listitem">
+Koh, Pang Wei, and Percy Liang. 2017. <span>“Understanding Black-Box Predictions via Influence Functions.”</span> In <em>Proceedings of the 34th International Conference on Machine Learning (ICML)</em>. <a href="https://proceedings.mlr.press/v70/koh17a.html">https://proceedings.mlr.press/v70/koh17a.html</a>.
+</div>
 <div id="ref-liu2025olmotrace" class="csl-entry" role="listitem">
 Liu, Jiacheng, Taylor Blanton, Yanai Elazar, Sewon Min, YenSung Chen, Arnavi Chheda-Kothary, Huy Tran, et al. 2025. <span>“OLMoTrace: Tracing Language Model Outputs Back to Trillions of Training Tokens.”</span> <em>arXiv Preprint arXiv:2504.07096</em>. <a href="https://arxiv.org/abs/2504.07096">https://arxiv.org/abs/2504.07096</a>.
 </div>

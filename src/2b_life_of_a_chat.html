@@ -356,10 +356,20 @@ Model Reference (01i)
 <li>Either you create a username and password (these are stored in our database) OR you sign in with Google</li>
 <li>Either way, you now have an account. This “account data” is stored in database, but it’s never available to outside partners. It’s just stored there so you can log in, keep track of your chats, etc. On other platforms your account might also be linked to third party data, used to create an advertising profile, etc. (Although we’re not trying to be scary here: AI-focused companies like OpenAI generally treat your account data the same as we do for now. It’s companies that also sell ads or other products where things get a bit more fuzzy).</li>
 </ul>
-<p>Ok, now you have an account. Here’s what it looks like in our database:</p>
-<ul>
-<li>#todo: screenshot what an example chat in a database look like. let users see “admin view” (using fake data, of course!)</li>
-</ul>
+<p>Ok, now you have an account. Here’s a simplified view of what your account record looks like in our database:</p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  USER RECORD (example with fake data)                       │
+├─────────────────────────────────────────────────────────────┤
+│  user_id:        usr_a1b2c3d4e5f6                           │
+│  created_at:     2024-03-15 14:23:01 UTC                    │
+│  auth_method:    google_oauth                               │
+│  email_hash:     [hashed - not stored in plain text]        │
+│  display_name:   "DataContributor42"                        │
+│  flywheel_opted_in: false                                   │
+│  default_license:   null                                    │
+│  chats_count:       0                                       │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<p>This is the “admin view” of your account—the essential metadata we store. Note that we hash sensitive identifiers and don’t store passwords in plain text. The <code>flywheel_opted_in</code> field starts as <code>false</code>; you explicitly enable it if you want to contribute data.</p>
 <p>Now you start a new chat!</p>
 <ul>
 <li>You write a “Prompt” (aka an “Input”)
