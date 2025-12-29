@@ -353,10 +353,7 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-why" id="toc-sec-why" class="nav-link active" data-scroll-target="#sec-why"><span class="header-section-number">4</span> Why collect data?</a>
-  <ul class="collapse">
-  <li><a href="#an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" id="toc-an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" class="nav-link" data-scroll-target="#an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data"><span class="header-section-number">4.1</span> An overly detailed accounting of all the ways we might generate LLM pre-training data</a></li>
-  </ul></li>
+  <li><a href="#an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" id="toc-an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" class="nav-link active" data-scroll-target="#an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data"><span class="header-section-number">3.1</span> An overly detailed accounting of all the ways we might generate LLM pre-training data</a></li>
   </ul>
 </nav>
     </div>
@@ -382,8 +379,7 @@ window.Quarto = {
 </header>
 
 
-<section id="sec-why" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Why collect data?</h1>
+<p>Status: first draft complete.</p>
 <blockquote class="blockquote">
 <p>Key insights: in general, we want more records that contain high-quality signals and/or observations about the world to be available to public AI organizations for training and evaluation.</p>
 </blockquote>
@@ -391,8 +387,8 @@ window.Quarto = {
 <p>At its core, “data” is useful for AI (and for other things!) because it provides information about the world.</p>
 <p>In general, it is intuitive that having more information will (generally) lead to better decision-making. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Although there are some scenarios we might come across (or invent) where acquiring information is not helpful – because we might not have “room” in our memory for more data, or some records might not help us at a certain task, or data causes our model to get worse in some sense (some examples of nuance in academic work: <span class="citation" data-cites="shen2024data">(<a href="references.html#ref-shen2024data" role="doc-biblioref">Shen, Raji, and Chen 2024</a>)</span>, <span class="citation" data-cites="sorscher2022beyond">(<a href="references.html#ref-sorscher2022beyond" role="doc-biblioref">Sorscher et al. 2022</a>)</span>) – in general, most people benefit from having more records of high-quality observations and signals <span class="citation" data-cites="hestness_deep_2017">(<a href="references.html#ref-hestness_deep_2017" role="doc-biblioref">Hestness et al. 2017</a>)</span>. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <p>So let’s put these more complicated cases aside for now, and make the assumption: in expectation, acquiring more high-quality data (that is “accurate”, or reflects “insight”) is useful. Oftentimes assessing data’s quality, or its truthiness, or its insightfulness, is not at all easy! With this assumption in mind (and hearty caution about the thorniness of truth and insight), we can speak generally about the types of data we might acquire through a flywheel and that data will be useful.</p>
-<section id="an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data"><span class="header-section-number">4.1</span> An overly detailed accounting of all the ways we might generate LLM pre-training data</h2>
+<section id="an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="an-overly-detailed-accounting-of-all-the-ways-we-might-generate-llm-pre-training-data"><span class="header-section-number">3.1</span> An overly detailed accounting of all the ways we might generate LLM pre-training data</h2>
 <p>Speaking at a very low level, LLM pre-training data can come from any sensor or form that creates digital records that contain sequences of tokens. However, we generally don’t want any old tokens – we want tokens that contain signals about the world and about people, and that have been organized (typically by people) in a way that captures the underlying structures of our world (or the structures that we people have imposed). In pre-training, it seems we can get away with mixing together many different types of structure. For post-training, we may want specific structure (e.g.&nbsp;data produced by people following specific instructions).</p>
 <p>We might further try to describe human-generated data in a very general fashion by saying: data is created when a person does something that leaves a digital trace: typing, speaking into a microphone, using other kinds of digital inputs like buttons, controllers, etc. They might also operate a camera or other sensing instrument that captures signals from the world. We also sometimes may want to use truly “sensor-only data” (e.g., seismic readings), though those sensors are built, placed, funded, and so on by humans.</p>
 <p>After typing, a person might use a terminal or GUI to send their inputs into some data structure – by committing code, editing a wiki, responding on a forum, and so on. Often, the person creating a record has a goal and/or a task they want to complete. This might be: ask a question, teach or correct something, build software, file a bug, summarize a meeting, translate a passage, or simply react to some information object (like/flag/skip). Critically, in practice, many high value sources of data also have some upstream social structure and corresponding incentives – institutions, communities, etc. that create meaningful incentives for people to produce records that are accurate, insightful, and so on <span class="citation" data-cites="deckelmann_wikipedias_2023">(<a href="references.html#ref-deckelmann_wikipedias_2023" role="doc-biblioref">Deckelmann 2023</a>)</span>, <span class="citation" data-cites="johnson2024wikimedia">(<a href="references.html#ref-johnson2024wikimedia" role="doc-biblioref">Johnson, Kaffee, and Redi 2024</a>)</span>, <span class="citation" data-cites="aryabumi2024code">(<a href="references.html#ref-aryabumi2024code" role="doc-biblioref">Aryabumi et al. 2024</a>)</span>.</p>
@@ -446,7 +442,7 @@ Hestness, Joel, Sharan Narang, Newsha Ardalani, Gregory Diamos, Heewoo Jun, Hass
 Johnson, Isaac, Lucie-Aimée Kaffee, and Miriam Redi. 2024. <span>“Wikimedia Data for AI: A Review of Wikimedia Datasets for NLP Tasks and AI-Assisted Editing.”</span> <em>arXiv Preprint arXiv:2410.08918</em>. <a href="https://arxiv.org/abs/2410.08918">https://arxiv.org/abs/2410.08918</a>.
 </div>
 <div id="ref-shen2024data" class="csl-entry" role="listitem">
-Shen, Judy Hanwen, Inioluwa Deborah Raji, and Irene Y Chen. 2024. <span>“The Data Addition Dilemma.”</span> <em>arXiv Preprint arXiv:2408.04154</em>. <a href="https://arxiv.org/abs/2408.04154">https://arxiv.org/abs/2408.04154</a>.
+Shen, Judy Hanwen, Inioluwa Deborah Raji, and Irene Y Chen. 2024. <span>“The Data Addition Dilemma.”</span> <em>MLHC 2024</em>. <a href="https://proceedings.mlr.press/v252/shen24a.html">https://proceedings.mlr.press/v252/shen24a.html</a>.
 </div>
 <div id="ref-sorscher2022beyond" class="csl-entry" role="listitem">
 Sorscher, Ben, Robert Geirhos, Shashank Shekhar, Surya Ganguli, and Ari Morcos. 2022. <span>“Beyond Neural Scaling Laws: Beating Power Law Scaling via Data Pruning.”</span> <em>Advances in Neural Information Processing Systems</em> 35: 19523–36. <a href="https://arxiv.org/abs/2206.14486">https://arxiv.org/abs/2206.14486</a>.
@@ -455,7 +451,6 @@ Sorscher, Ben, Robert Geirhos, Shashank Shekhar, Surya Ganguli, and Ari Morcos. 
 Wolpert, David H, and William G Macready. 1997. <span>“No Free Lunch Theorems for Optimization.”</span> <em>IEEE Transactions on Evolutionary Computation</em> 1 (1): 67–82. <a href="https://doi.org/10.1109/4235.585893">https://doi.org/10.1109/4235.585893</a>.
 </div>
 </div>
-</section>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr>

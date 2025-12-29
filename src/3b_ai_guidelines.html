@@ -304,13 +304,10 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#guidelines-for-using-ai" id="toc-guidelines-for-using-ai" class="nav-link active" data-scroll-target="#guidelines-for-using-ai"><span class="header-section-number">18</span> Guidelines for Using AI</a>
-  <ul class="collapse">
-  <li><a href="#writing-with-ai" id="toc-writing-with-ai" class="nav-link" data-scroll-target="#writing-with-ai"><span class="header-section-number">18.1</span> Writing with AI</a></li>
-  <li><a href="#citations-with-ai" id="toc-citations-with-ai" class="nav-link" data-scroll-target="#citations-with-ai"><span class="header-section-number">18.2</span> Citations with AI</a></li>
-  <li><a href="#code-with-ai" id="toc-code-with-ai" class="nav-link" data-scroll-target="#code-with-ai"><span class="header-section-number">18.3</span> Code with AI</a></li>
-  <li><a href="#general-practices" id="toc-general-practices" class="nav-link" data-scroll-target="#general-practices"><span class="header-section-number">18.4</span> General Practices</a></li>
-  </ul></li>
+  <li><a href="#writing-with-ai" id="toc-writing-with-ai" class="nav-link active" data-scroll-target="#writing-with-ai"><span class="header-section-number">17.1</span> Writing with AI</a></li>
+  <li><a href="#citations-with-ai" id="toc-citations-with-ai" class="nav-link" data-scroll-target="#citations-with-ai"><span class="header-section-number">17.2</span> Citations with AI</a></li>
+  <li><a href="#code-with-ai" id="toc-code-with-ai" class="nav-link" data-scroll-target="#code-with-ai"><span class="header-section-number">17.3</span> Code with AI</a></li>
+  <li><a href="#general-practices" id="toc-general-practices" class="nav-link" data-scroll-target="#general-practices"><span class="header-section-number">17.4</span> General Practices</a></li>
   </ul>
 </nav>
     </div>
@@ -336,11 +333,10 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="guidelines-for-using-ai" class="level1" data-number="18">
-<h1 data-number="18"><span class="header-section-number">18</span> Guidelines for Using AI</h1>
+<p>Status: first draft complete.</p>
 <p>This project is about AI, so using AI tools is welcome throughout the workflow. However, humans are ultimately accountable for what ships. Use AI to accelerate, but keep humans responsible for correctness, coherence, and integrity.</p>
-<section id="writing-with-ai" class="level2" data-number="18.1">
-<h2 data-number="18.1" class="anchored" data-anchor-id="writing-with-ai"><span class="header-section-number">18.1</span> Writing with AI</h2>
+<section id="writing-with-ai" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="writing-with-ai"><span class="header-section-number">17.1</span> Writing with AI</h2>
 <ul>
 <li>Human sign-off: read every line before it becomes part of the book. Treat AI output as a draft (sometimes, a VERY EARLY draft) expect to edit and fact-check.</li>
 <li>Iteration over one-shots: current models rarely produce publication-ready text in one pass, so plan to iterate and refine.</li>
@@ -351,8 +347,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Track changes (recommended): summarize AI-assisted edits in PR descriptions; include key prompts when they inform substantive choices.</li>
 </ul>
 </section>
-<section id="citations-with-ai" class="level2" data-number="18.2">
-<h2 data-number="18.2" class="anchored" data-anchor-id="citations-with-ai"><span class="header-section-number">18.2</span> Citations with AI</h2>
+<section id="citations-with-ai" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="citations-with-ai"><span class="header-section-number">17.2</span> Citations with AI</h2>
 <ul>
 <li>Verify metadata: for each citation suggested or formatted by AI, confirm author(s), title, venue, year, DOI/URL, and key fields in <code>references.bib</code> or <code>references_blogs.bib</code>.</li>
 <li>Check links: ensure all links resolve and are appropriate for the cited claim; add <code>urldate</code> for web sources.</li>
@@ -360,8 +356,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Be wary of hallucinated citations: do not add references unless you can independently verify they exist and match the claim.</li>
 </ul>
 </section>
-<section id="code-with-ai" class="level2" data-number="18.3">
-<h2 data-number="18.3" class="anchored" data-anchor-id="code-with-ai"><span class="header-section-number">18.3</span> Code with AI</h2>
+<section id="code-with-ai" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="code-with-ai"><span class="header-section-number">17.3</span> Code with AI</h2>
 <ul>
 <li>Write tests: include unit tests or executable examples that validate behavior for any non-trivial code contributed to this repo.</li>
 <li>Run when possible: execute tests locally when feasible; include brief notes or logs of results in the PR description.</li>
@@ -369,8 +365,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Security and privacy: do not paste secrets or sensitive data into AI tools; scrub logs and examples of credentials.</li>
 </ul>
 </section>
-<section id="general-practices" class="level2" data-number="18.4">
-<h2 data-number="18.4" class="anchored" data-anchor-id="general-practices"><span class="header-section-number">18.4</span> General Practices</h2>
+<section id="general-practices" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="general-practices"><span class="header-section-number">17.4</span> General Practices</h2>
 <ul>
 <li>Attribution: when AI assistance is significant, disclose it briefly (e.g., “sections drafted with AI, edited by <name>”).</name></li>
 <li>Accessibility: ensure AI-generated figures, tables, and examples include alt text and are accessible.</li>
@@ -378,7 +374,6 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

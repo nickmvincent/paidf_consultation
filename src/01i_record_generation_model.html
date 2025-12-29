@@ -304,15 +304,16 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#a-record-generation-model" id="toc-a-record-generation-model" class="nav-link active" data-scroll-target="#a-record-generation-model"><span class="header-section-number">11</span> A Record-Generation Model</a>
-  <ul class="collapse">
-  <li><a href="#objects-and-states" id="toc-objects-and-states" class="nav-link" data-scroll-target="#objects-and-states"><span class="header-section-number">11.1</span> Objects and States</a></li>
-  <li><a href="#instrumentation-and-policy" id="toc-instrumentation-and-policy" class="nav-link" data-scroll-target="#instrumentation-and-policy"><span class="header-section-number">11.2</span> Instrumentation and Policy</a></li>
-  <li><a href="#prompted-vs.-natural" id="toc-prompted-vs.-natural" class="nav-link" data-scroll-target="#prompted-vs.-natural"><span class="header-section-number">11.3</span> Prompted vs.&nbsp;Natural</a></li>
-  <li><a href="#minimal-schema" id="toc-minimal-schema" class="nav-link" data-scroll-target="#minimal-schema"><span class="header-section-number">11.4</span> Minimal Schema</a></li>
-  <li><a href="#metrics-and-levers" id="toc-metrics-and-levers" class="nav-link" data-scroll-target="#metrics-and-levers"><span class="header-section-number">11.5</span> Metrics and Levers</a></li>
-  <li><a href="#practical-mapping" id="toc-practical-mapping" class="nav-link" data-scroll-target="#practical-mapping"><span class="header-section-number">11.6</span> Practical Mapping</a></li>
-  </ul></li>
+  <li><a href="#notation-and-objects" id="toc-notation-and-objects" class="nav-link active" data-scroll-target="#notation-and-objects"><span class="header-section-number">10.1</span> Notation and Objects</a></li>
+  <li><a href="#pipeline-states-per-interaction" id="toc-pipeline-states-per-interaction" class="nav-link" data-scroll-target="#pipeline-states-per-interaction"><span class="header-section-number">10.2</span> Pipeline States (per interaction)</a></li>
+  <li><a href="#record-metadata" id="toc-record-metadata" class="nav-link" data-scroll-target="#record-metadata"><span class="header-section-number">10.3</span> Record Metadata</a></li>
+  <li><a href="#policy-knobs-and-rates" id="toc-policy-knobs-and-rates" class="nav-link" data-scroll-target="#policy-knobs-and-rates"><span class="header-section-number">10.4</span> Policy Knobs and Rates</a></li>
+  <li><a href="#publish-probability" id="toc-publish-probability" class="nav-link" data-scroll-target="#publish-probability"><span class="header-section-number">10.5</span> Publish Probability</a></li>
+  <li><a href="#retraction-and-lifecycle" id="toc-retraction-and-lifecycle" class="nav-link" data-scroll-target="#retraction-and-lifecycle"><span class="header-section-number">10.6</span> Retraction and Lifecycle</a></li>
+  <li><a href="#prompted-vs.-natural" id="toc-prompted-vs.-natural" class="nav-link" data-scroll-target="#prompted-vs.-natural"><span class="header-section-number">10.7</span> Prompted vs.&nbsp;Natural</a></li>
+  <li><a href="#minimal-schema" id="toc-minimal-schema" class="nav-link" data-scroll-target="#minimal-schema"><span class="header-section-number">10.8</span> Minimal Schema</a></li>
+  <li><a href="#metrics-and-levers" id="toc-metrics-and-levers" class="nav-link" data-scroll-target="#metrics-and-levers"><span class="header-section-number">10.9</span> Metrics and Levers</a></li>
+  <li><a href="#practical-mapping" id="toc-practical-mapping" class="nav-link" data-scroll-target="#practical-mapping"><span class="header-section-number">10.10</span> Practical Mapping</a></li>
   </ul>
 </nav>
     </div>
@@ -338,86 +339,135 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="a-record-generation-model" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> A Record-Generation Model</h1>
-<p>This section defines a compact model for how interactions become public records. It is meant to support concrete design and metrics without overfitting to any one implementation.</p>
-<section id="objects-and-states" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="objects-and-states"><span class="header-section-number">11.1</span> Objects and States</h2>
+<p>Status: first draft complete.</p>
+<p>This section defines a compact model for how interactions become public records. The goal is a small, measurable pipeline you can use for product design and metrics without locking into a single implementation.</p>
+<section id="notation-and-objects" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="notation-and-objects"><span class="header-section-number">10.1</span> Notation and Objects</h2>
+<p>We define symbols once and reuse them:</p>
+<table class="table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>X</code></td>
+<td>system or deployment where interactions happen; time is discrete by event</td>
+</tr>
+<tr class="even">
+<td><code>i</code></td>
+<td>interaction index</td>
+</tr>
+<tr class="odd">
+<td><code>x_i</code></td>
+<td>interaction context (agent, UI, model, route, timestamp)</td>
+</tr>
+<tr class="even">
+<td><code>o_i</code></td>
+<td>origin in <code>{natural, prompted}</code></td>
+</tr>
+<tr class="odd">
+<td><code>r_i</code></td>
+<td>record type in <code>R</code> (e.g., <code>chat</code>, <code>feedback</code>, <code>label</code>, <code>summary</code>)</td>
+</tr>
+<tr class="even">
+<td><code>K</code></td>
+<td>publish channels (e.g., <code>git</code>, <code>huggingface</code>, <code>bluesky</code>, <code>site</code>)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pipeline-states-per-interaction" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="pipeline-states-per-interaction"><span class="header-section-number">10.2</span> Pipeline States (per interaction)</h2>
+<p>Each interaction can move through a simple chain. Most variables are binary.</p>
 <ul>
-<li>System: a deployment <code>X</code> where interactions happen; time is discrete by event.</li>
-<li>Interaction <code>i</code>: occurs with context <code>x_i</code> (agent, UI, model, route, timestamp).</li>
-<li>Origin <code>o_i ∈ {natural, prompted}</code>: normal use vs.&nbsp;a surfaced request to share.</li>
-<li>Record type <code>r_i ∈ R</code>: e.g., <code>chat</code>, <code>feedback</code>, <code>label</code>, <code>summary</code>.</li>
-<li>Channels <code>K</code>: destinations like <code>git</code>, <code>huggingface</code>, <code>bluesky</code>, <code>site</code>.</li>
+<li><code>E_i</code>: eligible under policy (type, scope, age).</li>
+<li><code>C_i</code>: captured locally (structured log or draft exists).</li>
+<li><code>S_i</code>: share prompt shown (only if the product prompts).</li>
+<li><code>A_i</code>: authorization or consent to publish (may include license + name).</li>
+<li><code>T_i</code>: transform or sanitize succeeded (PII checks, schema, hashing).</li>
+<li><code>P_i^k</code>: published to channel <code>k ∈ K</code> (accepted or merged state).</li>
+<li><code>M_i</code>: workflow state for PR-style channels in <code>{open, merged, closed, tombstoned}</code>.</li>
 </ul>
-<p>Per interaction <code>i</code>, define stage variables (0/1 unless noted):</p>
+<p>Reading left to right, the pipeline is: <code>E -&gt; C -&gt; S -&gt; A -&gt; T -&gt; P</code>. If any stage is 0, the record cannot be published for that channel.</p>
+</section>
+<section id="record-metadata" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="record-metadata"><span class="header-section-number">10.3</span> Record Metadata</h2>
+<p>When an interaction is publishable, attach:</p>
 <ul>
-<li><code>E_i</code>: eligible under current policy (type, scope, age).</li>
-<li><code>C_i</code>: captured locally (structured log or draft record exists).</li>
-<li><code>S_i</code>: user was shown a share prompt (only if product prompts).</li>
-<li><code>A_i</code>: authorization/consent to publish (may encode license + name).</li>
-<li><code>T_i</code>: transform/sanitize succeeded (PII checks, schema, hashing).</li>
-<li><code>P_i^k</code>: published to channel <code>k ∈ K</code> (accepted/merged state).</li>
-<li><code>M_i ∈ {open, merged, closed, tombstoned}</code>: workflow state (for <code>git</code>/PR‑style channels).</li>
-</ul>
-<p>Metadata bound to a publishable record:</p>
-<ul>
-<li><code>ψ(x_i)</code>: schema mapping from interaction to structured payload.</li>
-<li><code>L_i</code>: license (e.g., CC0, CC‑BY, CC‑BY‑SA).</li>
-<li><code>U_i</code>: AI‑use preference signal (e.g., <code>train-genai=n;exceptions=cc-cr</code>).</li>
+<li><code>ψ(x_i)</code> (psi): schema mapping from interaction to structured payload.</li>
+<li><code>L_i</code>: license (e.g., CC0, CC-BY, CC-BY-SA).</li>
+<li><code>U_i</code>: AI-use preference (e.g., <code>train-genai=n;exceptions=cc-cr</code>).</li>
 <li><code>name_i</code>: attribution string (username, pseudonym, anonymous).</li>
 <li><code>uid_i</code>: stable contribution id.</li>
 </ul>
 </section>
-<section id="instrumentation-and-policy" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="instrumentation-and-policy"><span class="header-section-number">11.2</span> Instrumentation and Policy</h2>
-<p>Let <code>θ</code> collect product and policy knobs (logging mode, prompt rules, defaults). Key rates:</p>
+<section id="policy-knobs-and-rates" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="policy-knobs-and-rates"><span class="header-section-number">10.4</span> Policy Knobs and Rates</h2>
+<p>Let <code>θ</code> collect product and policy settings (logging mode, prompt rules, defaults). Define rates:</p>
 <ul>
-<li><code>q_i = Pr[S_i=1 | x_i, θ]</code>: prompt rate given context.</li>
-<li><code>p_c(i) = Pr[C_i=1 | x_i, θ]</code>: capture rate (automatic or draft creation).</li>
-<li><code>p_a(i) = Pr[A_i=1 | x_i, S_i, θ]</code>: consent rate (affected by prompts and UX).</li>
-<li><code>p_t(i) = Pr[T_i=1 | x_i, θ]</code>: transform/validation success.</li>
-<li><code>p_k(i) = Pr[P_i^k=1 | x_i, θ]</code>: channel‑specific acceptance/merge.</li>
+<li><code>q_i = Pr[S_i=1 | x_i, θ]</code>: prompt rate.</li>
+<li><code>p_c(i) = Pr[C_i=1 | x_i, θ]</code>: capture rate.</li>
+<li><code>p_a(i) = Pr[A_i=1 | x_i, S_i, θ]</code>: consent rate.</li>
+<li><code>p_t(i) = Pr[T_i=1 | x_i, θ]</code>: transform success.</li>
+<li><code>p_k(i) = Pr[P_i^k=1 | x_i, θ]</code>: channel acceptance or merge.</li>
 </ul>
-<p>For a single channel <code>k</code>, the per‑interaction publish probability factors as:</p>
+</section>
+<section id="publish-probability" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="publish-probability"><span class="header-section-number">10.5</span> Publish Probability</h2>
+<p>For a single channel <code>k</code>:</p>
 <p><code>Pr[P_i^k=1] = 1[E_i] · p_c(i) · p_a(i) · p_t(i) · p_k(i)</code></p>
-<p>Vector form for multiple channels: <code>P_i = (P_i^k)_{k∈K}</code> with per‑channel <code>p_k(i)</code>.</p>
-<p>Retraction is modeled with <code>D_i^k(t) ∈ {0,1}</code> and hazard <code>h_d(i,k)</code>: a published item can later be closed or tombstoned; <code>M_i</code> tracks state over time.</p>
+<p>Here, <code>1[E_i]</code> is an indicator: it is 1 when the interaction is eligible and 0 otherwise.</p>
+<p>For multiple channels, the publish vector is <code>P_i = (P_i^k)_{k∈K}</code>.</p>
 </section>
-<section id="prompted-vs.-natural" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="prompted-vs.-natural"><span class="header-section-number">11.3</span> Prompted vs.&nbsp;Natural</h2>
-<p>Origin influences consent: <code>o_i=prompted</code> increases <code>q_i</code>, which shifts <code>p_a(i)</code> by surfacing consent at the right time. Natural interactions can still be captured (<code>C_i=1</code>) without publishing (<code>A_i=0</code>).</p>
+<section id="retraction-and-lifecycle" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="retraction-and-lifecycle"><span class="header-section-number">10.6</span> Retraction and Lifecycle</h2>
+<p>After publication, items can be retracted. Model this with:</p>
+<ul>
+<li><code>D_i^k(t) ∈ {0,1}</code>: item <code>i</code> is withdrawn from channel <code>k</code> at time <code>t</code>.</li>
+<li><code>h_d(i,k)</code>: hazard of retraction.</li>
+<li><code>M_i</code>: tracks the visible lifecycle state.</li>
+</ul>
 </section>
-<section id="minimal-schema" class="level2" data-number="11.4">
-<h2 data-number="11.4" class="anchored" data-anchor-id="minimal-schema"><span class="header-section-number">11.4</span> Minimal Schema</h2>
-<p><code>ψ(x_i)</code> produces a payload with:</p>
+<section id="prompted-vs.-natural" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="prompted-vs.-natural"><span class="header-section-number">10.7</span> Prompted vs.&nbsp;Natural</h2>
+<p>Origin affects consent. When <code>o_i=prompted</code>, the product increases <code>q_i</code> and typically increases <code>p_a(i)</code> by surfacing consent at the right time. Natural interactions can still be captured (<code>C_i=1</code>) without publishing (<code>A_i=0</code>).</p>
+</section>
+<section id="minimal-schema" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="minimal-schema"><span class="header-section-number">10.8</span> Minimal Schema</h2>
+<p><code>ψ(x_i)</code> should at least include:</p>
 <ul>
 <li><code>uid</code>, <code>type</code>, <code>created_at</code>, <code>route</code>, <code>model</code>.</li>
-<li><code>content</code> (e.g., chat messages or summary), optional <code>feedback</code>.</li>
+<li><code>content</code> (messages or summary) and optional <code>feedback</code>.</li>
 <li><code>license=L_i</code>, <code>ai_use=U_i</code>, <code>attribution=name_i</code>.</li>
 <li>provenance: <code>source=o_i</code>, <code>prompt_shown=S_i</code>, <code>checks</code> (PII flags), <code>hashes</code>.</li>
 </ul>
 </section>
-<section id="metrics-and-levers" class="level2" data-number="11.5">
-<h2 data-number="11.5" class="anchored" data-anchor-id="metrics-and-levers"><span class="header-section-number">11.5</span> Metrics and Levers</h2>
+<section id="metrics-and-levers" class="level2" data-number="10.9">
+<h2 data-number="10.9" class="anchored" data-anchor-id="metrics-and-levers"><span class="header-section-number">10.9</span> Metrics and Levers</h2>
 <ul>
-<li>Throughput (per window <code>W</code>): <code>Λ_k = E[∑_{i∈W} P_i^k]</code>.</li>
-<li>Yield by stage: estimate <code>p_c, p_a, p_t, p_k</code> from logs to find bottlenecks.</li>
-<li>Quality gates: raise or lower <code>p_t</code> via validators; adjust <code>p_k</code> via review policy.</li>
+<li>Throughput for window <code>W</code>: expected published count <code>Λ_k = E[∑_{i∈W} P_i^k]</code>.</li>
+<li>Stage yield: estimate <code>p_c, p_a, p_t, p_k</code> from logs to locate bottlenecks.</li>
+<li>Quality gates: raise or lower <code>p_t</code> with validators; adjust <code>p_k</code> via review policy.</li>
 <li>UX levers: adjust <code>q_i</code> (when to prompt) to change <code>p_a(i)</code> without spamming.</li>
 </ul>
 </section>
-<section id="practical-mapping" class="level2" data-number="11.6">
-<h2 data-number="11.6" class="anchored" data-anchor-id="practical-mapping"><span class="header-section-number">11.6</span> Practical Mapping</h2>
+<section id="practical-mapping" class="level2" data-number="10.10">
+<h2 data-number="10.10" class="anchored" data-anchor-id="practical-mapping"><span class="header-section-number">10.10</span> Practical Mapping</h2>
 <ul>
 <li>OpenWebUI action: sets <code>S_i=1</code>, collects <code>A_i</code>, builds <code>ψ(x_i)</code> with <code>L_i, U_i, name_i</code>.</li>
-<li>Git PR: <code>P_i^git=1</code> iff merged; otherwise <code>M_i∈{open,closed}</code>.</li>
-<li>Bluesky/microblog: optional <code>P_i^bsky</code> with a short preview and <code>uid</code> link.</li>
+<li>Git PR: <code>P_i^git=1</code> iff merged; otherwise <code>M_i ∈ {open, closed}</code>.</li>
+<li>Bluesky or microblog: optional <code>P_i^bsky</code> with a short preview and <code>uid</code> link.</li>
 </ul>
-<p>This model is intentionally small: a staged Bernoulli chain with explicit metadata. It is sufficient to reason about product changes, consent flows, and publishing policies, and it is easy to compute stage‑level rates from operational logs.</p>
+<p>This model is intentionally small: a staged Bernoulli chain with explicit metadata. It is sufficient to reason about product changes, consent flows, and publishing policies, and it is easy to compute stage-level rates from operational logs.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

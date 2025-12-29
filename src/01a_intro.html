@@ -324,12 +324,9 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">3</span> Introduction</a>
-  <ul class="collapse">
-  <li><a href="#what-is-a-data-flywheel" id="toc-what-is-a-data-flywheel" class="nav-link" data-scroll-target="#what-is-a-data-flywheel"><span class="header-section-number">3.1</span> What is a data flywheel?</a></li>
-  <li><a href="#what-is-a-public-ai-data-flywheel" id="toc-what-is-a-public-ai-data-flywheel" class="nav-link" data-scroll-target="#what-is-a-public-ai-data-flywheel"><span class="header-section-number">3.2</span> What is a public AI data flywheel?</a></li>
-  <li><a href="#core-principles" id="toc-core-principles" class="nav-link" data-scroll-target="#core-principles"><span class="header-section-number">3.3</span> Core Principles</a></li>
-  </ul></li>
+  <li><a href="#what-is-a-data-flywheel" id="toc-what-is-a-data-flywheel" class="nav-link active" data-scroll-target="#what-is-a-data-flywheel"><span class="header-section-number">2.1</span> What is a data flywheel?</a></li>
+  <li><a href="#what-is-a-public-ai-data-flywheel" id="toc-what-is-a-public-ai-data-flywheel" class="nav-link" data-scroll-target="#what-is-a-public-ai-data-flywheel"><span class="header-section-number">2.2</span> What is a public AI data flywheel?</a></li>
+  <li><a href="#core-principles" id="toc-core-principles" class="nav-link" data-scroll-target="#core-principles"><span class="header-section-number">2.3</span> Core Principles</a></li>
   </ul>
 </nav>
     </div>
@@ -355,13 +352,12 @@ div.csl-indent {
 </header>
 
 
-<section id="introduction" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Introduction</h1>
+<p>Status: first draft complete.</p>
 <blockquote class="blockquote">
 <p>Key insight: a public AI data flywheel is a system that enables a data collection feedback loop that embeds the principles of “public AI” – notably, transparency and accountability.</p>
 </blockquote>
-<section id="what-is-a-data-flywheel" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="what-is-a-data-flywheel"><span class="header-section-number">3.1</span> What is a data flywheel?</h2>
+<section id="what-is-a-data-flywheel" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="what-is-a-data-flywheel"><span class="header-section-number">2.1</span> What is a data flywheel?</h2>
 <p>What is a data flywheel? Nvidia gives us <a href="https://www.nvidia.com/en-sg/glossary/data-flywheel/">this</a> definition: “A data flywheel is a feedback loop where data collected from interactions or processes is used to continuously refine AI models.” <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>In general, a “data flywheel” is a system or set of systems that capture and/or incentivize data. A “flywheel” generally differs from a more general data collection system because the flywheel is embedded into some kind of application (as opposed to e.g.&nbsp;“standalone” data labeling tasks). So, if I just post a Google form to the Internet and say, “Hey, feel free to use this form to send me data!”, that’s just a form, not a “flywheel”.</p>
 <p>Generally, most data collection systems lean more towards utilizing either</p>
@@ -369,22 +365,22 @@ div.csl-indent {
 <li>“sensor-style collection” (passive, instruments like cameras, microphones, or logging software, all of which lack an active “submit data” step) or</li>
 <li>“form-style collection” (active, requiring somebody to click “submit”).</li>
 </ul>
-<p>Historically, flywheels tend to imply a passive approach to data collection, but this is not necessarily a requirement. (More on this in <a href="01c_pipeworks.html" class="quarto-xref"><span>Chapter 5</span></a>).</p>
+<p>Historically, flywheels tend to imply a passive approach to data collection, but this is not necessarily a requirement. (More on this in <span class="citation" data-cites="a-democratic-data-pipeworks">(<a href="references.html#ref-a-democratic-data-pipeworks" role="doc-biblioref"><strong>a-democratic-data-pipeworks?</strong></a>)</span>).</p>
 </section>
-<section id="what-is-a-public-ai-data-flywheel" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="what-is-a-public-ai-data-flywheel"><span class="header-section-number">3.2</span> What is a public AI data flywheel?</h2>
+<section id="what-is-a-public-ai-data-flywheel" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="what-is-a-public-ai-data-flywheel"><span class="header-section-number">2.2</span> What is a public AI data flywheel?</h2>
 <p>First, what is “public AI”? The public AI network gives us this definition in a whitepaper from <span class="citation" data-cites="jackson_public_2024">(<a href="references.html#ref-jackson_public_2024" role="doc-biblioref">Jackson et al. 2024</a>)</span>: AI with</p>
 <blockquote class="blockquote">
 <p>“Public Access – Certain capabilities are so important for participation in public life that access to them should be universal. Public AI provides affordable access to these tools so that everyone can realize their potential.” “Public Accountability – Public AI earns trust by ensuring ultimate control of development rests with the public, giving everyone a chance to participate in shaping the future.” “Permanent Public Goods – Public AI is funded and operated in a way to maintain the public goods it produces permanently, enabling innovators to safely build on a firm foundation.”</p>
 </blockquote>
 <p>For more on the public AI concept, see also Mozilla’s work (including the <a href="https://www.mozillafoundation.org/en/research/library/public-ai/">web page</a> and paper <span class="citation" data-cites="marda2024public">(<a href="references.html#ref-marda2024public" role="doc-biblioref">Marda, Sun, and Surman 2024</a>)</span>). See also several workshop papers (RegML @ NeurIPS 2023 <span class="citation" data-cites="vincent2023alternative">(<a href="references.html#ref-vincent2023alternative" role="doc-biblioref">Vincent et al. 2023</a>)</span>; CodeML @ ICML 2025 <span class="citation" data-cites="tan2025if">(<a href="references.html#ref-tan2025if" role="doc-biblioref">Tan et al. 2025</a>)</span>; Workshop on Canadian Internet Policy <span class="citation" data-cites="vincentcanada">(<a href="references.html#ref-vincentcanada" role="doc-biblioref">Vincent, Surman, and Hirsch-Allen 2025</a>)</span>).</p>
 <p>Our focus in this mini-book is building “public AI” flywheels. To summarize heavily – if we try to achieve all the principles laid out in the large body work that tries to define “public AI” (and we should try!), we will face some unique challenges in the implementation of data flywheels.</p>
-<p>In building public AI data flywheels, we are trying to create a feedback loop to improve AI by creating and collecting high-quality data (more on this in <a href="01b_why.html" class="quarto-xref"><span>Chapter 4</span></a>). However, the public AI principles mean that we likely want to start from a position of very high accessibility and very high accountability relative to other technology organizations and products. This means we need to provide an accessible explanation of exactly what happens to any data a user creates and give people real agency over the shape of the data pipeline. Ideally, public AI builders should also endeavor to make as many components of our stack as close as possible to public goods, which creates challenges around sustaining effort and funding.</p>
+<p>In building public AI data flywheels, we are trying to create a feedback loop to improve AI by creating and collecting high-quality data (more on this in <span class="citation" data-cites="why-collect-data">(<a href="references.html#ref-why-collect-data" role="doc-biblioref"><strong>why-collect-data?</strong></a>)</span>). However, the public AI principles mean that we likely want to start from a position of very high accessibility and very high accountability relative to other technology organizations and products. This means we need to provide an accessible explanation of exactly what happens to any data a user creates and give people real agency over the shape of the data pipeline. Ideally, public AI builders should also endeavor to make as many components of our stack as close as possible to public goods, which creates challenges around sustaining effort and funding.</p>
 <p>Of course, it’s worth noting that some particular subset of the broad public (for instance, a particular city or state) could deliberate and make a collective decision that they prefer a more “traditional approach” to data flywheels. Very concretely, we could imagine a state conducting a referendum, and asking the public if they’d like a “public AI” product that follows industry standard practices around data and flywheels (sacrificing some degree of accessibility and/or accountability for other benefits). This might mean that the state deploys an AI chatbot with nearly the same data collection practices and privacy policies as organizations like Google or Anthropic.</p>
 <p>In this mini-book, we are taking the stance that it’s best to start from a position of leaning heavily towards a highly accessible and accountable flywheel. We start by minimizing data collection and retention (<a href="https://en.wikipedia.org/wiki/Data_minimization">“data minimization”</a>); data that is used directly for AI research and development (R&amp;D) should be provided via an opt-in by highly informed users.</p>
 </section>
-<section id="core-principles" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="core-principles"><span class="header-section-number">3.3</span> Core Principles</h2>
+<section id="core-principles" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="core-principles"><span class="header-section-number">2.3</span> Core Principles</h2>
 <p>We can translate the core principles of public AI to the data flywheel domain and arrive at roughly four requirements:</p>
 <ul>
 <li>Transparency for informed consent: Users must be fully informed about the models at play, the organizations who are building models, and the ramifications of any contributions to the flywheel. Ideally, users will also be informed about the training data underlying the models they use. A detailed FAQ and some kind of consent module (ideally going above and beyond standard Terms of Service<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>) are required before any data is shared. To some extent, maximally informed consent will require the active expenditure of resources to improve the public’s AI literacy (i.e.&nbsp;we need to build AI literacy focused systems and perhaps even pay people for their attention). We need systems that really do inform people. Luckily, that’s something it seems like AI can help with!</li>
@@ -393,7 +389,7 @@ div.csl-indent {
 <li><p>Data Rights: A public AI data flywheel should empower users with control over their data, mirroring GDPR principles and similar regulations (this is also practically important for compliance). This includes the right to access (<code>Art. 15</code>), rectify (<code>Art. 16</code>), erase when possible (<code>Art. 17</code>), and port data (<code>Art. 20</code>). One exemplar project we might look to for inspiration around the implementation of data rights and legal terms is Mozilla’s <a href="https://commonvoice.mozilla.org/">Common Voice</a> <span class="citation" data-cites="ardila2019common">(<a href="references.html#ref-ardila2019common" role="doc-biblioref">Ardila et al. 2019</a>)</span>.</p>
 <ul>
 <li>We note that data rights can conflict with a “fully open” ethos; we will attempt to mitigate these tensions to the best extent possible.</li>
-<li>We also note that public AI faces some unique challenges with cross-jurisdiction compliance; we discuss this at a high-level later on in <a href="01f_ethics_compliance.html" class="quarto-xref"><span>Chapter 8</span></a>.</li>
+<li>We also note that public AI faces some unique challenges with cross-jurisdiction compliance; we discuss this at a high-level later on in <span class="citation" data-cites="ethics-and-compliance">(<a href="references.html#ref-ethics-and-compliance" role="doc-biblioref"><strong>ethics-and-compliance?</strong></a>)</span>.</li>
 </ul></li>
 <li><p>Balancing reputation and pseudonymity: To the extent possible, we believe it is valuable to offer people the ability to contribute data with some kind of “real account” attached, so people can earn credit and reputation <strong>if they want to</strong>. But this must be balanced with the benefits of also enabling pseudonymity or even anonymous contribution. See e.g. <span class="citation" data-cites="mcdonald2019privacy">(<a href="references.html#ref-mcdonald2019privacy" role="doc-biblioref">McDonald et al. 2019</a>)</span> + <a href="https://mako.cc/copyrighteous/new-research-on-how-anonymity-is-perceived-in-open-collaboration">blog post</a>, <span class="citation" data-cites="tran2020anonymity">(<a href="references.html#ref-tran2020anonymity" role="doc-biblioref">Tran et al. 2020</a>)</span>, <span class="citation" data-cites="hwang2025trust">(<a href="references.html#ref-hwang2025trust" role="doc-biblioref">Hwang, Nanayakkara, and Shvartzshnaider 2025</a>)</span>).</p>
 <ul>
@@ -411,16 +407,16 @@ div.csl-indent {
 Ardila, Rosana, Megan Branson, Kelly Davis, Michael Henretty, Michael Kohler, Josh Meyer, Reuben Morais, Lindsay Saunders, Francis M Tyers, and Gregor Weber. 2019. <span>“Common Voice: A Massively-Multilingual Speech Corpus.”</span> <em>arXiv Preprint arXiv:1912.06670</em>. <a href="https://arxiv.org/abs/1912.06670">https://arxiv.org/abs/1912.06670</a>.
 </div>
 <div id="ref-hwang2025trust" class="csl-entry" role="listitem">
-Hwang, Sohyeon, Priyanka Nanayakkara, and Yan Shvartzshnaider. 2025. <span>“Trust and Friction: Negotiating How Information Flows Through Decentralized Social Media.”</span> <em>arXiv Preprint arXiv:2503.02150</em>. <a href="https://arxiv.org/abs/2503.02150">https://arxiv.org/abs/2503.02150</a>.
+Hwang, Sohyeon, Priyanka Nanayakkara, and Yan Shvartzshnaider. 2025. <span>“Trust and Friction: Negotiating How Information Flows Through Decentralized Social Media.”</span> <em>Proceedings of the ACM on Human-Computer Interaction (CSCW)</em>. <a href="https://doi.org/10.1145/3757516">https://doi.org/10.1145/3757516</a>.
 </div>
 <div id="ref-jackson_public_2024" class="csl-entry" role="listitem">
 Jackson, Brandon, B Cavello, Flynn Devine, Nick Garcia, Samuel J. Klein, Alex Krasodomski, Joshua Tan, and Eleanor Tursman. 2024. <span>“Public <span>AI</span>: <span>Infrastructure</span> for the <span>Common</span> <span>Good</span>.”</span> Public AI Network. <a href="https://doi.org/10.5281/zenodo.13914560">https://doi.org/10.5281/zenodo.13914560</a>.
 </div>
 <div id="ref-liu_data_2024" class="csl-entry" role="listitem">
-Liu, Jason. 2024. <span>“Data <span>Flywheel</span> <span>Go</span> <span>Brrr</span>: <span>Using</span> <span>Your</span> <span>Users</span> to <span>Build</span> <span>Better</span> <span>Products</span> - <span>Jason</span> <span>Liu</span>.”</span> <a href="https://jxnl.co/writing/2024/03/28/data-flywheel/">https://jxnl.co/writing/2024/03/28/data-flywheel/</a>.
+Liu, Jason. 2024. <span>“Data Flywheel Go Brrr: Using Your Users to Build Better Products.”</span> <a href="https://jxnl.co/writing/2024/03/28/data-flywheel/">https://jxnl.co/writing/2024/03/28/data-flywheel/</a>.
 </div>
 <div id="ref-marda2024public" class="csl-entry" role="listitem">
-Marda, Nik, Jasmine Sun, and Mark Surman. 2024. <span>“Public AI: Making AI Work for Everyone, by Everyone.”</span> Mozilla. <a href="https://assets.mofoprod.net/network/documents/Public_AI_Mozilla.pdf">https://assets.mofoprod.net/network/documents/Public_AI_Mozilla.pdf</a>.
+Marda, Nik, Jasmine Sun, and Mark Surman. 2024. <span>“Public AI: Making AI Work for Everyone, by Everyone.”</span> Mozilla Foundation. <a href="https://assets.mofoprod.net/network/documents/Public_AI_Mozilla.pdf">https://assets.mofoprod.net/network/documents/Public_AI_Mozilla.pdf</a>.
 </div>
 <div id="ref-mcdonald2019privacy" class="csl-entry" role="listitem">
 McDonald, Nora, Benjamin Mako Hill, Rachel Greenstadt, and Andrea Forte. 2019. <span>“Privacy, Anonymity, and Perceived Risk in Open Collaboration: A Study of Service Providers.”</span> In <em>Proceedings of the 2019 CHI Conference on Human Factors in Computing Systems</em>, 1–12. <a href="https://doi.org/10.1145/3290605.3300901">https://doi.org/10.1145/3290605.3300901</a>.
@@ -429,10 +425,10 @@ McDonald, Nora, Benjamin Mako Hill, Rachel Greenstadt, and Andrea Forte. 2019. <
 Rakova, Bogdana, Renee Shelby, and Megan Ma. 2023. <span>“Terms-We-Serve-with: Five Dimensions for Anticipating and Repairing Algorithmic Harm.”</span> <em>Big Data &amp; Society</em> 10 (2): 20539517231211553. <a href="https://doi.org/10.1177/20539517231211553">https://doi.org/10.1177/20539517231211553</a>.
 </div>
 <div id="ref-roche_what_2024" class="csl-entry" role="listitem">
-Roche, Adam, and Yali Sassoon. 2024. <span>“What Is a <span>Data</span> <span>Flywheel</span>? <span>A</span> <span>Guide</span> to <span>Sustainable</span> <span>Business</span> <span>Growth</span>.”</span> Snowplow Blog. <a href="https://snowplow.io/blog/what-is-a-data-flywheel">https://snowplow.io/blog/what-is-a-data-flywheel</a>.
+Roche, Adam, and Yali Sassoon. 2024. <span>“What Is a Data Flywheel? A Guide to Sustainable Business Growth.”</span> Snowplow Blog. <a href="https://snowplow.io/blog/what-is-a-data-flywheel">https://snowplow.io/blog/what-is-a-data-flywheel</a>.
 </div>
 <div id="ref-shankar_data_2024" class="csl-entry" role="listitem">
-Shankar, Shreya. 2024. <span>“Data <span>Flywheels</span> for <span>LLM</span> <span>Applications</span>.”</span> Shreya Shankar’s blog. <a href="https://www.sh-reya.com/blog/ai-engineering-flywheel/">https://www.sh-reya.com/blog/ai-engineering-flywheel/</a>.
+Shankar, Shreya. 2024. <span>“Data Flywheels for LLM Applications.”</span> Shreya Shankar’s blog. <a href="https://www.sh-reya.com/blog/ai-engineering-flywheel/">https://www.sh-reya.com/blog/ai-engineering-flywheel/</a>.
 </div>
 <div id="ref-tan2025if" class="csl-entry" role="listitem">
 Tan, Joshua, Nicholas Vincent, Katherine Elkins, and Magnus Sahlgren. 2025. <span>“If Open Source Is to Win, It Must Go Public.”</span> <em>arXiv Preprint arXiv:2507.09296</em>. <a href="https://arxiv.org/abs/2507.09296">https://arxiv.org/abs/2507.09296</a>.
@@ -447,7 +443,6 @@ Vincent, Nicholas, David Bau, Sarah Schwettmann, and Joshua Tan. 2023. <span>“
 Vincent, Nicholas, Mark Surman, and Jake Hirsch-Allen. 2025. <span>“Canada as a Champion for Public AI: Data, Compute and Open Source Infrastructure for Economic Growth and Inclusive Innovation.”</span>
 </div>
 </div>
-</section>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr>

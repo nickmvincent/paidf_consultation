@@ -304,16 +304,13 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-openwebui-action-mvp" id="toc-the-openwebui-action-mvp" class="nav-link active" data-scroll-target="#the-openwebui-action-mvp"><span class="header-section-number">12</span> The OpenWebUI Action MVP</a>
-  <ul class="collapse">
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">12.1</span> Overview</a></li>
-  <li><a href="#components" id="toc-components" class="nav-link" data-scroll-target="#components"><span class="header-section-number">12.2</span> Components</a></li>
-  <li><a href="#contribution-flow" id="toc-contribution-flow" class="nav-link" data-scroll-target="#contribution-flow"><span class="header-section-number">12.3</span> Contribution Flow</a></li>
-  <li><a href="#privacy-attribution-and-preference-signals" id="toc-privacy-attribution-and-preference-signals" class="nav-link" data-scroll-target="#privacy-attribution-and-preference-signals"><span class="header-section-number">12.4</span> Privacy, Attribution, and Preference Signals</a></li>
-  <li><a href="#what-we-tried-first-and-why-we-changed-it" id="toc-what-we-tried-first-and-why-we-changed-it" class="nav-link" data-scroll-target="#what-we-tried-first-and-why-we-changed-it"><span class="header-section-number">12.5</span> What We Tried First (and Why We Changed It)</a></li>
-  <li><a href="#safety-and-review" id="toc-safety-and-review" class="nav-link" data-scroll-target="#safety-and-review"><span class="header-section-number">12.6</span> Safety and Review</a></li>
-  <li><a href="#why-this-mvp-matters" id="toc-why-this-mvp-matters" class="nav-link" data-scroll-target="#why-this-mvp-matters"><span class="header-section-number">12.7</span> Why This MVP Matters</a></li>
-  </ul></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">11.1</span> Overview</a></li>
+  <li><a href="#components" id="toc-components" class="nav-link" data-scroll-target="#components"><span class="header-section-number">11.2</span> Components</a></li>
+  <li><a href="#contribution-flow" id="toc-contribution-flow" class="nav-link" data-scroll-target="#contribution-flow"><span class="header-section-number">11.3</span> Contribution Flow</a></li>
+  <li><a href="#privacy-attribution-and-preference-signals" id="toc-privacy-attribution-and-preference-signals" class="nav-link" data-scroll-target="#privacy-attribution-and-preference-signals"><span class="header-section-number">11.4</span> Privacy, Attribution, and Preference Signals</a></li>
+  <li><a href="#what-we-tried-first-and-why-we-changed-it" id="toc-what-we-tried-first-and-why-we-changed-it" class="nav-link" data-scroll-target="#what-we-tried-first-and-why-we-changed-it"><span class="header-section-number">11.5</span> What We Tried First (and Why We Changed It)</a></li>
+  <li><a href="#safety-and-review" id="toc-safety-and-review" class="nav-link" data-scroll-target="#safety-and-review"><span class="header-section-number">11.6</span> Safety and Review</a></li>
+  <li><a href="#why-this-mvp-matters" id="toc-why-this-mvp-matters" class="nav-link" data-scroll-target="#why-this-mvp-matters"><span class="header-section-number">11.7</span> Why This MVP Matters</a></li>
   </ul>
 </nav>
     </div>
@@ -339,20 +336,19 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-openwebui-action-mvp" class="level1" data-number="12">
-<h1 data-number="12"><span class="header-section-number">12</span> The OpenWebUI Action MVP</h1>
-<section id="overview" class="level2" data-number="12.1">
-<h2 data-number="12.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">12.1</span> Overview</h2>
+<p>Status: first draft complete.</p>
+<section id="overview" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">11.1</span> Overview</h2>
 <p>Our first working flywheel is deliberately simple: an OpenWebUI Action lets people opt in to share selected chats directly from the interface, and those contributions become pull requests to a HuggingFace dataset. By building on OpenWebUI’s accounts and controls, we avoid asking contributors to learn a new product or workflow, while still anchoring the data pipeline in a transparent source-control backend.</p>
 <p>The design goal is to keep friction low without abandoning provenance. Git-backed contributions provide an auditable history, clear authorship models, and a natural venue for discussion and review. At the same time, the action abstracts the mechanics of branching and committing so the contribution experience feels like a normal chat, not a dev tool.</p>
 <p>We experimented with two architectures on the way to this MVP. The earlier attempt staged submissions in a private “waiting room” repository and processed them asynchronously. It offered control but made it hard for contributors to see their impact. The current approach, which raises a pull request per contribution, lets contributors and reviewers observe exactly what was added and why, and it makes the curation process legible to the public.</p>
 </section>
-<section id="components" class="level2" data-number="12.2">
-<h2 data-number="12.2" class="anchored" data-anchor-id="components"><span class="header-section-number">12.2</span> Components</h2>
+<section id="components" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="components"><span class="header-section-number">11.2</span> Components</h2>
 <p>Three pieces make the flywheel work in practice. The chat frontend at https://chat.publicai.co/ provides the familiar place where conversations happen. An OpenWebUI action, implemented in Python, packages a contribution when a user chooses to share, pulling in the conversation, the user’s persistent preferences, and some basic metadata. Finally, the action talks to a HuggingFace dataset repository with a write token and opens a pull request that can be triaged manually or by scripts. In effect, the web app functions as a thin wrapper over “make a pull request with a typed JSON payload,” but that thin wrapper is precisely the difference between a usable experience and a developer-only workflow. Power users who prefer to operate in the open can always submit direct pull requests from their own HuggingFace accounts; the action does not preclude that path.</p>
 </section>
-<section id="contribution-flow" class="level2" data-number="12.3">
-<h2 data-number="12.3" class="anchored" data-anchor-id="contribution-flow"><span class="header-section-number">12.3</span> Contribution Flow</h2>
+<section id="contribution-flow" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="contribution-flow"><span class="header-section-number">11.3</span> Contribution Flow</h2>
 <p>First-time setup is intentionally lightweight. A user signs in to OpenWebUI, opens the Controls (Valves, Functions), and enables sharing. In the same place, they select a default license (for example CC0-1.0, CC-BY-4.0, or CC-BY-SA-4.0), choose an AI preference signal such as <code>train-genai=n;exceptions=cc-cr</code>, and decide how they want to be named in public artifacts: their username, a custom pseudonym, or a generic “anonymous.” Users who prefer to skip extra prompts can also opt into automatic feedback collection.</p>
 <p>With preferences set, contributing looks like any other chat until the moment of consent. After finishing a conversation with any model, the user clicks the Public AI Data Flywheel action. The action shows a concise confirmation screen that restates the current settings, previews the exact content to be shared, and explains what will happen next. The user can edit optional feedback or add context, then confirm. The action assembles a single, well-typed JSON record: the messages, a summary of the model and usage metadata, the selected license and preference signal, the chosen attribution, and a random contribution id. That record becomes the body of a pull request to the dataset repository.</p>
 <p>The pull request is the central coordination object. Reviewers can comment, merge, or request changes; automated checks can validate format and run policy scanners; and anyone can see the history that led to the decision. If the contribution is accepted, the data lands in the public dataset with the same license and preference signals the user selected. The PR thread itself preserves the reasoning and any follow-up, which becomes part of the public provenance trail.</p>
@@ -373,30 +369,29 @@ Model Reference (01i)
 </div>
 </div>
 </section>
-<section id="privacy-attribution-and-preference-signals" class="level2" data-number="12.4">
-<h2 data-number="12.4" class="anchored" data-anchor-id="privacy-attribution-and-preference-signals"><span class="header-section-number">12.4</span> Privacy, Attribution, and Preference Signals</h2>
+<section id="privacy-attribution-and-preference-signals" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="privacy-attribution-and-preference-signals"><span class="header-section-number">11.4</span> Privacy, Attribution, and Preference Signals</h2>
 <p>We want people to get credit when they want it, and privacy when they do not. Each contribution carries an attribution string drawn from the user’s chosen setting. Public releases display this attribution string but not the underlying OpenWebUI account id. Today, if you select “pseudonym,” that pseudonym is a deterministic function of your OpenWebUI account id (unsalted), which means contributions under a pseudonym can be linked to each other over time. We chose determinism to make it easy to accrue credit, support light‑weight moderation, and keep analytics simple without exposing account identifiers. If you want the least linkability, choose “anonymous.”</p>
 <p>Legal terms and downstream use are encoded explicitly. The action stores the contributor’s default license and the AI‑use preference signals they select. Preference signals, such as <code>train-genai=n</code>, are not a silver bullet, but they provide a machine‑readable expression of intent that downstream consumers can honor in tooling and policy. This makes it straightforward to build filters, gates, and dashboards that keep training‑only or evaluation‑only subsets separate, and it answers a recurring question about public datasets: what prevents private labs from silently absorbing everything? Preference signals and licensing do not prevent misuse on their own, but they make honoring the public’s choices the easiest path for responsible actors—and they create structure for accountability conversations when that trust is broken.</p>
 <p>Preset options (Content-Usage expressions using CC signals as exceptions): - Training family: - <code>train-genai=n</code> (deny training) - <code>train-genai=n;exceptions=cc-cr</code> (deny training unless Credit) - <code>train-genai=n;exceptions=cc-cr-dc</code> (deny training unless Credit + Direct Contribution) - <code>train-genai=n;exceptions=cc-cr-ec</code> (deny training unless Credit + Ecosystem Contribution) - <code>train-genai=n;exceptions=cc-cr-op</code> (deny training unless Credit + Open) - General AI use family: - <code>ai-use=n</code> (deny AI use) - <code>ai-use=n;exceptions=cc-cr</code> (deny AI use unless Credit) - <code>ai-use=n;exceptions=cc-cr-dc</code> (… unless Credit + Direct Contribution) - <code>ai-use=n;exceptions=cc-cr-ec</code> (… unless Credit + Ecosystem Contribution) - <code>ai-use=n;exceptions=cc-cr-op</code> (… unless Credit + Open)</p>
 <p>Default preset: <code>train-genai=n;exceptions=cc-cr</code> (deny training unless Credit).</p>
 </section>
-<section id="what-we-tried-first-and-why-we-changed-it" class="level2" data-number="12.5">
-<h2 data-number="12.5" class="anchored" data-anchor-id="what-we-tried-first-and-why-we-changed-it"><span class="header-section-number">12.5</span> What We Tried First (and Why We Changed It)</h2>
+<section id="what-we-tried-first-and-why-we-changed-it" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="what-we-tried-first-and-why-we-changed-it"><span class="header-section-number">11.5</span> What We Tried First (and Why We Changed It)</h2>
 <p>The earliest prototype wrote contributions to a private area named <code>_waiting_room/</code> and processed them in batches. A periodic job validated files, ran PII scanning, moved clean items forward, and quarantined anything suspect to a private area. The model mirrored a traditional ingestion pipeline and felt safe and controlled, but it carried an important cost: contributors could not immediately see that they had made a contribution, nor could they link to it, discuss it, or watch it progress. In a public AI context, those shortcomings matter. Visibility is not just a nice-to-have; it is how people learn what the system values and how it behaves.</p>
 <p>The pull-request-based MVP retains the benefits that mattered—validation and quarantine are still possible as part of PR checks—while restoring legibility. In practice, the contribution becomes a public artifact immediately, but one that can be refined before it becomes part of the canonical dataset. This change turned out to be the simplest way to align usability with accountability.</p>
 </section>
-<section id="safety-and-review" class="level2" data-number="12.6">
-<h2 data-number="12.6" class="anchored" data-anchor-id="safety-and-review"><span class="header-section-number">12.6</span> Safety and Review</h2>
+<section id="safety-and-review" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="safety-and-review"><span class="header-section-number">11.6</span> Safety and Review</h2>
 <p>Contributions pass through a few layers of basic safeguards. The action can run in a mock mode for testing without sending anything upstream. Automated checks scan for common types of sensitive information—emails, phone numbers, government identifiers, payment instruments—and flag or block contributions that appear risky. When there is doubt, reviewers can ask for edits in the PR or move the contribution to quarantine for a closer look. OpenWebUI’s existing rate limiting helps keep abuse manageable without inventing a new throttle.</p>
 <p>The goal is not to promise perfect redaction, but to reduce the chance that obviously sensitive material lands in the public dataset. The confirmation screen and the surrounding documentation set expectations clearly: do not share private or confidential content, and prefer synthetic or anonymized examples when in doubt. This guidance, coupled with visible review in PRs, encourages a culture of care without putting the entire burden on automation.</p>
 </section>
-<section id="why-this-mvp-matters" class="level2" data-number="12.7">
-<h2 data-number="12.7" class="anchored" data-anchor-id="why-this-mvp-matters"><span class="header-section-number">12.7</span> Why This MVP Matters</h2>
+<section id="why-this-mvp-matters" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="why-this-mvp-matters"><span class="header-section-number">11.7</span> Why This MVP Matters</h2>
 <p>Flywheels live or die by their first loop. An MVP that lets people see and understand their impact builds early momentum and attracts contributors who care about quality. Pull requests give us a natural unit of credit, discussion, and iteration; they also create space for lightweight governance. Over time, we can add small, high-leverage improvements—rubrics for labeling, better previews, richer preference signals—without changing the mental model. People chat, opt in, and their contribution shows up where the public can review it.</p>
 <p>This approach also sets up the rest of the pipeline. Because every artifact is a typed JSON with explicit license and use preferences, it is straightforward to derive evaluation sets, training splits, or dashboards that track coverage. And because the data moves through PRs, the same infrastructure can support community-led benchmarks, model audits, and discussions about edge cases. The infrastructure is simple on purpose, but it is pointed at the right problems: provenance, participation, and practical control over data use.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
